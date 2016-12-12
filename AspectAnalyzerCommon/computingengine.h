@@ -2,8 +2,6 @@
 #define COMPUTINGENGINE_H
 #include <QString>
 #include "matrix.h"
-//#include "plsa.h"
-#include "matrix.h"
 #include <QFileInfo>
 #include <QString>
 #include <QTextStream>

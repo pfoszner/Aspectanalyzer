@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include "consensus.h"
 #include "triclustering.h"
+#include "experimental.h"
 
 class ButtonHandlers : public QObject
 {
@@ -20,7 +21,8 @@ public:
     virtual ~ButtonHandlers();
     void Test();
     static ButtonHandlers btnHandler;
-    ComputingEngine *engine;
+    std::shared_ptr<ComputingEngine> engine;
+    std::shared_ptr<Experimental> exper;
 
 public slots:
     void btnAddTaskSlot(int);

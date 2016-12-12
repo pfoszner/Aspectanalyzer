@@ -13,7 +13,7 @@
 class Matrix
 {
 public:
-    Matrix(const std::vector <QString>&);
+    Matrix(std::vector <QString>&);
     Matrix(const Matrix&);
     Matrix(int idMatrix, const arma::mat& data, const QString& name, const QString& group, const std::vector<std::shared_ptr<Bicluster>>& biclusters)
         : idMatrix(idMatrix), data(data), name(name), group(group), expectedBiClusters(biclusters)

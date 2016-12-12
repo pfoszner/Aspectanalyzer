@@ -5,12 +5,13 @@
 ButtonHandlers::ButtonHandlers(QObject *parent) :
     QObject(parent)
 {
-    engine = new ComputingEngine();
+    engine = std::make_shared<ComputingEngine>();
+
+    exper = std::make_shared<Experimental>(engine);
 }
 
 ButtonHandlers::~ButtonHandlers()
 {
-    delete engine;
 }
 
 //Add new bi-clustering task to worker
@@ -108,19 +109,7 @@ void ButtonHandlers::btnLoadFromDatabaseSlot()
 
 void ButtonHandlers::btnTuneSlot()
 {
-    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, 1, Enums::Methods::PLSA, -1);
-
-    std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1);
-
-    newObject->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
-
-    newObject->SetEnsemble(test);
-
-    std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
-
-    params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
-
-    newObject->Compute(params);
+    exper->RunConsensus();
 
     //engine->AddBiClusteringTask(newObject);
 }

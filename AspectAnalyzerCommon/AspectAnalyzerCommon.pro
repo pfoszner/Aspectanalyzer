@@ -19,12 +19,14 @@ SOURCES += aspectanalyzercommon.cpp \
     dbtools.bicluster.cpp \
     dbtools.feature.cpp \
     singlethreadworker.cpp \
-    dbtools.label.cpp
+    dbtools.label.cpp \
+    experimental.cpp
 
 HEADERS += aspectanalyzercommon.h \
     computingengine.h \
     dbtools.h \
-    singlethreadworker.h
+    singlethreadworker.h \
+    experimental.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
@@ -92,3 +94,16 @@ else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../Hungaria
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../HungarianAlgorithm/release/HungarianAlgorithm.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../HungarianAlgorithm/debug/HungarianAlgorithm.lib
 else:unix: PRE_TARGETDEPS += $$PWD/../HungarianAlgorithm/libHungarianAlgorithm.a
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../EnsembleBiClustering/release/ -lEnsembleBiClustering
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../EnsembleBiClustering/debug/ -lEnsembleBiClustering
+else:unix: LIBS += -L$$PWD/../EnsembleBiClustering/ -lEnsembleBiClustering
+
+INCLUDEPATH += $$PWD/../EnsembleBiClustering
+DEPENDPATH += $$PWD/../EnsembleBiClustering
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../EnsembleBiClustering/release/libEnsembleBiClustering.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../EnsembleBiClustering/debug/libEnsembleBiClustering.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../EnsembleBiClustering/release/EnsembleBiClustering.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../EnsembleBiClustering/debug/EnsembleBiClustering.lib
+else:unix: PRE_TARGETDEPS += $$PWD/../EnsembleBiClustering/libEnsembleBiClustering.a

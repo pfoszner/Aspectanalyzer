@@ -1,10 +1,15 @@
 #include "matrix.h"
 
-Matrix::Matrix(const std::vector <QString>& sdata)
+Matrix::Matrix(std::vector <QString>& sdata)
 {
     QString separator = "\t";
 
     QStringList tmp = sdata[0].split("\t", QString::SkipEmptyParts);
+
+    if (sdata.back().size() == 0)
+    {
+        sdata.erase(sdata.end()-1);
+    }
 
     this->name = tmp[1];
     this->group = tmp[2];
