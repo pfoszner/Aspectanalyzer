@@ -540,15 +540,15 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
 
     for (int i = 0; i < expectedBiClusterCount; ++i)
     {
-        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, n);
-        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, p);
+        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, 50);  //n
+        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, 100);  //p
 
         if (clust1.size() == 0 || clust2.size() == 0)
             return std::vector<std::shared_ptr<Bicluster>>();
 
         std::shared_ptr<Bicluster> bic = std::make_shared<Bicluster>(-1, clust1, clust2, dataMatrix->AverageCorrelationValue(clust1, clust2), nullptr);
 
-        qDebug() << "Get bicluster " << i << " Initial ACV: " << *bic->ACV << " Size: (" << clust1.size() << ", " << clust2.size() << ")";
+        //qDebug() << "Get bicluster " << i << " Initial ACV: " << *bic->ACV << " Size: (" << clust1.size() << ", " << clust2.size() << ")";
 
         if (*bic->ACV < 1.0)
         {
