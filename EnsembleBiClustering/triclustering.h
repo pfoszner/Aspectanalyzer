@@ -10,7 +10,11 @@ class TriClustering : public EnsembleTask
 public:
 
     arma::Cube<short> cube;
-    arma::Cube<short> outcube;
+    //arma::Cube<short> outcube;
+    std::vector<int> trimF;
+    std::vector<int> trimE;
+    std::vector<int> trimB;
+
 
     TriClustering(std::shared_ptr<Matrix>& Vmatrix, int IdResult)
         : EnsembleTask(Vmatrix, Enums::Methods::TRICLUSTERING, IdResult)
