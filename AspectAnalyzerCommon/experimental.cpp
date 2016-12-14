@@ -143,10 +143,12 @@ void Experimental::RunConsensus()
 
         params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
 
-        auto res = newObject->Compute(params);
+        //auto res = newObject->Compute(params);
 
-        engine->db->SaveResult(res);
+        //engine->db->SaveResult(res);
 
-        //engine->AddBiClusteringTask(newObject);
+        engine->AddBiClusteringTask(newObject);
     }
+
+    engine->ServeQueue();
 }

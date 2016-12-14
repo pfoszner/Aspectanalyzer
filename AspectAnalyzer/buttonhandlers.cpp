@@ -111,6 +111,8 @@ void ButtonHandlers::btnTuneSlot()
 {
     exper->RunConsensus();
 
+    exper->RunTriclustering();
+
     //engine->AddBiClusteringTask(newObject);
 }
 
