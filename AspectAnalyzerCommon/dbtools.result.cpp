@@ -119,8 +119,11 @@ int DBTools::SaveResult(std::shared_ptr<BiclusteringObject> taskToSave)
 
     std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(taskToSave);
 
-    SaveMatrix(tmpPtr->WMatrix, "", "", Enums::MatrixType::W, taskToSave->idResult);
-    SaveMatrix(tmpPtr->HMatrix, "", "", Enums::MatrixType::H, taskToSave->idResult);
+    if (tmpPtr != nullptr)
+    {
+        SaveMatrix(tmpPtr->WMatrix, "", "", Enums::MatrixType::W, taskToSave->idResult);
+        SaveMatrix(tmpPtr->HMatrix, "", "", Enums::MatrixType::H, taskToSave->idResult);
+    }
 
     //save founded biclusters
     SaveBiclusters(taskToSave->foundedBiclusters, taskToSave->dataMatrix->idMatrix, taskToSave->idResult);
