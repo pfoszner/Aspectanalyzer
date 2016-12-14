@@ -267,9 +267,12 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
             //Return k-th tricluster
 
-            std::shared_ptr<Bicluster> New = std::make_shared<Bicluster>(-1, F, E, dataMatrix->AverageCorrelationValue(F, E), nullptr);
+            if (F.size() > 1 && E.size() > 1 && B.size() > 0)
+            {
+                std::shared_ptr<Bicluster> New = std::make_shared<Bicluster>(-1, F, E, dataMatrix->AverageCorrelationValue(F, E), nullptr);
 
-            RetVal.push_back(New);
+                RetVal.push_back(New);
+            }
 
             for (int b : B)
             {

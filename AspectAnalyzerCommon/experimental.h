@@ -24,6 +24,7 @@ public:
 
     void TestTriclustering();
     void RunConsensus();
+    void RunTriclustering();
 };
 
 #endif // EXPERIMENTAL_H
