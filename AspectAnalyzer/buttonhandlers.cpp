@@ -109,11 +109,11 @@ void ButtonHandlers::btnLoadFromDatabaseSlot()
 
 void ButtonHandlers::btnTuneSlot()
 {
-    exper->RunConsensus();
+    //exper->RunConsensus();
 
     exper->RunTriclustering();
 
-    //engine->AddBiClusteringTask(newObject);
+    qDebug() << "Mission Acomplished";
 }
 
 void ButtonHandlers::btnPlaySlot()

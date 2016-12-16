@@ -162,77 +162,91 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
             do
             {
                 std::vector<double> FLoss(F.size());
+                double LossF = -1;
+                std::vector<double>::iterator resultF;
 
-                for(uint f = 0; f < F.size(); ++f)
+                if (F.size() > 1)
                 {
-                    std::vector<int> tF = F;
+                    for(uint f = 0; f < F.size(); ++f)
+                    {
+                        std::vector<int> tF = F;
 
-                    tF.erase(tF.begin() + f);
+                        tF.erase(tF.begin() + f);
 
-                    SingleLossWorker *st = new SingleLossWorker(FLoss.begin() + f, tF, E, B, &cube);
+                        SingleLossWorker *st = new SingleLossWorker(FLoss.begin() + f, tF, E, B, &cube);
 
-                    QThreadPool::globalInstance()->start(st);
+                        QThreadPool::globalInstance()->start(st);
+                    }
+
+                    QThreadPool::globalInstance()->waitForDone();
+
+                    resultF = std::min_element(FLoss.begin(), FLoss.end());
+
+                    //int Fstar = F[std::distance(FLoss.begin(), resultF)];
+
+                    LossF = *resultF;
                 }
-
-                QThreadPool::globalInstance()->waitForDone();
-
-                auto resultF = std::min_element(FLoss.begin(), FLoss.end());
-
-                //int Fstar = F[std::distance(FLoss.begin(), resultF)];
-
-                double LossF = *resultF;
-
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 std::vector<double> ELoss(E.size());
+                double LossE = -1;
+                std::vector<double>::iterator resultE;
 
-                for(uint e = 0; e < E.size(); ++e)
+                if (E.size() > 1)
                 {
-                    std::vector<int> tE = E;
+                    for(uint e = 0; e < E.size(); ++e)
+                    {
+                        std::vector<int> tE = E;
 
-                    tE.erase(tE.begin() + e);
+                        tE.erase(tE.begin() + e);
 
-                    SingleLossWorker *st = new SingleLossWorker(std::next(ELoss.begin(), e), F, tE, B, &cube);
+                        SingleLossWorker *st = new SingleLossWorker(std::next(ELoss.begin(), e), F, tE, B, &cube);
 
-                    QThreadPool::globalInstance()->start(st);
+                        QThreadPool::globalInstance()->start(st);
+                    }
+
+                    QThreadPool::globalInstance()->waitForDone();
+
+                    resultE = std::min_element(ELoss.begin(), ELoss.end());
+
+                    LossE = *resultE;
+
+                    //int Estar = E[std::distance(ELoss.begin(), resultE)];
                 }
-
-                QThreadPool::globalInstance()->waitForDone();
-
-                auto resultE = std::min_element(ELoss.begin(), ELoss.end());
-
-                double LossE = *resultE;
-
-                //int Estar = E[std::distance(ELoss.begin(), resultE)];
-
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 std::vector<double> BLoss(B.size());
+                double LossB = -1;
+                std::vector<double>::iterator resultB;
 
-                for(uint b = 0; b < B.size(); ++b)
+                if (B.size() > 1)
                 {
-                    std::vector<int> tB = B;
+                    for(uint b = 0; b < B.size(); ++b)
+                    {
+                        std::vector<int> tB = B;
 
-                    tB.erase(tB.begin() + b);
+                        tB.erase(tB.begin() + b);
 
-                    SingleLossWorker *st = new SingleLossWorker(BLoss.begin() + b, F, E, tB, &cube);
+                        SingleLossWorker *st = new SingleLossWorker(BLoss.begin() + b, F, E, tB, &cube);
 
-                    QThreadPool::globalInstance()->start(st);
+                        QThreadPool::globalInstance()->start(st);
+                    }
+
+                    QThreadPool::globalInstance()->waitForDone();
+
+                    resultB = std::min_element(BLoss.begin(), BLoss.end());
+
+                    LossB = *resultB;
+
+                    //int Bstar = B[std::distance(BLoss.begin(), resultB)];
                 }
 
-                QThreadPool::globalInstance()->waitForDone();
+                double minLoss = 2;
+                if (LossE > 0 && minLoss > LossE) minLoss = LossE;
+                if (LossF > 0 && minLoss > LossF) minLoss = LossF;
+                if (LossB > 0 && minLoss > LossB) minLoss = LossB;
 
-                auto resultB = std::min_element(BLoss.begin(), BLoss.end());
-
-                double LossB = *resultB;
-
-                //int Bstar = B[std::distance(BLoss.begin(), resultB)];
-
-                double minLoss = LossE;
-                if (minLoss > LossF) minLoss = LossF;
-                if (minLoss > LossB) minLoss = LossB;
-
-                if (minLoss < lossSub && minLoss > 0)
+                if (minLoss < lossSub && minLoss > 0 && minLoss < 2)
                 {
                     lossSub = minLoss;
 

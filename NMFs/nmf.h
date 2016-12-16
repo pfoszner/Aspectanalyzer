@@ -6,7 +6,7 @@
 #include "biclusteringcommon.h"
 #include "enums.h"
 #include <cstdlib>
-#include <armadillo>
+//#include <armadillo>
 
 class NMF : public BiclusteringObject, public std::enable_shared_from_this<NMF>
 {
@@ -31,6 +31,7 @@ protected:
     bool useConnectivity = false;
     arma::umat old_cc;
     const double doubleMin = 10e-300;
+    bool trimByACV = false;
 
 protected:
     virtual double DivernegceValue();

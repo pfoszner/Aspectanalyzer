@@ -7,8 +7,8 @@
 #include <QString>
 #include <QTextStream>
 #include <QDebug>
-#include <armadillo>
-//#include "/usr/local/include/armadillo"
+//#include <armadillo>
+#include "/usr/local/include/armadillo"
 
 class Matrix
 {

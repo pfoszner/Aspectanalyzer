@@ -82,6 +82,8 @@ void ComputingEngine::ServeQueue()
 {
     qDebug() << "Thread Count" << QThreadPool::globalInstance()->maxThreadCount();
 
+    QThreadPool::globalInstance()->setMaxThreadCount(1);
+
     while ( queue.size() > 0 )
     {
         std::shared_ptr<BiclusteringObject> task = queue.front();

@@ -82,6 +82,7 @@ void Experimental::RunTriclustering()
 
         //engine->AddBiClusteringTask(newObject);
     //}
+       //engine->ServeQueue();
 }
 
 void Experimental::RunConsensus()
@@ -150,5 +151,5 @@ void Experimental::RunConsensus()
         engine->AddBiClusteringTask(newObject);
     }
 
-    engine->ServeQueue();
+    //engine->ServeQueue();
 }

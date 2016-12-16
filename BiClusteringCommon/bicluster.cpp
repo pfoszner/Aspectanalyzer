@@ -91,22 +91,22 @@ double Bicluster::Compare(std::shared_ptr<Bicluster> CompareTo, Enums::Similarit
 
             for(int item : cluster2)
             {
-                first.push_back("H{0}" + item);
+                first.push_back("H{0}" + QString::number(item));
             }
 
             for(int item : cluster1)
             {
-                first.push_back("W{0}" + item);
+                first.push_back("W{0}" + QString::number(item));
             }
 
             for (int item : CompareTo->cluster2)
             {
-                second.push_back("H{0}" + item);
+                second.push_back("H{0}" + QString::number(item));
             }
 
             for (int item : CompareTo->cluster1)
             {
-                second.push_back("W{0}" + item);
+                second.push_back("W{0}" + QString::number(item));
             }
 
             return JaccardIndex(first, second);
