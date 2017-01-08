@@ -2,6 +2,8 @@
 
 Matrix::Matrix(std::vector <QString>& sdata)
 {
+    idMatrix = std::make_shared<int>(-1);
+
     QString separator = "\t";
 
     QStringList tmp = sdata[0].split("\t", QString::SkipEmptyParts);

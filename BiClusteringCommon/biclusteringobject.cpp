@@ -2,8 +2,8 @@
 
 BiclusteringObject::BiclusteringObject(std::shared_ptr<Matrix>& dataMatrix)
 {
-    //this->dataMatrix = std::make_shared<Matrix>(dataMatrix);
-    this->dataMatrix = dataMatrix;
+    this->dataMatrix = std::make_shared<Matrix>(*dataMatrix);
+    //this->dataMatrix = dataMatrix;
 }
 
 Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<std::shared_ptr<Bicluster>>& original, const std::vector<std::shared_ptr<Bicluster>>& computed, Enums::BiclusterCompareMode mode, Enums::SimilarityMethods simMethod)

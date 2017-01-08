@@ -38,7 +38,7 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
         if (Result != nullptr && Result->idResult != ID)
         {
             if (Result->foundedBiclusters.size() == 0)
-                Result->foundedBiclusters = GetBiclusters(Result->dataMatrix->idMatrix, Result->idResult);
+                Result->foundedBiclusters = GetBiclusters(*Result->dataMatrix->idMatrix, Result->idResult);
 
             retVal.push_back(Result);
             Result = nullptr;
@@ -70,7 +70,7 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
     if (Result != nullptr)
     {
         if (Result->foundedBiclusters.size() == 0)
-            Result->foundedBiclusters = GetBiclusters(Result->dataMatrix->idMatrix, Result->idResult);
+            Result->foundedBiclusters = GetBiclusters(*Result->dataMatrix->idMatrix, Result->idResult);
 
         retVal.push_back(Result);
         Result = nullptr;
@@ -83,13 +83,18 @@ int DBTools::SaveResult(std::shared_ptr<BiclusteringObject> taskToSave)
 {
     int retVal = -1;
 
-    //Save Matrix if not save
-    if (taskToSave->dataMatrix->idMatrix < 0)
+    if (taskToSave->dataMatrix->idMatrix == nullptr)
     {
-        taskToSave->dataMatrix->idMatrix = SaveMatrix(taskToSave->dataMatrix->data, taskToSave->dataMatrix->name, taskToSave->dataMatrix->group, Enums::MatrixType::V, -1);
-        SaveBiclusters(taskToSave->dataMatrix->expectedBiClusters, taskToSave->dataMatrix->idMatrix, -1);
-        SaveLabels(taskToSave->dataMatrix->rowLabels, taskToSave->dataMatrix->idMatrix);
-        SaveLabels(taskToSave->dataMatrix->columnLabels, taskToSave->dataMatrix->idMatrix);
+        taskToSave->dataMatrix->idMatrix = std::make_shared<int>(-1);
+    }
+
+    //Save Matrix if not save
+    if (*taskToSave->dataMatrix->idMatrix < 0)
+    {
+        *taskToSave->dataMatrix->idMatrix = SaveMatrix(taskToSave->dataMatrix->data, taskToSave->dataMatrix->name, taskToSave->dataMatrix->group, Enums::MatrixType::V, -1);
+        SaveBiclusters(taskToSave->dataMatrix->expectedBiClusters, *taskToSave->dataMatrix->idMatrix, -1);
+        SaveLabels(taskToSave->dataMatrix->rowLabels, *taskToSave->dataMatrix->idMatrix);
+        SaveLabels(taskToSave->dataMatrix->columnLabels, *taskToSave->dataMatrix->idMatrix);
     }
 
     //save result row
@@ -99,7 +104,7 @@ int DBTools::SaveResult(std::shared_ptr<BiclusteringObject> taskToSave)
 
     query.prepare(queryText);
     query.bindValue(":method", taskToSave->idMethod + 1);
-    query.bindValue(":matrix", taskToSave->dataMatrix->idMatrix);
+    query.bindValue(":matrix", *taskToSave->dataMatrix->idMatrix);
     query.bindValue(":bicNum", taskToSave->expectedBiClusterCount);
     query.bindValue(":time", taskToSave->time_spent);
 
@@ -126,7 +131,7 @@ int DBTools::SaveResult(std::shared_ptr<BiclusteringObject> taskToSave)
     }
 
     //save founded biclusters
-    SaveBiclusters(taskToSave->foundedBiclusters, taskToSave->dataMatrix->idMatrix, taskToSave->idResult);
+    SaveBiclusters(taskToSave->foundedBiclusters, *taskToSave->dataMatrix->idMatrix, taskToSave->idResult);
 
     //save features
     SaveFeatures(taskToSave->features, taskToSave->idResult);

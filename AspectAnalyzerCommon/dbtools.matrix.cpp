@@ -41,7 +41,9 @@ std::shared_ptr<Matrix> DBTools::GetMatrix(int idMatrix)
 
     std::vector<std::shared_ptr<Bicluster>> expectedBiclusters = GetBiclusters(idMatrix, -1);
 
-    retVal = std::make_shared<Matrix>(idMatrix, data, name, group, expectedBiclusters);
+    std::shared_ptr<int> ptrIdMatrix = std::make_shared<int>(idMatrix);
+
+    retVal = std::make_shared<Matrix>(ptrIdMatrix, data, name, group, expectedBiclusters);
 
     retVal->rowLabels = GetLabels(idMatrix, Enums::LabelType::RowLabel);
     retVal->columnLabels = GetLabels(idMatrix, Enums::LabelType::ColumnLabel);

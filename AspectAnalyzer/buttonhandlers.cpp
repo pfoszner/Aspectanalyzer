@@ -52,9 +52,9 @@ void ButtonHandlers::btnLoadFromFileSlot()
 
     QString idLabel = "Matrix not in DB";
 
-    if (engine->CurrentVmatrix->idMatrix > 0)
+    if (engine->CurrentVmatrix->idMatrix != nullptr && *engine->CurrentVmatrix->idMatrix > 0)
     {
-        idLabel = QString::number(engine->CurrentVmatrix->idMatrix);
+        idLabel = QString::number(*engine->CurrentVmatrix->idMatrix);
     }
 
     emit setMatrixLabels(engine->CurrentVmatrix->name,
@@ -77,9 +77,9 @@ void ButtonHandlers::btnLoadFromDatabaseSlot()
 
         QString idLabel = "Matrix not in DB";
 
-        if (engine->CurrentVmatrix->idMatrix > 0)
+        if (engine->CurrentVmatrix->idMatrix != nullptr && *engine->CurrentVmatrix->idMatrix > 0)
         {
-            idLabel = QString::number(engine->CurrentVmatrix->idMatrix);
+            idLabel = QString::number(*engine->CurrentVmatrix->idMatrix);
         }
 
         emit setMatrixLabels(engine->CurrentVmatrix->name,
@@ -96,10 +96,10 @@ void ButtonHandlers::btnLoadFromDatabaseSlot()
                 btnAddTaskSlot(m);
                 if (false)//(engine->CurrentVmatrix->idMatrix < 0)
                 {
-                    engine->CurrentVmatrix->idMatrix = engine->db->SaveMatrix(engine->CurrentVmatrix->data, engine->CurrentVmatrix->name, engine->CurrentVmatrix->group, Enums::MatrixType::V, -1);
-                    engine->db->SaveBiclusters(engine->CurrentVmatrix->expectedBiClusters, engine->CurrentVmatrix->idMatrix, -1);
-                    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, engine->CurrentVmatrix->idMatrix);
-                    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, engine->CurrentVmatrix->idMatrix);
+                    *engine->CurrentVmatrix->idMatrix = engine->db->SaveMatrix(engine->CurrentVmatrix->data, engine->CurrentVmatrix->name, engine->CurrentVmatrix->group, Enums::MatrixType::V, -1);
+                    engine->db->SaveBiclusters(engine->CurrentVmatrix->expectedBiClusters, *engine->CurrentVmatrix->idMatrix, -1);
+                    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, *engine->CurrentVmatrix->idMatrix);
+                    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, *engine->CurrentVmatrix->idMatrix);
                 }
             }
         }
@@ -144,7 +144,11 @@ void ButtonHandlers::btnStopSlot()
 
     for(std::shared_ptr<BiclusteringObject> result : test)
     {
-        QFile retVal("result"+QString::number(result->idResult)+".txt");
+
+        if (result->idMethod < 8)
+            continue;
+
+        QFile retVal("result" + QString::number(result->idMethod) + "_"+QString::number(result->idResult)+".txt");
 
         retVal.open(QIODevice::WriteOnly | QIODevice::Text);
 
@@ -156,13 +160,13 @@ void ButtonHandlers::btnStopSlot()
         {
             out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
 
-            //out << "Cluster1:\n";
+            out << "Cluster1:\n";
 
-            //for(int c1 : bic->cluster1)
-            //{
-                //out << result->dataMatrix->rowLabels[c1].value << "\n";
+            for(int c1 : bic->cluster1)
+            {
+                out << result->dataMatrix->rowLabels[c1].value << "\n";
                 //out << c1 << "\n";
-            //}
+            }
 
             out << "\nCluster2:\n";
 

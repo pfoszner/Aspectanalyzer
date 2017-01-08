@@ -7,20 +7,20 @@
 #include <QString>
 #include <QTextStream>
 #include <QDebug>
-//#include <armadillo>
-#include "/usr/local/include/armadillo"
+#include <armadillo>
+//#include "/usr/local/include/armadillo"
 
 class Matrix
 {
 public:
     Matrix(std::vector <QString>&);
     Matrix(const Matrix&);
-    Matrix(int idMatrix, const arma::mat& data, const QString& name, const QString& group, const std::vector<std::shared_ptr<Bicluster>>& biclusters)
+    Matrix(std::shared_ptr<int>& idMatrix, const arma::mat& data, const QString& name, const QString& group, const std::vector<std::shared_ptr<Bicluster>>& biclusters)
         : idMatrix(idMatrix), data(data), name(name), group(group), expectedBiClusters(biclusters)
     {
         expectedBiClusterCount = biclusters.size();
     }
-    int idMatrix = -1;
+    std::shared_ptr<int> idMatrix;
     arma::mat data;
     QString name;
     QString group;
