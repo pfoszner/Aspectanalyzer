@@ -51,6 +51,12 @@ void Experimental::RunTriclustering()
             }
         }
 
+        std::shared_ptr<NMF> tmpPtr = std::static_pointer_cast<NMF>(single[best]);
+
+        tmpPtr->RebuildBiclusters();
+
+        //single[best]->PostProcessingTask();
+
         test.push_back(single[best]);
     }
 

@@ -24,6 +24,7 @@ public:
     std::vector<std::shared_ptr<Bicluster>> GetBiclusters(int, int);
     bool SaveLabels(std::vector<Label>& labels, int idMatrix);
     std::vector<Label> GetLabels(int idMatrix, int idLabelType);
+    arma::mat GetMatrixData(int, int);
 
 private:
     QString path;

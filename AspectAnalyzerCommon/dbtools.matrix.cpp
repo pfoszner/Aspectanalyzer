@@ -51,6 +51,42 @@ std::shared_ptr<Matrix> DBTools::GetMatrix(int idMatrix)
     return retVal;
 }
 
+arma::mat DBTools::GetMatrixData(int idResult, int idType)
+{
+    QSqlQuery query(db);
+
+    QString queryText = "SELECT [data] as rawdata FROM matrix WHERE id_result = " + QString::number(idResult) + " and id_type = " + QString::number(idType);
+
+    query.exec(queryText);
+
+    query.next();
+
+    QByteArray rawData = query.value("rawdata").toByteArray();
+
+    QDir dir = QDir::current();
+
+    if (!dir.cd("tmp"))
+    {
+        dir.mkdir("tmp");
+    }
+
+    QString filename = "tmp/dataToInsert.mat";
+
+    QFile tmpFile(filename);
+
+    tmpFile.open(QIODevice::WriteOnly);
+
+    tmpFile.write(rawData);
+
+    arma::mat data;
+
+    data.load(filename.toStdString());
+
+    QFile::remove(filename);
+
+    return data;
+}
+
 int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int type, int result)
 {
     int retVal = -1;

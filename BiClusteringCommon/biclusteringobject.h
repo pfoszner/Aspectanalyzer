@@ -43,7 +43,7 @@ public:
 
     virtual ~BiclusteringObject(){}
 
-protected:
+//protected:
     void PostProcessingTask();
 };
 

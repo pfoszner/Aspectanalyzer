@@ -40,6 +40,11 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
             if (Result->foundedBiclusters.size() == 0)
                 Result->foundedBiclusters = GetBiclusters(*Result->dataMatrix->idMatrix, Result->idResult);
 
+            std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(Result);
+
+            tmpPtr->WMatrix = GetMatrixData(ID, Enums::MatrixType::W);
+            tmpPtr->HMatrix = GetMatrixData(ID, Enums::MatrixType::H);
+
             retVal.push_back(Result);
             Result = nullptr;
         }
