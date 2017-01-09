@@ -292,6 +292,16 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
     }
 }
 
+void NMF::RebuildBiclusters()
+{
+    foundedBiclusters = GetBiclusters();
+
+    if (foundedBiclusters.size() == 0)
+    {
+        qDebug() << "Panic! Panic! Panic!";
+    }
+}
+
 std::vector<int> NMF::GetWBicluster(int k, Enums::ExtractingMethod extractingType, double threshold, uint maxBiclusterSize)
 {
     std::vector<int> retVal;
@@ -437,7 +447,7 @@ std::vector<int> NMF::GetHBicluster(int k, Enums::ExtractingMethod extractingTyp
                 }
                 break;
             case Enums::Quadrille:
-                threshold = max * 0.75;
+                threshold = max * 0.25;
                 break;
             default:
                 threshold = 0;

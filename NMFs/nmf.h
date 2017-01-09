@@ -21,7 +21,7 @@ protected:
     arma::umat HBiclusters;
     int SupervisedDim = -1;
     int maxNumberOfSteps = 1000;
-    Enums::ExtractingMethod exMethod = Enums::Average;
+    Enums::ExtractingMethod exMethod = Enums::Quadrille;
     double theta = 0.5;
     bool supervisedDim = false;
     int n;
@@ -32,6 +32,10 @@ protected:
     arma::umat old_cc;
     const double doubleMin = 10e-300;
     bool trimByACV = false;
+
+public:
+    void RebuildBiclusters();
+
 
 protected:
     virtual double DivernegceValue();
