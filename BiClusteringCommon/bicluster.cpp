@@ -84,6 +84,14 @@ double Bicluster::Compare(std::shared_ptr<Bicluster> CompareTo, Enums::Similarit
             else
                 return 0;
         }
+        case Enums::SimilarityMethods::Cluster1:
+        {
+            return JaccardIndex(CompareTo->cluster1, cluster1);
+        }
+        case Enums::SimilarityMethods::Cluster2:
+        {
+            return JaccardIndex(CompareTo->cluster2, cluster2);
+        }
         case Enums::SimilarityMethods::BothAsOne:
         {
             std::vector<QString> first;

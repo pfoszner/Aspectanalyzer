@@ -5,6 +5,12 @@ NMF::NMF(std::shared_ptr<Matrix>& data) : BiclusteringObject(data), n(data->data
 
 }
 
+NMF::NMF(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time)
+ : BiclusteringObject(Vmatrix, Method, IdResult, time), n(Vmatrix->data.n_cols), p(Vmatrix->data.n_rows)
+{
+
+}
+
 double NMF::DivernegceValue()
 {
     return 0.0;
@@ -447,7 +453,7 @@ std::vector<int> NMF::GetHBicluster(int k, Enums::ExtractingMethod extractingTyp
                 }
                 break;
             case Enums::Quadrille:
-                threshold = max * 0.25;
+                threshold = max * 0.99;
                 break;
             default:
                 threshold = 0;
@@ -550,8 +556,8 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
 
     for (int i = 0; i < expectedBiClusterCount; ++i)
     {
-        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, n);  //n
-        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, 50);  //p
+        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, 100);  //n
+        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, 100);  //p
 
         if (clust1.size() == 0 || clust2.size() == 0)
             return std::vector<std::shared_ptr<Bicluster>>();

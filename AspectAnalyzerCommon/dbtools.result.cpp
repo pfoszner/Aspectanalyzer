@@ -40,11 +40,14 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
             if (Result->foundedBiclusters.size() == 0)
                 Result->foundedBiclusters = GetBiclusters(*Result->dataMatrix->idMatrix, Result->idResult);
 
-            std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(Result);
+//            std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(Result);
 
-            tmpPtr->WMatrix = GetMatrixData(ID, Enums::MatrixType::W);
-            tmpPtr->HMatrix = GetMatrixData(ID, Enums::MatrixType::H);
-
+//            if (tmpPtr != nullptr)
+//            {
+//                GetMatrixData(ID, Enums::MatrixType::W, tmpPtr);
+//                GetMatrixData(ID, Enums::MatrixType::H, tmpPtr);
+//                arma::mat testM = tmpPtr->WMatrix * tmpPtr->HMatrix;
+//            }
             retVal.push_back(Result);
             Result = nullptr;
         }
@@ -52,7 +55,11 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
         if (Result == nullptr)
         {
             std::shared_ptr<Matrix> dataMatrix = GetMatrix(Vmatrix);
-            Result = std::make_shared<BiclusteringObject>(dataMatrix, Enums::Methods(method), ID, time);
+
+            if (method < 8)
+                Result = std::make_shared<NMF>(dataMatrix, Enums::Methods(method), ID, time);
+            else
+                Result = std::make_shared<BiclusteringObject>(dataMatrix, Enums::Methods(method), ID, time);
 
             std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
 

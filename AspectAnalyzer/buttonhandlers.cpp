@@ -109,9 +109,21 @@ void ButtonHandlers::btnLoadFromDatabaseSlot()
 
 void ButtonHandlers::btnTuneSlot()
 {
+    for(int i=0; i<=3; ++i)
+    {
+        for(int r=0; r < 1; ++r)
+        {
+            btnAddTaskSlot(i);
+        }
+    }
+
+    engine->ServeQueue();
+
     //exper->RunConsensus();
 
-    exper->RunTriclustering();
+    //exper->RunTriclustering();
+
+    //exper->CompareGrandTruthMiRNA();
 
     qDebug() << "Mission Acomplished";
 }

@@ -13,14 +13,16 @@ class NMF : public BiclusteringObject, public std::enable_shared_from_this<NMF>
 
 public:
     NMF(std::shared_ptr<Matrix>&);
+    NMF(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time);
     arma::mat HMatrix;
     arma::mat WMatrix;
+
 
 protected:
     arma::umat WBiclusters;
     arma::umat HBiclusters;
     int SupervisedDim = -1;
-    int maxNumberOfSteps = 1000;
+    int maxNumberOfSteps = 600;
     Enums::ExtractingMethod exMethod = Enums::Quadrille;
     double theta = 0.5;
     bool supervisedDim = false;

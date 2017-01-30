@@ -8,25 +8,37 @@ BiclusteringObject::BiclusteringObject(std::shared_ptr<Matrix>& dataMatrix)
 
 Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<std::shared_ptr<Bicluster>>& original, const std::vector<std::shared_ptr<Bicluster>>& computed, Enums::BiclusterCompareMode mode, Enums::SimilarityMethods simMethod)
 {
-    Array<double> CostMatrix(original.size(), computed.size());
+    int size = original.size();
 
-    for(uint i = 0; i < original.size(); ++i)
+    if (computed.size() > size)
+        size = computed.size();
+
+    Array<double> CostMatrix(size, size);
+
+    for(uint i = 0; i < size; ++i)
     {
-        for(uint j = 0; j < computed.size(); ++j)
+        for(uint j = 0; j < size; ++j)
         {
             try
             {
-                switch (mode)
+                if (i >= original.size() || j >= computed.size())
                 {
-                    case Enums::BiclusterCompareMode::Both:
-                        CostMatrix[i][j] = original[i]->Compare(computed[j], simMethod);
-                        break;
-                    case Enums::BiclusterCompareMode::First:
-                        CostMatrix[i][j] = original[i]->CompareFirst(computed[j], simMethod);
-                        break;
-                    case Enums::BiclusterCompareMode::Second:
-                        CostMatrix[i][j] = original[i]->CompareSecond(computed[j], simMethod);
-                        break;
+                    CostMatrix[i][j] = 0.0;
+                }
+                else
+                {
+                    switch (mode)
+                    {
+                        case Enums::BiclusterCompareMode::Both:
+                            CostMatrix[i][j] = original[i]->Compare(computed[j], simMethod);
+                            break;
+                        case Enums::BiclusterCompareMode::First:
+                            CostMatrix[i][j] = original[i]->CompareFirst(computed[j], simMethod);
+                            break;
+                        case Enums::BiclusterCompareMode::Second:
+                            CostMatrix[i][j] = original[i]->CompareSecond(computed[j], simMethod);
+                            break;
+                    }
                 }
             }
             catch (...)

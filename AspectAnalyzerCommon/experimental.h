@@ -25,6 +25,8 @@ public:
     void TestTriclustering();
     void RunConsensus();
     void RunTriclustering();
+    void CompareGrandTruth();
+    void CompareGrandTruthMiRNA();
 };
 
 #endif // EXPERIMENTAL_H

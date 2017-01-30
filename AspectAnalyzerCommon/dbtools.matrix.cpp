@@ -51,11 +51,11 @@ std::shared_ptr<Matrix> DBTools::GetMatrix(int idMatrix)
     return retVal;
 }
 
-arma::mat DBTools::GetMatrixData(int idResult, int idType)
+void DBTools::GetMatrixData(int idResult, int idType, std::shared_ptr<NMF> result)
 {
     QSqlQuery query(db);
 
-    QString queryText = "SELECT [data] as rawdata FROM matrix WHERE id_result = " + QString::number(idResult) + " and id_type = " + QString::number(idType);
+    QString queryText = "SELECT [data] as rawdata FROM matrix WHERE id_result = " + QString::number(idResult) + " and id_matrix_type = " + QString::number(idType);
 
     query.exec(queryText);
 
@@ -78,13 +78,12 @@ arma::mat DBTools::GetMatrixData(int idResult, int idType)
 
     tmpFile.write(rawData);
 
-    arma::mat data;
-
-    data.load(filename.toStdString());
+    if (idType == Enums::MatrixType::W)
+        result->WMatrix.load(filename.toStdString());
+    else
+        result->HMatrix.load(filename.toStdString());
 
     QFile::remove(filename);
-
-    return data;
 }
 
 int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int type, int result)

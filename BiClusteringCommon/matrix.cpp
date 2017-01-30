@@ -6,7 +6,29 @@ Matrix::Matrix(std::vector <QString>& sdata)
 
     QString separator = "\t";
 
-    QStringList tmp = sdata[0].split("\t", QString::SkipEmptyParts);
+    QString test = sdata[0];
+
+    for(QChar c : test)
+    {
+        if (c == '\t' || c == ';')
+        {
+            separator = c;
+            break;
+        }
+    }
+
+    QStringList tmp = sdata[0].split(separator, QString::SkipEmptyParts);
+
+    test = sdata[1];
+
+    for(QChar c : test)
+    {
+        if (c == '\t' || c == ';')
+        {
+            separator = c;
+            break;
+        }
+    }
 
     if (sdata.back().size() == 0)
     {
@@ -64,7 +86,7 @@ Matrix::Matrix(std::vector <QString>& sdata)
 
         for(int i = 1; i < headerRow.size(); ++i)
         {
-            columnLabels.emplace_back(-1, -1, Enums::LabelType::ColumnLabel, i, headerRow[i].trimmed());
+            columnLabels.emplace_back(-1, -1, Enums::LabelType::ColumnLabel, i-1, headerRow[i].trimmed());
         }
 
         startMainLoop = 2;

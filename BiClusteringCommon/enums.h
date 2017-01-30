@@ -78,6 +78,8 @@ public:
             JaccardIndex,
             JaccardWeighted,
             BothAsOne,
+            Cluster1,
+            Cluster2
         };
 
     enum ExtractingMethod
