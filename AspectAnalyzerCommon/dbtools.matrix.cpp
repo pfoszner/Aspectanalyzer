@@ -33,6 +33,8 @@ std::shared_ptr<Matrix> DBTools::GetMatrix(int idMatrix)
 
     data.load(filename.toStdString());
 
+    qDebug() << "Size: " << data.n_rows << ", " << data.n_cols << ". Sample value: ";
+
     QFile::remove(filename);
 
     QString name = query.value("name").toString();
@@ -92,6 +94,8 @@ int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int
     
     QSqlQuery query(db);
     
+    bool testSize = query.exec("PRAGMA SQLITE_MAX_LENGTH = 2147483647");
+
     QString queryText;
     
     QString error;
@@ -107,11 +111,23 @@ int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int
 
     matrixToSave.save(filename.toStdString());
 
-    QFile file(filename);
+    std::ifstream file(filename.toStdString());
 
-    file.open(QIODevice::ReadOnly);
+    file.seekg(0, std::ios_base::end);
 
-    QByteArray rawData = file.readAll();
+    auto fileSize = file.tellg();
+
+    file.seekg(0, std::ios_base::beg);
+
+    //file.open(QIODevice::ReadOnly);
+
+    qDebug() << fileSize;
+
+    std::vector<char> rawData(fileSize);// = file.readAll();
+
+    file.read(rawData.data(), fileSize);
+
+    //qDebug() << file.errorString();
 
     QFile::remove(filename);
 
@@ -126,7 +142,7 @@ int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int
         query.bindValue(":result", result);
     else
         query.bindValue(":result", QVariant(QVariant::Int));
-    query.bindValue(":rawdata", rawData);
+    query.bindValue(":rawdata", rawData.data());
 
     bool test = query.exec();
 

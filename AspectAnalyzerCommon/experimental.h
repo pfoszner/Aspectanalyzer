@@ -27,6 +27,7 @@ public:
     void RunTriclustering();
     void CompareGrandTruth();
     void CompareGrandTruthMiRNA();
+    void ARFFPlay();
 };
 
 #endif // EXPERIMENTAL_H

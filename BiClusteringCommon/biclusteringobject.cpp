@@ -8,7 +8,7 @@ BiclusteringObject::BiclusteringObject(std::shared_ptr<Matrix>& dataMatrix)
 
 Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<std::shared_ptr<Bicluster>>& original, const std::vector<std::shared_ptr<Bicluster>>& computed, Enums::BiclusterCompareMode mode, Enums::SimilarityMethods simMethod)
 {
-    int size = original.size();
+    uint size = original.size();
 
     if (computed.size() > size)
         size = computed.size();
@@ -123,4 +123,92 @@ std::shared_ptr<BiclusteringObject> BiclusteringObject::Compute(std::vector<std:
 void BiclusteringObject::ParseParameters(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params)
 {
     params.clear();
+}
+
+void BiclusteringObject::GenerateARFFFile(QString path, int dim, std::vector<int> indexes)
+{
+    if (indexes.size() == 0)
+    {
+        if (dim == 0)
+        {
+            for(uint i = 0; i < dataMatrix->data.n_rows; ++i)
+            {
+                indexes.push_back(i);
+            }
+        }
+        else
+        {
+            for(uint i = 0; i < dataMatrix->data.n_cols; ++i)
+            {
+                indexes.push_back(i);
+            }
+        }
+    }
+
+    QFile retVal(path);
+
+    retVal.open(QFile::WriteOnly | QFile::Text);
+
+    QTextStream out(&retVal);
+
+    out << "@RELATION biclustering\n\n";
+
+    for(uint i = 0; i < indexes.size(); ++i)
+    {
+        if (dim == 0)
+            out << "@ATTRIBUTE " << dataMatrix->rowLabels[indexes[i]].value << " numeric\n";
+        else
+            out << "@ATTRIBUTE " << dataMatrix->columnLabels[indexes[i]].value << " numeric\n";
+    }
+
+    QList<QString> distinstClass;
+
+    for(uint i = 0; i < dataMatrix->classLabels.size(); ++i)
+    {
+        if (dim == 1 && dataMatrix->classLabels[i].idLabelType == Enums::LabelType::RowClassLabel)
+        {
+            if (!distinstClass.contains(dataMatrix->classLabels[i].value))
+            {
+                distinstClass.append(dataMatrix->classLabels[i].value);
+            }
+        }
+        else if (dim == 0 && dataMatrix->classLabels[i].idLabelType == Enums::LabelType::ColumnClassLabel)
+        {
+            if (!distinstClass.contains(dataMatrix->classLabels[i].value))
+            {
+                distinstClass.append(dataMatrix->classLabels[i].value);
+            }
+        }
+    }
+
+    out << "@ATTRIBUTE class {'";
+
+    for(uint i = 0; i < distinstClass.size(); ++i)
+    {
+        out << distinstClass[i] << "'";
+
+        if (i == distinstClass.size() - 1)
+            out << "}\n";
+        else
+            out << ",'";
+    }
+
+    out << "@DATA\n";
+
+    if (dim == 1)
+    {
+        for(int r = 0; r < dataMatrix->data.n_rows; ++r)
+        {
+            for(int c = 0; c < indexes.size(); ++c)
+            {
+                out << QString::number(dataMatrix->data(r,indexes[c])).replace(",",".") << ",";
+            }
+
+            auto iter = std::find_if(dataMatrix->classLabels.begin(), dataMatrix->classLabels.end(), [r](Label search) { return search.idLabelType == Enums::LabelType::RowClassLabel && search.indexNbr == r; });
+
+            out << "\"" << iter->value << "\"\n";
+        }
+    }
+
+    retVal.close();
 }

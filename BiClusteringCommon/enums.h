@@ -11,7 +11,8 @@ public:
     {
         RowLabel = 1,
         ColumnLabel,
-        ClassLabel
+        RowClassLabel,
+        ColumnClassLabel
     };
 
     enum MunkresFunc

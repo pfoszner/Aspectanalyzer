@@ -13,6 +13,7 @@
 class Matrix
 {
 public:
+    Matrix(QString filename);
     Matrix(std::vector <QString>&);
     Matrix(const Matrix&);
     Matrix(std::shared_ptr<int>& idMatrix, const arma::mat& data, const QString& name, const QString& group, const std::vector<std::shared_ptr<Bicluster>>& biclusters)
@@ -34,6 +35,9 @@ public:
 
 public:
     void AddValue(double value);
+
+private:
+    void LoadFromDataList(std::vector <QString>& sdata);
 };
 
 #endif // MATRIX_H

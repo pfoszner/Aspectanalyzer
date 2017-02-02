@@ -142,6 +142,7 @@ void DBTools::CreateNewDatabase()
                test = query.exec("PRAGMA locking_mode = EXCLUSIVE");
                test = query.exec("PRAGMA foreign_keys = OFF");
                test = query.exec("PRAGMA temp_store = MEMORY");
+               test = query.exec("PRAGMA SQLITE_MAX_LENGTH = 2147483647");
                test = query.exec("COMMIT;");
 
      if (!test)

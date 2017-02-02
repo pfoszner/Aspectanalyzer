@@ -21,7 +21,7 @@ public:
 protected:
     arma::umat WBiclusters;
     arma::umat HBiclusters;
-    int SupervisedDim = -1;
+    int SupervisedDim = 0;
     int maxNumberOfSteps = 600;
     Enums::ExtractingMethod exMethod = Enums::Quadrille;
     double theta = 0.5;

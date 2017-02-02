@@ -25,6 +25,7 @@ public:
     std::vector<std::shared_ptr<Bicluster>> foundedBiclusters;
     double time_spent;
     std::vector<FeatureResult> features;
+    void GenerateARFFFile(QString path, int dim, std::vector<int> indexes = std::vector<int>());
 
 
 public:

@@ -1,6 +1,36 @@
 #include "matrix.h"
 
+Matrix::Matrix(QString filename)
+{
+    QFile file(filename);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        //QMessageBox::information(0, "error", file.errorString());
+    }
+    else
+    {
+        QTextStream in(&file);
+
+        std::vector <QString> vec;
+
+        while(!in.atEnd()) {
+            QString line = in.readLine().trimmed();
+
+            vec.push_back(line);
+        }
+
+        LoadFromDataList(vec);
+
+        file.close();
+    }
+}
+
 Matrix::Matrix(std::vector <QString>& sdata)
+{
+    LoadFromDataList(sdata);
+}
+
+void Matrix::LoadFromDataList(std::vector <QString>& sdata)
 {
     idMatrix = std::make_shared<int>(-1);
 

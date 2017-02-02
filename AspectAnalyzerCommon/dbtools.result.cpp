@@ -9,7 +9,7 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
     idMethod++;
 
     if (idResult > 0)
-        queryString += " WHERE RESULT.id_result = ", QString::number(idResult);
+        queryString += " WHERE RESULT.id_result = " + QString::number(idResult);
     else if (VmatrixID > 0 && idMethod > 0)
         queryString += " WHERE RESULT.id_matrix = " + QString::number(VmatrixID) + " and RESULT.id_method = " + QString::number(idMethod);
     else if (VmatrixID > 0)
@@ -22,6 +22,8 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
 
     queryString += " ORDER BY RESULT.id_result";
 
+    qDebug() << queryString;
+
     QSqlQuery query(db);
 
     std::shared_ptr<BiclusteringObject> Result;
@@ -31,7 +33,7 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
     while (query.next())
     {
         int ID = query.value("id_result").toInt();
-        int method = query.value("id_method").toInt();
+        int method = query.value("id_method").toInt() - 1;
         double time = query.value("time").toDouble();
         int Vmatrix = query.value("id_matrix").toInt();
 

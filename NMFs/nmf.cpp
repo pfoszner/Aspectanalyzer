@@ -166,57 +166,74 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
         WBiclusters = arma::zeros<arma::umat>(p, expectedBiClusterCount);
         HBiclusters = arma::zeros<arma::umat>(n, expectedBiClusterCount);
 
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+
+        for(uint i = 0; i < dataMatrix->data.n_rows; ++i)
+        {
+            if (i < 2012)
+                dataMatrix->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Prostate");
+            else if (i > 4027)
+                dataMatrix->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Head and Neck");
+            else
+                dataMatrix->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Thyroid");
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////
+
         if (SupervisedDim >= 0)
         {
-            if (SupervisedDim == 1)
+            QList<QString> distinstClass;
+            QList<Label> classesValues;
+
+            for(uint i = 0; i < dataMatrix->classLabels.size(); ++i)
             {
-                //List<string> Classes = base.DataMatrix.Labels.Where(q => q.IdLabelType == LabelType.Class && q.Dim == 0).Select(s => s.Value).Distinct().ToList();
+                if (SupervisedDim == 0 && dataMatrix->classLabels[i].idLabelType == Enums::LabelType::RowClassLabel)
+                {
+                    classesValues.append(dataMatrix->classLabels[i]);
+                    if (!distinstClass.contains(dataMatrix->classLabels[i].value))
+                    {
+                        distinstClass.append(dataMatrix->classLabels[i].value);
+                    }
+                }
+                else if (SupervisedDim == 1 && dataMatrix->classLabels[i].idLabelType == Enums::LabelType::ColumnClassLabel)
+                {
+                    classesValues.append(dataMatrix->classLabels[i]);
+                    if (!distinstClass.contains(dataMatrix->classLabels[i].value))
+                    {
+                        distinstClass.append(dataMatrix->classLabels[i].value);
+                    }
+                }
+            }
 
-                //List<Label> ClassesValues = base.DataMatrix.Labels.Where(q => q.IdLabelType == LabelType.Class && q.Dim == 0).ToList();
+            if (SupervisedDim == 0)
+            {
+                arma::umat CurrWBiClusters;
 
-                //for (int i = 0; i < Classes.Count; ++i)
-                //{
-                //    List<Label> SingleClass = ClassesValues.FindAll(q => q.Value.Equals(Classes[i]));
+                for (uint i = 0; i < distinstClass.size(); ++i)
+                {
+                    arma::uvec Wvec = arma::sort_index(WMatrix.col(i));
 
-                //    List<int> Inside = new List<int>();
-                //    List<int> Outside = new List<int>();
+                    for(int r = 0; r < p; ++r)
+                    {
+                        if (distinstClass[i] == classesValues[r].value)
+                        {
+                            Wvec(r) = 2.0;
+                        }
+                        else
+                        {
+                            Wvec(r) = 1.0;
+                        }
+                    }
 
-                //    for (int e = 0; e < p; ++e)
-                //    {
-                //        if (SingleClass.Exists(q => q.Index == e))
-                //        {
-                //            Inside.Add(e);
-                //        }
-                //        else
-                //        {
-                //            Outside.Add(e);
-                //        }
-                //    }
 
-                //    string InsideInd = ComputeInd(Inside);
-                //    string OutsideInd = ComputeInd(Outside);
+                    CurrWBiClusters = arma::join_rows(CurrWBiClusters, Wvec);
+                }
 
-                //    Wmatrix[String.Format("{0};{1}", InsideInd, i)] = ILMath.multiplyElem(Wmatrix[String.Format("{0};{1}", InsideInd, i)], 2.0);
+                WMatrix = WMatrix % CurrWBiClusters;
 
-                //    double[] ColSum = new double[base.ExpectedBiClusterCount];
-
-                //    for (int t = 0; t < p; ++t)
-                //    {
-                //        for (int j = 0; j < base.ExpectedBiClusterCount; ++j)
-                //        {
-                //            ColSum[j] += Wmatrix.GetValue(t, j);
-                //        }
-                //    }
-
-                    //Normalize Columns in matrix W
-                //    for (int t = 0; t < p; ++t)
-                //    {
-                //        for (int j = 0; j < base.ExpectedBiClusterCount; ++j)
-                //        {
-                //            Wmatrix(t, j) /= ColSum[j];
-                //        }
-                //    }
-                //}
+                // Normalization step
+                WMatrix = WMatrix % arma::repmat(1./arma::sum(WMatrix,0), p, 1);
             }
         }
 
