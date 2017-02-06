@@ -93,8 +93,6 @@ int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int
     int retVal = -1;
     
     QSqlQuery query(db);
-    
-    bool testSize = query.exec("PRAGMA SQLITE_MAX_LENGTH = 2147483647");
 
     QString queryText;
     

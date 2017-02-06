@@ -155,8 +155,6 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
         InitializateFirstValues();
 
-        arma::mat test = WMatrix * HMatrix;
-
         double divergence = 0;
 
         double lastDivergance = 0;
@@ -171,9 +169,9 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
         for(uint i = 0; i < dataMatrix->data.n_rows; ++i)
         {
-            if (i < 2012)
+            if (i < 505)
                 dataMatrix->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Prostate");
-            else if (i > 4027)
+            else if (i > 1008)
                 dataMatrix->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Head and Neck");
             else
                 dataMatrix->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Thyroid");
@@ -210,7 +208,7 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
             {
                 arma::umat CurrWBiClusters;
 
-                for (uint i = 0; i < distinstClass.size(); ++i)
+                for (int i = 0; i < distinstClass.size(); ++i)
                 {
                     arma::uvec Wvec = arma::sort_index(WMatrix.col(i));
 
@@ -243,7 +241,7 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
             divergence = DivernegceValue();
 
-            //qDebug() << numOfSteps << ": " << divergence;
+            qDebug() << numOfSteps << ": " << divergence;
 
             features.emplace_back(Enums::Divergence, divergence, numOfSteps);
 
@@ -470,7 +468,7 @@ std::vector<int> NMF::GetHBicluster(int k, Enums::ExtractingMethod extractingTyp
                 }
                 break;
             case Enums::Quadrille:
-                threshold = max * 0.99;
+                threshold = max * 0.75;
                 break;
             default:
                 threshold = 0;

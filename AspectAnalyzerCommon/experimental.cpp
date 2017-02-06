@@ -19,15 +19,15 @@ void Experimental::TestTriclustering()
 
 void Experimental::ARFFPlay()
 {
-    std::shared_ptr<Matrix> dupa = std::make_shared<Matrix>("/mnt/E/TCGA/DataMatrixTCGA5.vmatrix");
+    std::shared_ptr<Matrix> dupa = std::make_shared<Matrix>("/mnt/E/TCGA/DataMatrixTCGA5_mutect.vmatrix");
 
-    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(50, 82, -1, -1);
+    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(1, 1, -1, -1);
 
     for(uint i = 0; i < dupa->data.n_rows; ++i)
     {
-        if (i < 2012)
+        if (i < 505)
             dupa->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Prostate");
-        else if (i > 4027)
+        else if (i > 1008)
             dupa->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Head and Neck");
         else
             dupa->classLabels.emplace_back(-1, 82, Enums::LabelType::RowClassLabel, i, "Thyroid");
@@ -35,7 +35,7 @@ void Experimental::ARFFPlay()
 
     test[0]->dataMatrix = dupa;
 
-    test[0]->GenerateARFFFile("/mnt/E/TCGA/test.arff", 1);
+    //test[0]->GenerateARFFFile("/mnt/E/TCGA/test.arff", 1);
 
     std::vector<int> indexes;
 
@@ -52,7 +52,72 @@ void Experimental::ARFFPlay()
 
     test[0]->GenerateARFFFile("/mnt/E/TCGA/test_50.arff", 1, indexes);
 
+    std::vector <QString> gs = GetSignature();
 
+    std::vector<int> indexes2;
+
+    for(QString item : gs)
+    {
+        for(Label l : dupa->columnLabels)
+        {
+            if (l.value == item)
+            {
+                int in = l.indexNbr;
+                auto iter = std::find_if(indexes2.begin(), indexes2.end(), [in](int s){ return s == in; });
+
+                if (iter == indexes2.end())
+                    indexes2.push_back(in);
+            }
+        }
+    }
+
+    test[0]->GenerateARFFFile("/mnt/E/TCGA/test_rafal.arff", 1, indexes2);
+
+    std::vector<int> indexes3;
+
+    for(int it : indexes)
+    {
+        auto iter = std::find_if(indexes3.begin(), indexes3.end(), [it](int s){ return s == it; });
+
+        if (iter == indexes3.end())
+            indexes3.push_back(it);
+    }
+
+    for(int it : indexes2)
+    {
+        auto iter2 = std::find_if(indexes3.begin(), indexes3.end(), [it](int s){ return s == it; });
+
+        if (iter2 == indexes3.end())
+            indexes3.push_back(it);
+    }
+
+    test[0]->GenerateARFFFile("/mnt/E/TCGA/test_super.arff", 1, indexes3);
+
+}
+
+std::vector <QString> Experimental::GetSignature()
+{
+    std::vector <QString> vector;
+
+    QFile file("/mnt/E/TCGA/genes.txt");
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        //QMessageBox::information(0, "error", file.errorString());
+    }
+    else
+    {
+        QTextStream in(&file);
+
+
+
+        while(!in.atEnd()) {
+            QString line = in.readLine().trimmed();
+
+            vector.push_back(line);
+        }
+    }
+
+    return vector;
 }
 
 void Experimental::CompareGrandTruthMiRNA()
@@ -101,7 +166,7 @@ void Experimental::CompareGrandTruthMiRNA()
             {
                 QString currClass;
 
-                for(int c = 0; c < classes.size(); ++c)
+                for(uint c = 0; c < classes.size(); ++c)
                 {
                     if (std::get<0>(classes[c]) == label.value)
                     {
@@ -112,7 +177,7 @@ void Experimental::CompareGrandTruthMiRNA()
 
                 bool added = false;
 
-                for(int b = 0; b < dicLabel.size(); ++b)
+                for(uint b = 0; b < dicLabel.size(); ++b)
                 {
                     if (dicLabel[b] == currClass)
                     {

@@ -183,7 +183,7 @@ void BiclusteringObject::GenerateARFFFile(QString path, int dim, std::vector<int
 
     out << "@ATTRIBUTE class {'";
 
-    for(uint i = 0; i < distinstClass.size(); ++i)
+    for(int i = 0; i < distinstClass.size(); ++i)
     {
         out << distinstClass[i] << "'";
 
@@ -197,9 +197,9 @@ void BiclusteringObject::GenerateARFFFile(QString path, int dim, std::vector<int
 
     if (dim == 1)
     {
-        for(int r = 0; r < dataMatrix->data.n_rows; ++r)
+        for(uint r = 0; r < dataMatrix->data.n_rows; ++r)
         {
-            for(int c = 0; c < indexes.size(); ++c)
+            for(uint c = 0; c < indexes.size(); ++c)
             {
                 out << QString::number(dataMatrix->data(r,indexes[c])).replace(",",".") << ",";
             }

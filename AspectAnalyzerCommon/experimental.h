@@ -28,6 +28,7 @@ public:
     void CompareGrandTruth();
     void CompareGrandTruthMiRNA();
     void ARFFPlay();
+    std::vector <QString> GetSignature();
 };
 
 #endif // EXPERIMENTAL_H
