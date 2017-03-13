@@ -12,6 +12,8 @@
 
 class Matrix
 {
+
+
 public:
     Matrix(QString filename);
     Matrix(std::vector <QString>&);
@@ -38,6 +40,7 @@ public:
 
 private:
     void LoadFromDataList(std::vector <QString>& sdata);
+    void LoadSoftFile(QString& filepath);
 };
 
 #endif // MATRIX_H

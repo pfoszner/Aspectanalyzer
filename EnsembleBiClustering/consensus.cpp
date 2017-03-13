@@ -214,15 +214,86 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
 {
     std::vector<std::shared_ptr<Bicluster>> retVal;
 
+    int bicSize = orgResults[0].size();
+
     //Are there any results at all?
     if (orgResults.size() == 0)
     {
         throw "No results";
     }
     //Every result on the list should have the same number of bi-clusters
-    else if (std::all_of(orgResults.begin(), orgResults.end(), [orgResults](const std::vector<std::shared_ptr<Bicluster>>& in){ return in.size() != orgResults[0].size(); } ))
+    else if (!std::all_of(orgResults.begin(), orgResults.end(), [bicSize](const std::vector<std::shared_ptr<Bicluster>>& in){ return in.size() == bicSize; } ))
     {
-        throw "Results inconsistent";
+        if (expectedBiClusterCount > 0)
+        {
+            for(int r = 0; r < orgResults.size(); ++r)
+            {
+                if (orgResults[r].size() < expectedBiClusterCount)
+                {
+                    std::shared_ptr<Bicluster> emptyBic = std::make_shared<Bicluster>(-1, std::vector<int>(), std::vector<int>(), nullptr, nullptr);
+
+                    while (orgResults[r].size() < expectedBiClusterCount)
+                    {
+                        orgResults[r].push_back(emptyBic);
+                    }
+                }
+                else if (orgResults[r].size() > expectedBiClusterCount)
+                {
+                    while(orgResults[r].size() > expectedBiClusterCount)
+                    {
+                        Array<double> CM = GetCostMatrixForBiclusters(orgResults[r], orgResults[r], Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
+
+                        ClassicalHungarian MunkresEngine;
+
+                        MunkresEngine.SetCostMatrix(CM, ClassicalHungarian::Max);
+
+                        MunkresEngine.RunMunkres();
+
+                        int remove = 0;
+                        int merge = 1;
+                        double maxSimi = MunkresEngine.C_orig[remove][merge];
+
+                        for(int i = 0; i < MunkresEngine.C_orig.height; ++i)
+                        {
+                            for(int j = 0; j < MunkresEngine.C_orig.width; ++j)
+                            {
+                                if (i != j)
+                                {
+                                    if (MunkresEngine.C_orig[i][j] > maxSimi)
+                                    {
+                                        remove = i;
+                                        merge = j;
+                                        maxSimi = MunkresEngine.C_orig[remove][merge];
+                                    }
+                                }
+                            }
+                        }
+
+                        for(int c1 : orgResults[r][remove]->cluster1)
+                        {
+                            auto it = std::find_if(orgResults[r][remove]->cluster1.begin(), orgResults[r][remove]->cluster1.end(), [c1](int iter) { return iter == c1; } );
+
+                            if (it == orgResults[r][remove]->cluster1.end())
+                                orgResults[r][merge]->cluster1.push_back(c1);
+                        }
+
+                        for(int c2 : orgResults[r][remove]->cluster2)
+                        {
+                            auto it = std::find_if(orgResults[r][remove]->cluster2.begin(), orgResults[r][remove]->cluster2.end(), [c2](int iter) { return iter == c2; } );
+
+                            if (it == orgResults[r][remove]->cluster2.end())
+                                orgResults[r][merge]->cluster2.push_back(c2);
+                        }
+
+                        orgResults[r].erase(orgResults[r].begin() + remove);
+                    }
+                }
+            }
+        }
+        else
+        {
+            throw "Results inconsistent";
+        }
     }
     //nothing to do if there is only one result
     else if (orgResults.size() == 1)
@@ -338,7 +409,7 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
                     }
                 }
 
-                if ((FinalCluster1.size() >= minClusterSize) || (MinWeight == 0.1))
+                if ((FinalCluster1.size() >= minClusterSize) || (MinWeight <= 0.1))
                     done = true;
                 else
                     MinWeight *= 0.9;
@@ -360,7 +431,7 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
                     }
                 }
 
-                if ((FinalCluster2.size() >= minClusterSize) || (MinWeight == 0.1))
+                if ((FinalCluster2.size() >= minClusterSize) || (MinWeight <= 0.1))
                     done = true;
                 else
                     MinWeight *= 0.9;

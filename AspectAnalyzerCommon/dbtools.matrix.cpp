@@ -33,7 +33,7 @@ std::shared_ptr<Matrix> DBTools::GetMatrix(int idMatrix)
 
     data.load(filename.toStdString());
 
-    qDebug() << "Size: " << data.n_rows << ", " << data.n_cols << ". Sample value: ";
+    //qDebug() << "Size: " << data.n_rows << ", " << data.n_cols;
 
     QFile::remove(filename);
 
@@ -109,21 +109,27 @@ int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int
 
     matrixToSave.save(filename.toStdString());
 
-    std::ifstream file(filename.toStdString());
+    QFile file(filename);
 
-    file.seekg(0, std::ios_base::end);
+    file.open(QIODevice::ReadOnly);
 
-    auto fileSize = file.tellg();
+    QByteArray rawData = file.readAll();
 
-    file.seekg(0, std::ios_base::beg);
+    //std::ifstream file(filename.toStdString());
+
+    //file.seekg(0, std::ios_base::end);
+
+    //auto fileSize = file.tellg();
+
+    //file.seekg(0, std::ios_base::beg);
 
     //file.open(QIODevice::ReadOnly);
 
-    qDebug() << fileSize;
+    qDebug() << rawData.size();
 
-    std::vector<char> rawData(fileSize);// = file.readAll();
+    //std::vector<char> rawData(fileSize);// = file.readAll();
 
-    file.read(rawData.data(), fileSize);
+    //file.read(rawData.data(), fileSize);
 
     //qDebug() << file.errorString();
 
@@ -140,7 +146,7 @@ int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int
         query.bindValue(":result", result);
     else
         query.bindValue(":result", QVariant(QVariant::Int));
-    query.bindValue(":rawdata", rawData.data());
+    query.bindValue(":rawdata", rawData);
 
     bool test = query.exec();
 

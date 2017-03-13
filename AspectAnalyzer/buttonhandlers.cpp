@@ -109,25 +109,36 @@ void ButtonHandlers::btnLoadFromDatabaseSlot()
 
 void ButtonHandlers::btnTuneSlot()
 {
-    //for(int i=0; i<=3; ++i)
-    //{
-    //    for(int r=0; r < 1; ++r)
-    //    {
-    //        btnAddTaskSlot(i);
-    //    }
-    //}
+
+    //exper->LoadKumalBiclusters();
+
+    exper->RunAllTriclustering();
+
+    qDebug() << "Mission Acomplished";
+
+    return;
+
+    for(int i=0; i<=3; ++i)
+    {
+        for(int r=0; r < 10; ++r)
+        {
+            btnAddTaskSlot(i);
+        }
+    }
 
     //engine->ServeQueue();
 
-    //exper->RunConsensus();
+    exper->RunConsensus();
 
-    //exper->RunTriclustering();
+    exper->RunTriclustering();
 
     //exper->CompareGrandTruthMiRNA();
 
-    exper->ARFFPlay();
+    //exper->ARFFPlay();
 
-    qDebug() << "Mission Acomplished";
+    exper->StartCustom();
+
+
 }
 
 void ButtonHandlers::btnPlaySlot()

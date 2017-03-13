@@ -81,7 +81,7 @@ void DBTools::CreateNewDatabase()
                  "  `dim2`	INTEGER NOT NULL,"
                  "  `group`	TEXT NOT NULL,"
                  "  `id_result`  INTEGER,"
-                 "  `data`  BLOB"
+                 "  `data`  LARGEBLOB"
                ");");
                test = query.exec("CREATE TABLE `label_type` ("
                "    `id_label_type`	INTEGER NOT NULL UNIQUE,"

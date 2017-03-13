@@ -188,6 +188,9 @@ double Bicluster::JaccardIndex(const std::vector<QString>& s, const std::vector<
         }
     }
 
+    if (sum.size() == 0)
+        return 0.0;
+
     try
     {
         RetVal = (double)inter.size() / (double)sum.size();
@@ -223,6 +226,9 @@ double Bicluster::JaccardIndex(const std::vector<int>& s, const std::vector<int>
             sum.push_back(item);
         }
     }
+
+    if (sum.size() == 0)
+        return 0.0;
 
     try
     {

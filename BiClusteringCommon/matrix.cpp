@@ -1,8 +1,52 @@
 #include "matrix.h"
 
-Matrix::Matrix(QString filename)
+Matrix::Matrix(QString filepath)
 {
-    QFile file(filename);
+    QFileInfo fi(filepath);
+
+    QString extension = fi.suffix();
+
+    if (extension == "vmatrix"){
+
+        QFile file(filepath);
+        if(!file.open(QIODevice::ReadOnly))
+        {
+            //QMessageBox::information(0, "error", file.errorString());
+        }
+        else
+        {
+
+            QTextStream in(&file);
+
+            std::vector <QString> vec;
+
+            while(!in.atEnd()) {
+                QString line = in.readLine().trimmed();
+
+                vec.push_back(line);
+            }
+
+            LoadFromDataList(vec);
+
+            file.close();
+        }
+    }
+    else if (extension == "soft"){
+            LoadSoftFile(filepath);
+    }
+}
+
+Matrix::Matrix(std::vector <QString>& sdata)
+{
+    LoadFromDataList(sdata);
+}
+
+void Matrix::LoadSoftFile(QString& filepath)
+{
+    idMatrix = std::make_shared<int>(-1);
+
+    QFile file(filepath);
+
     if(!file.open(QIODevice::ReadOnly))
     {
         //QMessageBox::information(0, "error", file.errorString());
@@ -11,23 +55,95 @@ Matrix::Matrix(QString filename)
     {
         QTextStream in(&file);
 
-        std::vector <QString> vec;
+        bool waitForData = true;
+        bool header = true;
+
+        int rowIndex = 0;
 
         while(!in.atEnd()) {
+
             QString line = in.readLine().trimmed();
 
-            vec.push_back(line);
+            if (waitForData){
+                if (line == "!dataset_table_begin"){
+                    waitForData = false;
+                }
+            }
+            else{
+                if (header){
+
+                    QStringList tmp = line.split('\t');
+
+                    for(int i = 2; i < tmp.size(); ++i)
+                    {
+                        columnLabels.emplace_back(-1, -1, Enums::LabelType::ColumnLabel, i-2, tmp[i]);
+                    }
+
+                    header = false;
+                }
+                else{
+                    if (line == "!dataset_table_end")
+                        break;
+                    else{
+
+                        QStringList tmp = line.split('\t');
+
+                        rowLabels.emplace_back(-1, -1, Enums::LabelType::RowLabel, rowIndex++, tmp[1]);
+
+                        arma::vec row = arma::zeros<arma::vec>(tmp.size()-2);
+
+                        std::vector<int> nullVals;
+
+                        double averageInRow = 0;
+                        int notNullNum = 0;
+
+                        for(int i = 2; i < tmp.size(); ++i)
+                        {
+                            if (tmp[i] != "null"){
+                                bool ok;
+
+                                double value = tmp[i].trimmed().toDouble(&ok);
+
+                                if (!ok)
+                                {
+                                    value = tmp[i].replace(",",".").toDouble(&ok);
+
+                                    if (!ok)
+                                    {
+                                        qDebug() << "Conversion gone wrong. Value: \"" << tmp[i] << "\"";
+                                    }
+                                }
+
+                                row(i - 2) = value;
+
+                                averageInRow += value;
+                                notNullNum++;
+                            }
+                            else{
+                                nullVals.push_back(i-2);
+                            }
+                        }
+
+                        if (notNullNum > 0){
+
+                            if (nullVals.size() > 0){
+
+                                averageInRow = averageInRow / notNullNum;
+
+                                for(int n : nullVals)
+                                {
+                                    row[n] = averageInRow;
+                                }
+                            }
+
+                            data = arma::join_cols(data, row.t());
+                        }
+                    }
+
+                }
+            }
         }
-
-        LoadFromDataList(vec);
-
-        file.close();
     }
-}
-
-Matrix::Matrix(std::vector <QString>& sdata)
-{
-    LoadFromDataList(sdata);
 }
 
 void Matrix::LoadFromDataList(std::vector <QString>& sdata)

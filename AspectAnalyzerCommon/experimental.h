@@ -22,6 +22,7 @@ public:
     Experimental(std::shared_ptr<ComputingEngine>& engine) : engine(engine)
     {}
 
+    void StartCustom();
     void TestTriclustering();
     void RunConsensus();
     void RunTriclustering();
@@ -29,6 +30,9 @@ public:
     void CompareGrandTruthMiRNA();
     void ARFFPlay();
     std::vector <QString> GetSignature();
+    void LoadKumalBiclusters();
+    void RunAllConsensus();
+    void RunAllTriclustering();
 };
 
 #endif // EXPERIMENTAL_H

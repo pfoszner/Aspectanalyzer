@@ -42,7 +42,7 @@ public:
         v = std::vector<T>(copy.v);
     }
 
-protected:
+//protected:
 	int width;
 	int height;
 	std::vector<T> v; 

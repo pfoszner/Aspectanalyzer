@@ -39,7 +39,15 @@ public:
             QUBIC,
             CONSENSUS,
             TRICLUSTERING,
-
+            Spectral,
+            Plaid,
+            OPSM,
+            BBC,
+            CPB,
+            ISA,
+            ChengandChurch,
+            BiMax,
+            xMOTIFs
         };
 
     enum MethodsParameters

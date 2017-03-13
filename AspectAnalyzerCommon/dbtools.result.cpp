@@ -22,7 +22,7 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
 
     queryString += " ORDER BY RESULT.id_result";
 
-    qDebug() << queryString;
+    //qDebug() << queryString;
 
     QSqlQuery query(db);
 

@@ -25,6 +25,10 @@ Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<s
                 {
                     CostMatrix[i][j] = 0.0;
                 }
+                else if (original.size() == 0 || computed.size() == 0)
+                {
+                    CostMatrix[i][j] = 0.0;
+                }
                 else
                 {
                     switch (mode)
@@ -155,10 +159,15 @@ void BiclusteringObject::GenerateARFFFile(QString path, int dim, std::vector<int
 
     for(uint i = 0; i < indexes.size(); ++i)
     {
+        QString value = dataMatrix->columnLabels[indexes[i]].value;
+
         if (dim == 0)
-            out << "@ATTRIBUTE " << dataMatrix->rowLabels[indexes[i]].value << " numeric\n";
-        else
-            out << "@ATTRIBUTE " << dataMatrix->columnLabels[indexes[i]].value << " numeric\n";
+            value = dataMatrix->rowLabels[indexes[i]].value;
+
+        if (value.size() == 0)
+            value = "empty";
+
+        out << "@ATTRIBUTE " << value << " numeric\n";
     }
 
     QList<QString> distinstClass;
