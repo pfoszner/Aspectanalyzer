@@ -38,6 +38,8 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
     {
         BuildBinaryCube(Biclusters, dataMatrix->data.n_rows, dataMatrix->data.n_cols);
 
+
+
         int k = 0;
 
         do
@@ -159,8 +161,33 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
             bool done = false;
 
+            double onesOutside = 0;
+            double zerosInside = cube.n_elem - arma::accu(cube);
+
             do
             {
+                double LossF = -1;
+                int Fstar = -1;
+
+
+                if (F.size() > 1)
+                {
+                    for(uint f = 0; f < F.size(); ++f)
+                    {
+                        auto rowF = cube(arma::span(F[f],F[f]),arma::span(0,dataMatrix->data.n_cols-1), arma::span(0,Biclusters.size()-1));
+
+                        double onesOut = arma::accu(rowF);
+
+                        double tmpLossF = (onesOutside + onesOut) + (zerosInside - (rowF.n_elem - onesOut));
+
+                        if (Fstar < 0 || tmpLossF < LossF)
+                            LossF = tmpLossF;
+                        Fstar = f;
+                    }
+                }
+
+                /*
+
                 std::vector<double> FLoss(F.size());
                 double LossF = -1;
                 std::vector<double>::iterator resultF;
@@ -185,8 +212,37 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                     //int Fstar = F[std::distance(FLoss.begin(), resultF)];
 
                     LossF = *resultF;
-                }
+                }*/
+
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                double tLossE = -1;
+                int Estar = -1;
+                std::vector<double> tELoss(E.size());
+
+                if (E.size() > 1)
+                {
+                    for(uint e = 0; e < E.size(); ++e)
+                    {
+                        auto colE = cube(arma::span(0,F.size()-1),arma::span(E[e],E[e]), arma::span(0,B.size()-1));
+
+                        double onesOut = arma::accu(colE);
+                        double zerosOut = colE.n_elem - onesOut;
+
+                        double tmpLossE = (onesOutside + onesOut) + (zerosInside - zerosOut);
+
+                        tELoss[e] = tmpLossE / (double)(F.size() * (E.size() - 1) * B.size());
+
+                        if (Estar < 0 || zerosOut > tLossE)
+                        {
+                            tLossE = zerosOut;
+                            Estar = E[e];
+                        }
+                    }
+                }
+
+
+                //auto sliceB = cube.slice(2);
 
                 std::vector<double> ELoss(E.size());
                 double LossE = -1;
@@ -211,7 +267,9 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
                     LossE = *resultE;
 
-                    //int Estar = E[std::distance(ELoss.begin(), resultE)];
+                    int Estar2 = E[std::distance(ELoss.begin(), resultE)];
+
+                    qDebug() << "New: " << Estar << " Old: " << Estar2;
                 }
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -252,7 +310,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
                     if (lossSub == LossF)
                     {
-                        F.erase(F.begin() + std::distance(FLoss.begin(), resultF));
+                        F.erase(F.begin() + Fstar);
                     }
                     if (lossSub == LossE)
                     {

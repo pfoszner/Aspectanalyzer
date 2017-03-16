@@ -31,6 +31,11 @@ Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<s
                 }
                 else
                 {
+                    CostMatrixWorker *st = new CostMatrixWorker(&CostMatrix[i][j], original[i], computed[j], mode, simMethod);
+
+                    QThreadPool::globalInstance()->start(st);
+
+                    /*
                     switch (mode)
                     {
                         case Enums::BiclusterCompareMode::Both:
@@ -43,6 +48,7 @@ Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<s
                             CostMatrix[i][j] = original[i]->CompareSecond(computed[j], simMethod);
                             break;
                     }
+                    */
                 }
             }
             catch (...)
@@ -52,6 +58,8 @@ Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<s
             }
         }
     }
+
+    QThreadPool::globalInstance()->waitForDone();
 
     return CostMatrix;
 }

@@ -17,7 +17,8 @@ SOURCES += biclusteringcommon.cpp \
     enums.cpp \
     bicluster.cpp \
     biclusteringutils.cpp \
-    label.cpp
+    label.cpp \
+    costmatrixworker.cpp
 
 HEADERS += biclusteringcommon.h \
     matrix.h \
@@ -26,7 +27,8 @@ HEADERS += biclusteringcommon.h \
     enums.h \
     bicluster.h \
     biclusteringutils.h \
-    label.h
+    label.h \
+    costmatrixworker.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

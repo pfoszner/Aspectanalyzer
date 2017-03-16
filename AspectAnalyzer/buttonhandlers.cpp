@@ -112,7 +112,9 @@ void ButtonHandlers::btnTuneSlot()
 
     //exper->LoadKumalBiclusters();
 
-    exper->RunAllTriclustering();
+    exper->RunAllConsensus();
+
+    //exper->RunAllTriclustering();
 
     qDebug() << "Mission Acomplished";
 

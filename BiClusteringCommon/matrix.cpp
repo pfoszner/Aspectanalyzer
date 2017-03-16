@@ -316,7 +316,14 @@ std::shared_ptr<double> Matrix::AverageCorrelationValue(const std::vector<int>& 
     {
         for (uint j = 0; j < clusterW.size(); ++j)
         {
-            Amatrix(j, i) = data(clusterW[j], clusterH[i]);
+            try
+            {
+                Amatrix(j, i) = data(clusterW[j], clusterH[i]);
+            }
+            catch(...)
+            {
+                qDebug() << "Panic. ACV part errror: " << clusterW[j] << "," << clusterH[i];
+            }
         }
     }
 

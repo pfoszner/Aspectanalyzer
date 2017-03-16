@@ -239,31 +239,25 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
                 }
                 else if (orgResults[r].size() > expectedBiClusterCount)
                 {
+                    Array<double> CM = GetCostMatrixForBiclusters(orgResults[r], orgResults[r], Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
+
                     while(orgResults[r].size() > expectedBiClusterCount)
                     {
-                        Array<double> CM = GetCostMatrixForBiclusters(orgResults[r], orgResults[r], Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
-
-                        ClassicalHungarian MunkresEngine;
-
-                        MunkresEngine.SetCostMatrix(CM, ClassicalHungarian::Max);
-
-                        MunkresEngine.RunMunkres();
-
                         int remove = 0;
                         int merge = 1;
-                        double maxSimi = MunkresEngine.C_orig[remove][merge];
+                        double maxSimi = CM[remove][merge];
 
-                        for(int i = 0; i < MunkresEngine.C_orig.height; ++i)
+                        for(int i = 0; i < CM.height; ++i)
                         {
-                            for(int j = 0; j < MunkresEngine.C_orig.width; ++j)
+                            for(int j = 0; j < CM.width; ++j)
                             {
                                 if (i != j)
                                 {
-                                    if (MunkresEngine.C_orig[i][j] > maxSimi)
+                                    if (CM[i][j] > maxSimi)
                                     {
                                         remove = i;
                                         merge = j;
-                                        maxSimi = MunkresEngine.C_orig[remove][merge];
+                                        maxSimi = CM[remove][merge];
                                     }
                                 }
                             }
@@ -286,6 +280,46 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
                         }
 
                         orgResults[r].erase(orgResults[r].begin() + remove);
+
+                        Array<double> cmUpdate(orgResults[r].size(), orgResults[r].size());
+
+                        for(int i = 0; i < CM.height; ++i)
+                        {
+                            for(int j = 0; j < CM.width; ++j)
+                            {
+                                int iOut = i;
+                                int jOut = j;
+
+                                if (i == remove || j == merge)
+                                    continue;
+
+                                if (i > remove)
+                                    iOut--;
+
+                                if (j > remove)
+                                    jOut--;
+
+                                if (j == merge || i == merge)
+                                {
+                                    //cmUpdate[iOut][jOut] = orgResults[r][iOut]->Compare(orgResults[r][jOut], Enums::SimilarityMethods::JaccardIndex);
+                                    CostMatrixWorker *st = new CostMatrixWorker(&cmUpdate[iOut][jOut], orgResults[r][iOut], orgResults[r][jOut], Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
+
+                                    QThreadPool::globalInstance()->start(st);
+                                }
+                                else
+                                {
+                                    cmUpdate[iOut][jOut] = CM[i][j];
+                                }
+                            }
+                        }
+
+                        QThreadPool::globalInstance()->waitForDone();
+
+                        CM.Initialize(cmUpdate);
+
+                        //Array<double> test = GetCostMatrixForBiclusters(orgResults[r], orgResults[r], Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
+
+                        //qDebug() << test[10, 10];
                     }
                 }
             }

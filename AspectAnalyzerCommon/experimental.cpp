@@ -450,9 +450,15 @@ void Experimental::RunAllConsensus()
 {
     std::vector<std::shared_ptr<BiclusteringObject>> test;
 
-    for(int i = 6; i <= 8; ++i)
+    std::vector<int> ids;
+
+    //ids.push_back(8);
+    ids.push_back(5);
+
+
+    for(uint i = 0; i <= ids.size(); ++i)
     {
-        test  = engine->db->GetResults(-1, i, -1, -1);
+        test  = engine->db->GetResults(-1, ids[i], -1, -1);
 
         double average = 0;
 
@@ -491,7 +497,8 @@ void Experimental::RunAllConsensus()
 
             auto res = newObject->Compute(params);
 
-            engine->db->SaveResult(res);
+            if (res != nullptr)
+                engine->db->SaveResult(res);
         }
 
         qDebug() << "Done ;]";

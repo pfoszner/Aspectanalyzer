@@ -11,6 +11,8 @@
 #include "enums.h"
 #include "classicalhungarian.h"
 #include <QDebug>
+#include <QThreadPool>
+#include "costmatrixworker.h"
 //#include <armadillo>
 //#include "/usr/local/include/armadillo"
 
