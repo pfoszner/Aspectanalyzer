@@ -20,9 +20,11 @@ std::shared_ptr<BiclusteringObject> TriClustering::Compute(std::vector<std::tupl
 
         return shared_from_this();
     }
-    catch (...)
+    catch (std::exception& e)
     {
         //Logger.Log(String.Format("Error in Compute. Message: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace), LogTypes.Error);
+
+        qDebug() << e.what();
 
         std::shared_ptr<BiclusteringObject> null;
 
@@ -36,14 +38,15 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
     try
     {
-        BuildBinaryCube(Biclusters, dataMatrix->data.n_rows, dataMatrix->data.n_cols);
-
-
-
         int k = 0;
 
         do
         {
+            if (Biclusters.size() == 0)
+                break;
+
+            BuildBinaryCube(Biclusters, dataMatrix->data.n_rows, dataMatrix->data.n_cols);
+
             k++;
             std::vector<int> F;
 
@@ -63,38 +66,6 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
             {
                 B.push_back(i);
             }
-
-            //////////////////////////////////////////////////////////////
-
-            std::vector<int> removeB;
-
-            for(int b : B)
-            {
-                bool remove = true;
-
-                for(int f : F)
-                {
-                    for(int e : E)
-                    {
-                        if (cube(f,e,b) == 1)
-                        {
-                            remove = false;
-                        }
-                    }
-                }
-
-                if (remove)
-                {
-                    removeB.push_back(b);
-                }
-            }
-
-            for(int b = removeB.size()-1; b > 0; --b)
-            {
-                B.erase(B.begin()+removeB[b]);
-            }
-
-            //////////////////////////////////////////////////////////////
 
             std::vector<int> removeF;
 
@@ -119,7 +90,10 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                 }
             }
 
-            for(int f = removeF.size()-1; f > 0; --f)
+            if (removeF.size() > 0)
+                RemoveCubeRow(removeF);
+
+            for(int f = removeF.size()-1; f >= 0; --f)
             {
                 F.erase(F.begin()+removeF[f]);
             }
@@ -132,7 +106,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
             {
                 bool remove = true;
 
-                for(int f : F)
+                for(int f = 1; f < F.size(); ++f)
                 {
                     for(int b : B)
                     {
@@ -149,7 +123,10 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                 }
             }
 
-            for(int e = removeE.size()-1; e > 0; --e)
+            if (removeE.size() > 0)
+                RemoveCubeColumn(removeE);
+
+            for(int e = removeE.size()-1; e >= 0; --e)
             {
                 E.erase(E.begin()+removeE[e]);
             }
@@ -169,134 +146,76 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                 double LossF = -1;
                 int Fstar = -1;
 
-
                 if (F.size() > 1)
                 {
                     for(uint f = 0; f < F.size(); ++f)
                     {
-                        auto rowF = cube(arma::span(F[f],F[f]),arma::span(0,dataMatrix->data.n_cols-1), arma::span(0,Biclusters.size()-1));
+                        arma::ucube rowF = cube.tube(f,0,f,E.size()-1);
 
                         double onesOut = arma::accu(rowF);
+                        double zerosOut = rowF.n_elem - onesOut;
 
-                        double tmpLossF = (onesOutside + onesOut) + (zerosInside - (rowF.n_elem - onesOut));
+                        double tmpLossF = (onesOutside + onesOut) + (zerosInside - zerosOut);
+
+                        tmpLossF /= (double)((F.size()-1)*E.size()*B.size());
 
                         if (Fstar < 0 || tmpLossF < LossF)
+                        {
                             LossF = tmpLossF;
-                        Fstar = f;
+                            Fstar = f;
+                        }
                     }
                 }
 
-                /*
-
-                std::vector<double> FLoss(F.size());
-                double LossF = -1;
-                std::vector<double>::iterator resultF;
-
-                if (F.size() > 1)
-                {
-                    for(uint f = 0; f < F.size(); ++f)
-                    {
-                        std::vector<int> tF = F;
-
-                        tF.erase(tF.begin() + f);
-
-                        SingleLossWorker *st = new SingleLossWorker(FLoss.begin() + f, tF, E, B, &cube);
-
-                        QThreadPool::globalInstance()->start(st);
-                    }
-
-                    QThreadPool::globalInstance()->waitForDone();
-
-                    resultF = std::min_element(FLoss.begin(), FLoss.end());
-
-                    //int Fstar = F[std::distance(FLoss.begin(), resultF)];
-
-                    LossF = *resultF;
-                }*/
-
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                double tLossE = -1;
+                double LossE = -1;
                 int Estar = -1;
-                std::vector<double> tELoss(E.size());
 
                 if (E.size() > 1)
                 {
                     for(uint e = 0; e < E.size(); ++e)
                     {
-                        auto colE = cube(arma::span(0,F.size()-1),arma::span(E[e],E[e]), arma::span(0,B.size()-1));
+                        arma::ucube colE = cube.tube(0,e,F.size()-1,e);
 
                         double onesOut = arma::accu(colE);
                         double zerosOut = colE.n_elem - onesOut;
 
                         double tmpLossE = (onesOutside + onesOut) + (zerosInside - zerosOut);
 
-                        tELoss[e] = tmpLossE / (double)(F.size() * (E.size() - 1) * B.size());
+                        tmpLossE /= (double)((E.size()-1)*F.size()*B.size());
 
-                        if (Estar < 0 || zerosOut > tLossE)
+                        if (Estar < 0 || tmpLossE < LossE)
                         {
-                            tLossE = zerosOut;
-                            Estar = E[e];
+                            LossE = tmpLossE;
+                            Estar = e;
                         }
                     }
                 }
-
-
-                //auto sliceB = cube.slice(2);
-
-                std::vector<double> ELoss(E.size());
-                double LossE = -1;
-                std::vector<double>::iterator resultE;
-
-                if (E.size() > 1)
-                {
-                    for(uint e = 0; e < E.size(); ++e)
-                    {
-                        std::vector<int> tE = E;
-
-                        tE.erase(tE.begin() + e);
-
-                        SingleLossWorker *st = new SingleLossWorker(std::next(ELoss.begin(), e), F, tE, B, &cube);
-
-                        QThreadPool::globalInstance()->start(st);
-                    }
-
-                    QThreadPool::globalInstance()->waitForDone();
-
-                    resultE = std::min_element(ELoss.begin(), ELoss.end());
-
-                    LossE = *resultE;
-
-                    int Estar2 = E[std::distance(ELoss.begin(), resultE)];
-
-                    qDebug() << "New: " << Estar << " Old: " << Estar2;
-                }
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                std::vector<double> BLoss(B.size());
                 double LossB = -1;
-                std::vector<double>::iterator resultB;
+                int Bstar = -1;
 
                 if (B.size() > 1)
                 {
                     for(uint b = 0; b < B.size(); ++b)
                     {
-                        std::vector<int> tB = B;
+                        auto bicB = cube.slice(b);
 
-                        tB.erase(tB.begin() + b);
+                        double onesOut = arma::accu(bicB);
+                        double zerosOut = bicB.n_elem - onesOut;
 
-                        SingleLossWorker *st = new SingleLossWorker(BLoss.begin() + b, F, E, tB, &cube);
+                        double tmpLossB = (onesOutside + onesOut) + (zerosInside - zerosOut);
 
-                        QThreadPool::globalInstance()->start(st);
+                        tmpLossB /= (double)((B.size()-1) * E.size() * F.size());
+
+                        if (Bstar < 0 || tmpLossB < LossB)
+                        {
+                            LossB = tmpLossB;
+                            Bstar = b;
+                        }
                     }
-
-                    QThreadPool::globalInstance()->waitForDone();
-
-                    resultB = std::min_element(BLoss.begin(), BLoss.end());
-
-                    LossB = *resultB;
-
-                    //int Bstar = B[std::distance(BLoss.begin(), resultB)];
                 }
 
                 double minLoss = 2;
@@ -310,15 +229,45 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
                     if (lossSub == LossF)
                     {
+                        arma::ucube rowF = cube.tube(Fstar,0,Fstar,E.size()-1);
+
                         F.erase(F.begin() + Fstar);
+
+                        double onesOut = arma::accu(rowF);
+                        double zerosOut = rowF.n_elem - onesOut;
+
+                        onesOutside += onesOut;
+                        zerosInside -= zerosOut;
+
+                        RemoveCubeRow(Fstar);
                     }
                     if (lossSub == LossE)
                     {
-                        E.erase(E.begin() + std::distance(ELoss.begin(), resultE));
+                        arma::ucube colE = cube.tube(0,Estar,F.size()-1,Estar);
+
+                        E.erase(E.begin() + Estar);
+
+                        double onesOut = arma::accu(colE);
+                        double zerosOut = colE.n_elem - onesOut;
+
+                        onesOutside += onesOut;
+                        zerosInside -= zerosOut;
+
+                        RemoveCubeColumn(Estar);
                     }
                     if (lossSub == LossB)
                     {
-                        B.erase(B.begin() + std::distance(BLoss.begin(), resultB));
+                        auto bicB = cube.slice(Bstar);
+
+                        B.erase(B.begin() + Bstar);
+
+                        double onesOut = arma::accu(bicB);
+                        double zerosOut = bicB.n_elem - onesOut;
+
+                        onesOutside += onesOut;
+                        zerosInside -= zerosOut;
+
+                        cube.shed_slice(Bstar);
                     }
 
                     qDebug() << "New Min value " << minLoss << ", F: " << F.size() << ", E: " << E.size() << ", B: " << B.size();
@@ -346,27 +295,140 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                 RetVal.push_back(New);
             }
 
-            for (int b : B)
+            for(int b = B.size()-1; b >= 0; --b)
             {
-                //Clear bi-clusters that were included in current
-                for (uint f = 0; f < cube.n_rows; ++f)
-                {
-                    for (uint e = 0; e < cube.n_cols; ++e)
-                    {
-                        cube(f,e,b) = (short)0;
-                    }
-                }
+                Biclusters.erase(Biclusters.begin()+B[b]);
             }
         }
         while (k < expectedBiClusterCount);
     }
-    catch (...)
+    catch (std::exception& e)
     {
-        qDebug() << "Exception";
+        qDebug() << "Exception " <<  e.what();
         //Logger.Log(String.Format("Error Message: {0}, StackTrace: {1}", ex.Message, ex.StackTrace), Common.LogTypes.Error);
     }
 
     return RetVal;
+}
+
+void TriClustering::RemoveCubeColumn(std::vector<int> colIndex)
+{
+    arma::ucube newCube = arma::ucube(cube.n_rows, cube.n_cols - colIndex.size(), cube.n_slices);
+
+    //newCube.zeros(cube.n_rows - 1, cube.n_cols, cube.n_slices);
+
+    for (uint b = 0; b < cube.n_slices; ++b)
+    {
+        for (uint f = 0; f < cube.n_rows; ++f)
+        {
+            int vecIndexE = 0;
+            int remIndex = 0;
+
+            for (uint e = 0; e < cube.n_cols; ++e)
+            {
+                if (e != colIndex[remIndex])
+                {
+                    newCube(f, vecIndexE, b) = cube(f, e, b);
+                    vecIndexE++;
+                }
+                else
+                {
+                    if (remIndex < colIndex.size() - 1)
+                        remIndex++;
+                }
+            }
+        }
+    }
+
+    cube = newCube;
+
+}
+
+void TriClustering::RemoveCubeColumn(int colIndex)
+{
+    arma::ucube newCube = arma::ucube(cube.n_rows, cube.n_cols - 1, cube.n_slices);
+
+    //newCube.zeros(cube.n_rows - 1, cube.n_cols, cube.n_slices);
+
+    for (uint b = 0; b < cube.n_slices; ++b)
+    {
+        for (uint f = 0; f < cube.n_rows; ++f)
+        {
+            int vecIndexE = 0;
+
+            for (uint e = 0; e < cube.n_cols; ++e)
+            {
+                if (e != colIndex)
+                {
+                    newCube(f, vecIndexE, b) = cube(f, e, b);
+                    vecIndexE++;
+                }
+            }
+        }
+    }
+
+    cube = newCube;
+
+}
+
+void TriClustering::RemoveCubeRow(std::vector<int> rowIndex)
+{
+    arma::ucube newCube = arma::ucube(cube.n_rows - rowIndex.size(), cube.n_cols, cube.n_slices);
+
+    //newCube.zeros(cube.n_rows - 1, cube.n_cols, cube.n_slices);
+
+    for (uint b = 0; b < cube.n_slices; ++b)
+    {
+        for (uint e = 0; e < cube.n_cols; ++e)
+        {
+            int vecIndexF = 0;
+            int remIndex = 0;
+
+            for (uint f = 0; f < cube.n_rows; ++f)
+            {
+                if (f != rowIndex[remIndex])
+                {
+                    newCube(vecIndexF, e, b) = cube(f, e, b);
+                    vecIndexF++;
+                }
+                else
+                {
+                    if (remIndex < rowIndex.size()-1)
+                        remIndex++;
+                }
+            }
+        }
+    }
+
+    cube = newCube;
+
+}
+
+void TriClustering::RemoveCubeRow(int rowIndex)
+{
+    arma::ucube newCube = arma::ucube(cube.n_rows - 1, cube.n_cols, cube.n_slices);
+
+    //newCube.zeros(cube.n_rows - 1, cube.n_cols, cube.n_slices);
+
+    for (uint b = 0; b < cube.n_slices; ++b)
+    {
+        for (uint e = 0; e < cube.n_cols; ++e)
+        {
+            int vecIndexF = 0;
+
+            for (uint f = 0; f < cube.n_rows; ++f)
+            {
+                if (f != rowIndex)
+                {
+                    newCube(vecIndexF, e, b) = cube(f, e, b);
+                    vecIndexF++;
+                }
+            }
+        }
+    }
+
+    cube = newCube;
+
 }
 
 void TriClustering::BuildBinaryCube(const std::vector<std::shared_ptr<Bicluster>>& Biclusters, int dim1, int dim2)
@@ -387,7 +449,7 @@ void TriClustering::BuildBinaryCube(const std::vector<std::shared_ptr<Bicluster>
             {
                 for (int j : Biclusters[b]->cluster2)
                 {
-                    cube(i, j, b) = (short)1;
+                    cube(i, j, b) = 1;
                 }
             }
         }
@@ -443,6 +505,12 @@ void SingleLossWorker::run()
 {
     double retVal = 0.0;
 
+    int outside = 0;
+    int inside = 0;
+    int zerosIn = 0;
+    int onesOut = 0;
+    double testSum = 0;
+
     int vecIndexB = 0;
 
     for (uint b = 0; b < (*cube).n_slices; ++b)
@@ -458,14 +526,30 @@ void SingleLossWorker::run()
                 // Count zeros inside selected area
                 if ((f == (uint)F[vecIndexF])&&(e == (uint)E[vecIndexE])&&(b == (uint)B[vecIndexB]))
                 {
+                    inside++;
+
                     if ((*cube)(f,e,b) == 0)
+                    {
                         retVal += 1.0;
+                        zerosIn++;
+                    }
                 }
                 // Count ones outside selected area
                 else
                 {
+                    outside++;
+
+                    testSum += (*cube)(f,e,b);
+
                     if ((*cube)(f,e,b) == 1)
+                    {
                         retVal += 1.0;
+                        onesOut++;
+                    }
+                    else if ((*cube)(f,e,b) != 0)
+                    {
+                        qDebug() << (*cube)(f,e,b);
+                    }
                 }
 
                 if (e == (uint)E[vecIndexE])

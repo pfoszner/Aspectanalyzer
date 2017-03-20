@@ -4,12 +4,13 @@
 #include "ensembletask.h"
 #include <QThreadPool>
 #include <QMutex>
+#include <exception>
 
 class TriClustering : public EnsembleTask
 {
 public:
 
-    arma::Cube<short> cube;
+    arma::ucube cube;
     //arma::Cube<short> outcube;
     std::vector<int> trimF;
     std::vector<int> trimE;
@@ -32,6 +33,10 @@ public:
 private:
     void BuildBinaryCube(const std::vector<std::shared_ptr<Bicluster>>& Biclusters, int dim1, int dim2);
     std::vector<std::shared_ptr<Bicluster>> DoTheTriClustering(std::vector<std::shared_ptr<Bicluster>> Biclusters);
+    void RemoveCubeRow(int rowIndex);
+    void RemoveCubeColumn(int colIndex);
+    void RemoveCubeColumn(std::vector<int> colIndex);
+    void RemoveCubeRow(std::vector<int> rowIndex);
 
 };
 
@@ -43,10 +48,10 @@ private:
     std::vector<int> F;
     std::vector<int> E;
     std::vector<int> B;
-    arma::Cube<short>* cube;
+    arma::ucube* cube;
 
 public:
-    SingleLossWorker(std::vector<double>::iterator pointer, const std::vector<int>& F, const std::vector<int>& E, const std::vector<int>& B, arma::Cube<short>* cube)
+    SingleLossWorker(std::vector<double>::iterator pointer, const std::vector<int>& F, const std::vector<int>& E, const std::vector<int>& B, arma::ucube* cube)
         : pointer(pointer), F(F), E(E), B(B), cube(cube)
     {
 

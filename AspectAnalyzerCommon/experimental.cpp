@@ -456,7 +456,7 @@ void Experimental::RunAllConsensus()
     ids.push_back(5);
 
 
-    for(uint i = 0; i <= ids.size(); ++i)
+    for(uint i = 0; i < ids.size(); ++i)
     {
         test  = engine->db->GetResults(-1, ids[i], -1, -1);
 
