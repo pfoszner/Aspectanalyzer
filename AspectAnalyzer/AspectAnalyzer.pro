@@ -3,6 +3,8 @@ TEMPLATE = app
 QT += qml quick widgets
 QT += sql
 
+DEFINES += _OSX
+
 CONFIG += c++11
 
 SOURCES += main.cpp \
@@ -81,10 +83,11 @@ else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/..
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../AspectAnalyzerCommon/debug/AspectAnalyzerCommon.lib
 else:unix: PRE_TARGETDEPS += $$PWD/../AspectAnalyzerCommon/libAspectAnalyzerCommon.a
 
-#INCLUDEPATH += /usr/local/include/
-#DEPENDPATH += /usr/local/include
-#LIBS += -framework Accelerate
-#LIBS += -L/usr/local/lib -larmadillo
+INCLUDEPATH += /usr/local/include/
+DEPENDPATH += /usr/local/include
+LIBS += -framework Accelerate
+LIBS += -L/usr/local/lib -larmadillo
+LIBS += -L/opt/local/lib
 
 INCLUDEPATH += /usr/include/
 DEPENDPATH += /usr/include

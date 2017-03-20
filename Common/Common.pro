@@ -10,6 +10,8 @@ TARGET = Common
 TEMPLATE = lib
 CONFIG += staticlib
 
+DEFINES += _OSX
+
 SOURCES += common.cpp
 
 HEADERS += common.h \
