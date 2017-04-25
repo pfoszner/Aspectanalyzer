@@ -45,7 +45,7 @@ else:unix: PRE_TARGETDEPS += $$PWD/../BiClusteringCommon/libBiClusteringCommon.a
 
 INCLUDEPATH += /usr/local/include/
 DEPENDPATH += /usr/local/include
-LIBS += -framework Accelerate
+#LIBS += -framework Accelerate
 LIBS += -L/usr/local/lib -larmadillo
 LIBS += -L/opt/local/lib
 

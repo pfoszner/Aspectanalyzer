@@ -49,13 +49,13 @@ else:unix: PRE_TARGETDEPS += $$PWD/../NMFs/libNMFs.a
 
 INCLUDEPATH += /usr/local/include/
 DEPENDPATH += /usr/local/include
-LIBS += -framework Accelerate
+#LIBS += -framework Accelerate
 LIBS += -L/usr/local/lib -larmadillo
 LIBS += -L/opt/local/lib
 
 INCLUDEPATH += /usr/include/
 DEPENDPATH += /usr/include
-#LIBS += -L/usr/lib -larmadillo
+LIBS += -L/usr/lib -larmadillo
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../BiClusteringCommon/release/ -lBiClusteringCommon
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../BiClusteringCommon/debug/ -lBiClusteringCommon

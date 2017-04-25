@@ -8,7 +8,8 @@ DEFINES += _OSX
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    buttonhandlers.cpp
+    buttonhandlers.cpp \
+    addbiclusteringtask.cpp
 
 RESOURCES += qml.qrc
 
@@ -68,7 +69,8 @@ DISTFILES += \
     Tab2.qml
 
 HEADERS += \
-    buttonhandlers.h
+    buttonhandlers.h \
+    addbiclusteringtask.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../AspectAnalyzerCommon/release/ -lAspectAnalyzerCommon
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../AspectAnalyzerCommon/debug/ -lAspectAnalyzerCommon
@@ -85,7 +87,7 @@ else:unix: PRE_TARGETDEPS += $$PWD/../AspectAnalyzerCommon/libAspectAnalyzerComm
 
 INCLUDEPATH += /usr/local/include/
 DEPENDPATH += /usr/local/include
-LIBS += -framework Accelerate
+#LIBS += -framework Accelerate
 LIBS += -L/usr/local/lib -larmadillo
 LIBS += -L/opt/local/lib
 

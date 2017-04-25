@@ -3,6 +3,9 @@
 #include <QQuickView>
 #include <QQmlContext>
 #include "buttonhandlers.h"
+#include "addbiclusteringtask.h"
+
+
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +45,8 @@ int main(int argc, char *argv[])
 
     QObject::connect(window, SIGNAL(btnStopSignal()),
                          &btnHandlers, SLOT(btnStopSlot()));
+
+
 
     return app.exec();
 }

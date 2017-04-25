@@ -1,4 +1,8 @@
 #include "buttonhandlers.h"
+#include <QtWidgets>
+#include <QTranslator>
+#include <QLocale>
+#include <QLibraryInfo>
 
 
 //Ctr
@@ -49,6 +53,11 @@ void ButtonHandlers::btnLoadFromFileSlot()
     QFileInfo fileInfo(fileName);
 
     engine->LoadDataMatrix(fileName);
+
+    double test1 = arma::mean(engine->CurrentVmatrix->data.elem(engine->CurrentVmatrix->data > 0));
+    auto test2 = arma::median(engine->CurrentVmatrix->data.elem(engine->CurrentVmatrix->data > 0));
+
+    qDebug() << "Mean: " << test1 << " Median: " << test2;
 
     QString idLabel = "Matrix not in DB";
 
@@ -107,38 +116,105 @@ void ButtonHandlers::btnLoadFromDatabaseSlot()
     qDebug() << "Data loaded sucessfully";
 }
 
+QWizardPage *createIntroPage()
+{
+    QWizardPage *page = new QWizardPage;
+    page->setTitle("Introduction");
+
+    QLabel *label = new QLabel("This wizard will help you register your copy "
+                               "of Super Product Two.");
+    label->setWordWrap(true);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(label);
+    page->setLayout(layout);
+
+    return page;
+}
+
+QWizardPage *createRegistrationPage()
+{
+    QWizardPage *page = new QWizardPage;
+    page->setTitle("Registration");
+    page->setSubTitle("Please fill both fields.");
+
+    QLabel *nameLabel = new QLabel("Name:");
+    QLineEdit *nameLineEdit = new QLineEdit;
+
+    QLabel *emailLabel = new QLabel("Email address:");
+    QLineEdit *emailLineEdit = new QLineEdit;
+
+    QGridLayout *layout = new QGridLayout;
+    layout->addWidget(nameLabel, 0, 0);
+    layout->addWidget(nameLineEdit, 0, 1);
+    layout->addWidget(emailLabel, 1, 0);
+    layout->addWidget(emailLineEdit, 1, 1);
+    page->setLayout(layout);
+
+    return page;
+}
+
+QWizardPage *createConclusionPage()
+{
+    QWizardPage *page = new QWizardPage;
+    page->setTitle("Conclusion");
+
+    QLabel *label = new QLabel("You are now successfully registered. Have a "
+                               "nice day!");
+    label->setWordWrap(true);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(label);
+    page->setLayout(layout);
+
+    return page;
+}
+
 void ButtonHandlers::btnTuneSlot()
 {
+    //QWizard wizard;
+    //wizard.addPage(createIntroPage());
+    //wizard.addPage(createRegistrationPage());
+    //wizard.addPage(createConclusionPage());
+
+    //wizard.setWindowTitle("Trivial Wizard");
+    //wizard.show();
+    //wizard.exec();
+
+    AddBiclusteringTask wizard;
+
+    wizard.show();
+    wizard.exec();
 
     //exper->LoadKumalBiclusters();
 
     //exper->RunAllConsensus();
 
-    exper->RunAllTriclustering();
+    //exper->RunAllTriclustering();
 
-    qDebug() << "Mission Acomplished";
+    //qDebug() << "Mission Acomplished";
 
-    return;
+    //return;
 
-    for(int i=0; i<=3; ++i)
-    {
-        for(int r=0; r < 10; ++r)
-        {
-            btnAddTaskSlot(i);
-        }
-    }
+    //for(int i=0; i<=3; ++i)
+    //{
+    //    for(int r=0; r < 10; ++r)
+    //    {
+    //        btnAddTaskSlot(i);
+    //    }
+    //}
 
     //engine->ServeQueue();
 
-    exper->RunConsensus();
+    //exper->RunConsensus();
 
-    exper->RunTriclustering();
+    //exper->RunTriclustering();
 
     //exper->CompareGrandTruthMiRNA();
 
     //exper->ARFFPlay();
 
-    exper->StartCustom();
+    //exper->StartCustom();
 
 
 }
@@ -167,27 +243,33 @@ void ButtonHandlers::btnPauseSlot()
 
 void ButtonHandlers::btnStopSlot()
 {
-    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, -1, -1);
+    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, Enums::Methods::TRICLUSTERING, -1);
 
     for(std::shared_ptr<BiclusteringObject> result : test)
     {
+        //if (result->idMethod < 8)
+        //    continue;
 
-        if (result->idMethod < 8)
-            continue;
+        QDir dir = QDir::current();
 
-        QFile retVal("result" + QString::number(result->idMethod) + "_"+QString::number(result->idResult)+".txt");
-
-        retVal.open(QIODevice::WriteOnly | QIODevice::Text);
-
-        QTextStream out(&retVal);
+        if (!dir.cd("wyniki"))
+        {
+            dir.mkdir("wyniki");
+        }
 
         int index = 0;
 
         for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
         {
-            out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
+            QFile retVal("wyniki/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
 
-            out << "Cluster1:\n";
+            retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+
+            QTextStream out(&retVal);
+
+            //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
+
+            //out << "Cluster1:\n";
 
             for(int c1 : bic->cluster1)
             {
@@ -195,31 +277,30 @@ void ButtonHandlers::btnStopSlot()
                 //out << c1 << "\n";
             }
 
-            out << "\nCluster2:\n";
+            //out << "\nCluster2:\n";
 
             for(int c2 : bic->cluster2)
             {
-                out << result->dataMatrix->columnLabels[c2].value << "\n";
+                //out << result->dataMatrix->columnLabels[c2].value << "\n";
                 //out << c2 << "\n";
             }
 
             out << "\n\n";
+
+            retVal.close();
         }
 
-        retVal.close();
+        QFile labels("genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
 
+        labels.open(QIODevice::WriteOnly | QIODevice::Text);
+
+        QTextStream outL(&labels);
+
+        for(Label item : result->dataMatrix->rowLabels)
+        {
+            outL << item.value << "\n";
+        }
+
+        labels.close();
     }
-
-    QFile labels("genes.txt");
-
-    labels.open(QIODevice::WriteOnly | QIODevice::Text);
-
-    QTextStream outL(&labels);
-
-    for(Label item : test[0]->dataMatrix->columnLabels)
-    {
-        outL << item.value << "\n";
-    }
-
-    labels.close();
 }

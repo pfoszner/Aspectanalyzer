@@ -28,6 +28,8 @@ Matrix::Matrix(QString filepath)
 
             LoadFromDataList(vec);
 
+
+
             file.close();
         }
     }

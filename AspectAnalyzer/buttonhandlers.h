@@ -12,6 +12,7 @@
 #include "consensus.h"
 #include "triclustering.h"
 #include "experimental.h"
+#include "addbiclusteringtask.h"
 
 class ButtonHandlers : public QObject
 {
