@@ -4,29 +4,18 @@
 #include <QWizard>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QtWidgets>
+#include <QTranslator>
+#include <QLocale>
+#include <QLibraryInfo>
 
-class AddBiclusteringTask : public QWizard
+class AddBiclusteringTask
 {
-    Q_OBJECT
-
-    public:
-        AddBiclusteringTask(QWidget *parent = 0);
-
-        void accept() override;
-
-};
-
-
-
-class IntroPage : public QWizardPage
-{
-    Q_OBJECT
-
 public:
-    IntroPage(QWidget *parent = 0);
-
-private:
-    QLabel *label;
+    AddBiclusteringTask(){}
+    void addTask();
 };
+
+
 
 #endif // ADDBICLUSTERINGTASK_H

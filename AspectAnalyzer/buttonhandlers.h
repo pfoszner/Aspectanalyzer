@@ -27,12 +27,13 @@ public:
 
 public slots:
     void btnAddTaskSlot(int);
-    void btnLoadFromFileSlot();
-    void btnLoadFromDatabaseSlot();
-    void btnTuneSlot();
+    //void btnLoadFromFileSlot();
+    //void btnLoadFromDatabaseSlot();
+    //void btnTuneSlot();
     void btnPlaySlot();
     void btnPauseSlot();
     void btnStopSlot();
+    void btnCustomSlot(QString);
 
 signals:
     void setMatrixLabels(const QString &text, const QString &nr, const QString &nc, const QString &min, const QString &max, const QString &dbID);

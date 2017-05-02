@@ -11,12 +11,10 @@ ApplicationWindow {
     title: qsTr("Aspect Analyzer")
 
     signal btnAddTaskSignal(int id)
-    signal btnLoadFromFileSignal()
-    signal btnLoadFromDatabaseSignal()
-    signal btnTuneSignal()
     signal btnPlaySignal()
     signal btnPauseSignal()
     signal btnStopSignal()
+    signal btnCustomSignal(string mode)
 
     TabView {
         id: tabView1
@@ -39,262 +37,67 @@ ApplicationWindow {
             source: "Tab1.qml"
             Rectangle { id: rectangle1; color: "#475542" ; anchors.fill: parent; border.color: "#475542"
 
-                Label {
-                    id: lblMatrixDesc
-                    x: 374
-                    y: 42
-                    width: 44
-                    height: 22
-                    text: qsTr("No matrix loaded")
-                    font.bold: true
-                    font.pointSize: 12
-
-
-                }
-
-                Label {
-                    id: lblLoadedMatrix
-                    x: 374
-                    y: 13
-                    text: qsTr("Loaded matrix: ")
-                    font.bold: true
-                    font.pointSize: 12
-                }
-
-                Label {
-                    id: lblDbID
-                    x: 374
-                    y: 75
-                    width: 44
-                    height: 22
-                    text: qsTr("DB ID: No data")
-                    font.bold: true
-                    font.pointSize: 12
-                    textFormat: Text.AutoText
-                }
-
-                ComboBox {
-                    id: method
-                    x: 374
-                    y: 98
-                    width: 225
-                    height: 33
-                    model: [ "PLSA", "Least Square Error", "Kullback-Liebler", "nsKullback-Liebler" ]
-                }
-
-                Image {
-                    id: matrixPrev
-                    x: 0
-                    y: 0
-                    width: 300
-                    height: 300
-                    anchors.bottomMargin: 68
-                    anchors.leftMargin: 22
-                    anchors.rightMargin: 313
-                    anchors.topMargin: 98
-                    anchors.fill: parent
-                    fillMode: Image.PreserveAspectFit
-                    opacity: 1
-                    z: 2
-                    source: "Graphics/no_image.png"
-                }
-
-                Label {
-                    id: lblMatrixSize
-                    x: 22
-                    y: 13
-                    text: qsTr("Matrix size: ? x ?")
-                    font.pointSize: 12
-                    font.bold: true
-                }
-
-                Label {
-                    id: lblMatrixRange
-                    x: 22
-                    y: 51
-                    text: qsTr("Values range: < ? - ? >")
-                    font.bold: true
-                    font.pointSize: 12
-                }
-
-                Label {
-                    id: lblFile
-                    x: 428
-                    y: 188
-                    text: qsTr("File")
-                    font.pointSize: 12
-                    font.bold: true
-                }
-
-                Label {
-                    id: lblDatabse
-                    x: 521
-                    y: 188
-                    text: qsTr("Database")
-                    font.bold: true
-                    font.pointSize: 12
-                }
-
-                Image {
-                    id: btnLoadFromFile
-                    x: 372
-                    y: 175
-                    width: 48
-                    height: 48
-                    source: "Graphics/file.png"
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-
-                            btnLoadFromFileSignal();
-
-                        }
-                    }
-                }
-
-                Image {
-                    id: btnLoadFromDatabase
-                    x: 467
-                    y: 175
-                    width: 48
-                    height: 48
-                    source: "Graphics/database.png"
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-
-                            btnLoadFromDatabaseSignal();
-
-                        }
-                    }
-                }
-
-                Label {
-                    id: lblLoadMatrixFrom
-                    x: 372
-                    y: 147
-                    text: qsTr("Load matrix from:")
-                    font.pointSize: 12
-                    font.bold: true
-                }
-
-                Image {
-                    id: btnTune
-                    x: 372
-                    y: 242
-                    width: 48
-                    height: 48
-                    source: "Graphics/tune.png"
-
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-
-                            btnTuneSignal();
-
-                        }
-                    }
-                }
-
                 Image {
                     id: btnAddTask
-                    x: 372
-                    y: 309
                     width: 48
                     height: 48
+                    x: 10
+                    y: 10
+                    transformOrigin: Item.TopLeft
                     source: "Graphics/add.png"
+
+                    Text {
+                        id: addlabel
+                        text: "Add new tasks"
+                        x: parent.x + 48
+                        y: 10
+                        font.bold: true
+                        font.pointSize: 12
+                    }
 
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
 
-                            btnAddTaskSignal(method.currentIndex);
+                            btnAddTaskSignal(1);
 
                         }
                     }
                 }
-
-                Label {
-                    id: lblTune
-                    x: 426
-                    y: 255
-                    text: qsTr("Tune parameters")
-                    font.bold: true
-                    font.pointSize: 12
-                }
-
-                Label {
-                    id: lblAddTask
-                    x: 426
-                    y: 322
-                    text: qsTr("Add task")
-                    font.pointSize: 12
-                    font.bold: true
-                }
-
-                Connections {
-                    target: lblreceiver
-                    ignoreUnknownSignals: true
-                    onSetMatrixLabels : {
-                        lblMatrixDesc.text = text
-                        lblMatrixSize.text = "Matrix size: " + nr + " x " + nc
-                        lblMatrixRange.text = "Values range: < " + min + " ; " + max + " >"
-                        lblDbID.text = "DB ID: " + dbID
-                    }
-
-                }
-
-
-
-            }
-        }
-
-        Tab {
-            id: worker
-            visible: true
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.top: parent.top
-            antialiasing: true
-            transformOrigin: Item.Center
-            title: "Worker"
-            source: "Tab2.qml"
-            Rectangle { id: rectangle2; color: "#475542" ; border.color: "#475542"
 
                 Image {
                     id: imgRunning
-                    x: 48
-                    y: 71
+                    x: 10
+                    y: 98
                     width: 48
                     height: 48
                     source: "Graphics/running.png"
+
+                    Text {
+                        id: lblRunning
+                        x: parent.x + 48
+                        y: 10
+                        text: qsTr("0 tasks runinng")
+                        font.bold: true
+                        font.pointSize: 12
+                    }
                 }
 
                 Image {
                     id: imgInQueue
-                    x: 48
-                    y: 153
+                    x: 10
+                    y: 178
                     width: 48
                     height: 48
                     source: "Graphics/queue.png"
-                }
-
-                Label {
-                    id: lblInQueue
-                    x: 122
-                    y: 166
-                    text: qsTr("0 tasks in queue")
-                    font.bold: true
-                    font.pointSize: 12
-                }
-
-                Label {
-                    id: lblRunning
-                    x: 124
-                    y: 84
-                    text: qsTr("0 tasks runinng")
-                    font.bold: true
-                    font.pointSize: 12
+                    Text {
+                        id: lblInQueue
+                        x: parent.x + 48
+                        y: 10
+                        text: qsTr("0 tasks in queue")
+                        font.bold: true
+                        font.pointSize: 12
+                    }
                 }
 
                 Image {
@@ -351,6 +154,52 @@ ApplicationWindow {
                     }
                 }
 
+                Image {
+                    id: logo
+                    source: "Graphics/pslogo.gif"
+                    width: 200
+                    height: 200
+                    x: parent.width - 250
+                }
+
+                ProgressBar {
+                    id: progressBar
+                    x: 50
+                    y: parent.height - 100
+                    width: parent.width - 100
+                    height: 32
+                    minimumValue: 0.0
+                    maximumValue: 100.0
+                }
+
+                TextInput {
+                    id: textInput
+                    x: 438
+                    y: 280
+                    width: 80
+                    height: 20
+                    text: qsTr("1")
+                    font.pixelSize: 48
+                }
+
+                Image {
+                    id: btnCustom
+                    x: 500
+                    y: 250
+                    width: 48
+                    height: 48
+                    source: "Graphics/intruder.png"
+
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+
+                            btnCustomSignal(textInput.text);
+
+                        }
+                    }
+                }
+
                 Connections {
                     target: lblTasks
                     ignoreUnknownSignals: true
@@ -365,7 +214,7 @@ ApplicationWindow {
         }
 
         Tab {
-            id: data
+            id: dataTab
             visible: true
             anchors.left: parent.left
             anchors.bottom: parent.bottom
@@ -392,6 +241,8 @@ ApplicationWindow {
             Rectangle { color: "#475542" ; border.color: "#475542"
 
             }
+
         }
+
     }
 }

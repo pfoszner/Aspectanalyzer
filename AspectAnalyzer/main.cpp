@@ -28,14 +28,14 @@ int main(int argc, char *argv[])
     QObject::connect(window, SIGNAL(btnAddTaskSignal(int)),
                          &btnHandlers, SLOT(btnAddTaskSlot(int)));
 
-    QObject::connect(window, SIGNAL(btnLoadFromFileSignal()),
-                         &btnHandlers, SLOT(btnLoadFromFileSlot()));
+//    QObject::connect(window, SIGNAL(btnLoadFromFileSignal()),
+//                         &btnHandlers, SLOT(btnLoadFromFileSlot()));
 
-    QObject::connect(window, SIGNAL(btnLoadFromDatabaseSignal()),
-                         &btnHandlers, SLOT(btnLoadFromDatabaseSlot()));
+//    QObject::connect(window, SIGNAL(btnLoadFromDatabaseSignal()),
+//                         &btnHandlers, SLOT(btnLoadFromDatabaseSlot()));
 
-    QObject::connect(window, SIGNAL(btnTuneSignal()),
-                         &btnHandlers, SLOT(btnTuneSlot()));
+//    QObject::connect(window, SIGNAL(btnTuneSignal()),
+//                         &btnHandlers, SLOT(btnTuneSlot()));
 
     QObject::connect(window, SIGNAL(btnPlaySignal()),
                          &btnHandlers, SLOT(btnPlaySlot()));
@@ -45,6 +45,9 @@ int main(int argc, char *argv[])
 
     QObject::connect(window, SIGNAL(btnStopSignal()),
                          &btnHandlers, SLOT(btnStopSlot()));
+
+    QObject::connect(window, SIGNAL(btnCustomSignal(QString)),
+                         &btnHandlers, SLOT(btnCustomSlot(QString)));
 
 
 

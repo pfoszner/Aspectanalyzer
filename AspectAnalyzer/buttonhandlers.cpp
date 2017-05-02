@@ -1,8 +1,5 @@
 #include "buttonhandlers.h"
-#include <QtWidgets>
-#include <QTranslator>
-#include <QLocale>
-#include <QLibraryInfo>
+
 
 
 //Ctr
@@ -18,160 +15,12 @@ ButtonHandlers::~ButtonHandlers()
 {
 }
 
+
+
 //Add new bi-clustering task to worker
 void ButtonHandlers::btnAddTaskSlot(int methodID)
 {
-    std::shared_ptr<BiclusteringObject> newObject;
 
-    switch(methodID)
-    {
-        case Enums::PLSA:
-            newObject = std::make_shared<PLSA>(engine->CurrentVmatrix);
-            break;
-        case Enums::LEAST_SQUARE_ERROR:
-            newObject = std::make_shared<LSE>(engine->CurrentVmatrix);
-            break;
-        case Enums::KULLBACK_LIEBER:
-            newObject = std::make_shared<KullbackLeibler>(engine->CurrentVmatrix);
-            break;
-        case Enums::NonSmooth_KULLBACK_LIEBER:
-            newObject = std::make_shared<nsKullbackLeibler>(engine->CurrentVmatrix, 0.5);
-            break;
-    }
-
-    engine->AddBiClusteringTask(newObject);
-    setTasksLabels(QString::number(engine->GetRunning()), QString::number(engine->GetInQueue()));
-}
-
-void ButtonHandlers::btnLoadFromFileSlot()
-{
-    QString fileName = QFileDialog::getOpenFileName(nullptr,
-        tr("Open Image"), "", tr("AspectAnalyzer Files (*.vmatrix *.arff)"));
-
-    //QString fileName = "../Data/11.vmatrix";
-
-    QFileInfo fileInfo(fileName);
-
-    engine->LoadDataMatrix(fileName);
-
-    double test1 = arma::mean(engine->CurrentVmatrix->data.elem(engine->CurrentVmatrix->data > 0));
-    auto test2 = arma::median(engine->CurrentVmatrix->data.elem(engine->CurrentVmatrix->data > 0));
-
-    qDebug() << "Mean: " << test1 << " Median: " << test2;
-
-    QString idLabel = "Matrix not in DB";
-
-    if (engine->CurrentVmatrix->idMatrix != nullptr && *engine->CurrentVmatrix->idMatrix > 0)
-    {
-        idLabel = QString::number(*engine->CurrentVmatrix->idMatrix);
-    }
-
-    emit setMatrixLabels(engine->CurrentVmatrix->name,
-                         QString::number(engine->CurrentVmatrix->data.n_rows),
-                         QString::number(engine->CurrentVmatrix->data.n_cols),
-                         QString::number(engine->CurrentVmatrix->data.min()),
-                         QString::number(engine->CurrentVmatrix->data.max()),
-                         idLabel);
-}
-
-void ButtonHandlers::btnLoadFromDatabaseSlot()
-{
-    for(uint i = 1; i <= 216; ++i)
-    {
-        QString fileName = "../Data/" + QString::number(i) + ".vmatrix";
-
-        engine->LoadDataMatrix(fileName);
-
-        //engine->CurrentVmatrix = engine->db->GetMatrix(1);
-
-        QString idLabel = "Matrix not in DB";
-
-        if (engine->CurrentVmatrix->idMatrix != nullptr && *engine->CurrentVmatrix->idMatrix > 0)
-        {
-            idLabel = QString::number(*engine->CurrentVmatrix->idMatrix);
-        }
-
-        emit setMatrixLabels(engine->CurrentVmatrix->name,
-                             QString::number(engine->CurrentVmatrix->data.n_rows),
-                             QString::number(engine->CurrentVmatrix->data.n_cols),
-                             QString::number(engine->CurrentVmatrix->data.min()),
-                             QString::number(engine->CurrentVmatrix->data.max()),
-                             idLabel);
-
-        for(uint r = 0; r < 10; ++r)
-        {
-            for(int m = 0; m <= 3; ++m)
-            {
-                btnAddTaskSlot(m);
-                if (false)//(engine->CurrentVmatrix->idMatrix < 0)
-                {
-                    *engine->CurrentVmatrix->idMatrix = engine->db->SaveMatrix(engine->CurrentVmatrix->data, engine->CurrentVmatrix->name, engine->CurrentVmatrix->group, Enums::MatrixType::V, -1);
-                    engine->db->SaveBiclusters(engine->CurrentVmatrix->expectedBiClusters, *engine->CurrentVmatrix->idMatrix, -1);
-                    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, *engine->CurrentVmatrix->idMatrix);
-                    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, *engine->CurrentVmatrix->idMatrix);
-                }
-            }
-        }
-    }
-    qDebug() << "Data loaded sucessfully";
-}
-
-QWizardPage *createIntroPage()
-{
-    QWizardPage *page = new QWizardPage;
-    page->setTitle("Introduction");
-
-    QLabel *label = new QLabel("This wizard will help you register your copy "
-                               "of Super Product Two.");
-    label->setWordWrap(true);
-
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(label);
-    page->setLayout(layout);
-
-    return page;
-}
-
-QWizardPage *createRegistrationPage()
-{
-    QWizardPage *page = new QWizardPage;
-    page->setTitle("Registration");
-    page->setSubTitle("Please fill both fields.");
-
-    QLabel *nameLabel = new QLabel("Name:");
-    QLineEdit *nameLineEdit = new QLineEdit;
-
-    QLabel *emailLabel = new QLabel("Email address:");
-    QLineEdit *emailLineEdit = new QLineEdit;
-
-    QGridLayout *layout = new QGridLayout;
-    layout->addWidget(nameLabel, 0, 0);
-    layout->addWidget(nameLineEdit, 0, 1);
-    layout->addWidget(emailLabel, 1, 0);
-    layout->addWidget(emailLineEdit, 1, 1);
-    page->setLayout(layout);
-
-    return page;
-}
-
-QWizardPage *createConclusionPage()
-{
-    QWizardPage *page = new QWizardPage;
-    page->setTitle("Conclusion");
-
-    QLabel *label = new QLabel("You are now successfully registered. Have a "
-                               "nice day!");
-    label->setWordWrap(true);
-
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(label);
-    page->setLayout(layout);
-
-    return page;
-}
-
-void ButtonHandlers::btnTuneSlot()
-{
     //QWizard wizard;
     //wizard.addPage(createIntroPage());
     //wizard.addPage(createRegistrationPage());
@@ -183,40 +32,157 @@ void ButtonHandlers::btnTuneSlot()
 
     AddBiclusteringTask wizard;
 
-    wizard.show();
-    wizard.exec();
+    wizard.addTask();
 
-    //exper->LoadKumalBiclusters();
+//    std::shared_ptr<BiclusteringObject> newObject;
 
-    //exper->RunAllConsensus();
+//    switch(methodID)
+//    {
+//        case Enums::PLSA:
+//            newObject = std::make_shared<PLSA>(engine->CurrentVmatrix);
+//            break;
+//        case Enums::LEAST_SQUARE_ERROR:
+//            newObject = std::make_shared<LSE>(engine->CurrentVmatrix);
+//            break;
+//        case Enums::KULLBACK_LIEBER:
+//            newObject = std::make_shared<KullbackLeibler>(engine->CurrentVmatrix);
+//            break;
+//        case Enums::NonSmooth_KULLBACK_LIEBER:
+//            newObject = std::make_shared<nsKullbackLeibler>(engine->CurrentVmatrix, 0.5);
+//            break;
+//    }
 
-    //exper->RunAllTriclustering();
+//    engine->AddBiClusteringTask(newObject);
+//    setTasksLabels(QString::number(engine->GetRunning()), QString::number(engine->GetInQueue()));
+}
 
-    //qDebug() << "Mission Acomplished";
+//void ButtonHandlers::btnLoadFromFileSlot()
+//{
+//    QString fileName = QFileDialog::getOpenFileName(nullptr,
+//        tr("Open Image"), "", tr("AspectAnalyzer Files (*.vmatrix *.arff)"));
 
-    //return;
+//    //QString fileName = "../Data/11.vmatrix";
 
-    //for(int i=0; i<=3; ++i)
-    //{
-    //    for(int r=0; r < 10; ++r)
-    //    {
-    //        btnAddTaskSlot(i);
-    //    }
-    //}
+//    QFileInfo fileInfo(fileName);
 
-    //engine->ServeQueue();
+//    engine->LoadDataMatrix(fileName);
 
-    //exper->RunConsensus();
+//    double test1 = arma::mean(engine->CurrentVmatrix->data.elem(engine->CurrentVmatrix->data > 0));
+//    auto test2 = arma::median(engine->CurrentVmatrix->data.elem(engine->CurrentVmatrix->data > 0));
 
-    //exper->RunTriclustering();
+//    qDebug() << "Mean: " << test1 << " Median: " << test2;
 
-    //exper->CompareGrandTruthMiRNA();
+//    QString idLabel = "Matrix not in DB";
 
-    //exper->ARFFPlay();
+//    if (engine->CurrentVmatrix->idMatrix != nullptr && *engine->CurrentVmatrix->idMatrix > 0)
+//    {
+//        idLabel = QString::number(*engine->CurrentVmatrix->idMatrix);
+//    }
 
-    //exper->StartCustom();
+//    emit setMatrixLabels(engine->CurrentVmatrix->name,
+//                         QString::number(engine->CurrentVmatrix->data.n_rows),
+//                         QString::number(engine->CurrentVmatrix->data.n_cols),
+//                         QString::number(engine->CurrentVmatrix->data.min()),
+//                         QString::number(engine->CurrentVmatrix->data.max()),
+//                         idLabel);
+//}
+
+//void ButtonHandlers::btnLoadFromDatabaseSlot()
+//{
+//    for(uint i = 1; i <= 216; ++i)
+//    {
+//        QString fileName = "../Data/" + QString::number(i) + ".vmatrix";
+
+//        engine->LoadDataMatrix(fileName);
+
+//        //engine->CurrentVmatrix = engine->db->GetMatrix(1);
+
+//        QString idLabel = "Matrix not in DB";
+
+//        if (engine->CurrentVmatrix->idMatrix != nullptr && *engine->CurrentVmatrix->idMatrix > 0)
+//        {
+//            idLabel = QString::number(*engine->CurrentVmatrix->idMatrix);
+//        }
+
+//        emit setMatrixLabels(engine->CurrentVmatrix->name,
+//                             QString::number(engine->CurrentVmatrix->data.n_rows),
+//                             QString::number(engine->CurrentVmatrix->data.n_cols),
+//                             QString::number(engine->CurrentVmatrix->data.min()),
+//                             QString::number(engine->CurrentVmatrix->data.max()),
+//                             idLabel);
+
+//        for(uint r = 0; r < 10; ++r)
+//        {
+//            for(int m = 0; m <= 3; ++m)
+//            {
+//                btnAddTaskSlot(m);
+//                if (false)//(engine->CurrentVmatrix->idMatrix < 0)
+//                {
+//                    *engine->CurrentVmatrix->idMatrix = engine->db->SaveMatrix(engine->CurrentVmatrix->data, engine->CurrentVmatrix->name, engine->CurrentVmatrix->group, Enums::MatrixType::V, -1);
+//                    engine->db->SaveBiclusters(engine->CurrentVmatrix->expectedBiClusters, *engine->CurrentVmatrix->idMatrix, -1);
+//                    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, *engine->CurrentVmatrix->idMatrix);
+//                    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, *engine->CurrentVmatrix->idMatrix);
+//                }
+//            }
+//        }
+//    }
+//    qDebug() << "Data loaded sucessfully";
+//}
 
 
+
+//void ButtonHandlers::btnTuneSlot()
+//{
+//    //QWizard wizard;
+//    //wizard.addPage(createIntroPage());
+//    //wizard.addPage(createRegistrationPage());
+//    //wizard.addPage(createConclusionPage());
+
+//    //wizard.setWindowTitle("Trivial Wizard");
+//    //wizard.show();
+//    //wizard.exec();
+
+//    AddBiclusteringTask wizard;
+
+//    wizard.show();
+//    wizard.exec();
+
+//    //exper->LoadKumalBiclusters();
+
+//    //exper->RunAllConsensus();
+
+//    //exper->RunAllTriclustering();
+
+//    //qDebug() << "Mission Acomplished";
+
+//    //return;
+
+//    //for(int i=0; i<=3; ++i)
+//    //{
+//    //    for(int r=0; r < 10; ++r)
+//    //    {
+//    //        btnAddTaskSlot(i);
+//    //    }
+//    //}
+
+//    //engine->ServeQueue();
+
+//    //exper->RunConsensus();
+
+//    //exper->RunTriclustering();
+
+//    //exper->CompareGrandTruthMiRNA();
+
+//    //exper->ARFFPlay();
+
+//    //exper->StartCustom();
+
+
+//}
+
+void ButtonHandlers::btnCustomSlot(QString mode)
+{
+    qDebug() << "Starting custom calculation in mode = " << mode;
 }
 
 void ButtonHandlers::btnPlaySlot()
@@ -226,81 +192,81 @@ void ButtonHandlers::btnPlaySlot()
 
 void ButtonHandlers::btnPauseSlot()
 {
-    engine->LoadDataMatrix("/mnt/E/TCGA/DataMatrixTCGAThyroid carcinoma.vmatrix");
+//    engine->LoadDataMatrix("/mnt/E/TCGA/DataMatrixTCGAThyroid carcinoma.vmatrix");
 
-    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 1);
-    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 1);
+//    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 1);
+//    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 1);
 
-    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 4);
-    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 4);
+//    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 4);
+//    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 4);
 
-    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 7);
-    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 7);
+//    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 7);
+//    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 7);
 
-    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 10);
-    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 10);
+//    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 10);
+//    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 10);
 }
 
 void ButtonHandlers::btnStopSlot()
 {
-    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, Enums::Methods::TRICLUSTERING, -1);
+//    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, Enums::Methods::TRICLUSTERING, -1);
 
-    for(std::shared_ptr<BiclusteringObject> result : test)
-    {
-        //if (result->idMethod < 8)
-        //    continue;
+//    for(std::shared_ptr<BiclusteringObject> result : test)
+//    {
+//        //if (result->idMethod < 8)
+//        //    continue;
 
-        QDir dir = QDir::current();
+//        QDir dir = QDir::current();
 
-        if (!dir.cd("wyniki"))
-        {
-            dir.mkdir("wyniki");
-        }
+//        if (!dir.cd("wyniki"))
+//        {
+//            dir.mkdir("wyniki");
+//        }
 
-        int index = 0;
+//        int index = 0;
 
-        for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
-        {
-            QFile retVal("wyniki/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
+//        for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
+//        {
+//            QFile retVal("wyniki/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
 
-            retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+//            retVal.open(QIODevice::WriteOnly | QIODevice::Text);
 
-            QTextStream out(&retVal);
+//            QTextStream out(&retVal);
 
-            //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
+//            //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
 
-            //out << "Cluster1:\n";
+//            //out << "Cluster1:\n";
 
-            for(int c1 : bic->cluster1)
-            {
-                out << result->dataMatrix->rowLabels[c1].value << "\n";
-                //out << c1 << "\n";
-            }
+//            for(int c1 : bic->cluster1)
+//            {
+//                out << result->dataMatrix->rowLabels[c1].value << "\n";
+//                //out << c1 << "\n";
+//            }
 
-            //out << "\nCluster2:\n";
+//            //out << "\nCluster2:\n";
 
-            for(int c2 : bic->cluster2)
-            {
-                //out << result->dataMatrix->columnLabels[c2].value << "\n";
-                //out << c2 << "\n";
-            }
+//            for(int c2 : bic->cluster2)
+//            {
+//                //out << result->dataMatrix->columnLabels[c2].value << "\n";
+//                //out << c2 << "\n";
+//            }
 
-            out << "\n\n";
+//            out << "\n\n";
 
-            retVal.close();
-        }
+//            retVal.close();
+//        }
 
-        QFile labels("genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
+//        QFile labels("genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
 
-        labels.open(QIODevice::WriteOnly | QIODevice::Text);
+//        labels.open(QIODevice::WriteOnly | QIODevice::Text);
 
-        QTextStream outL(&labels);
+//        QTextStream outL(&labels);
 
-        for(Label item : result->dataMatrix->rowLabels)
-        {
-            outL << item.value << "\n";
-        }
+//        for(Label item : result->dataMatrix->rowLabels)
+//        {
+//            outL << item.value << "\n";
+//        }
 
-        labels.close();
-    }
+//        labels.close();
+//    }
 }

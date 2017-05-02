@@ -27,7 +27,6 @@ private:
     std::vector<SingleThreadWorker> threadArray;
     std::queue<std::shared_ptr<BiclusteringObject>> resultsToWrite;
 
-
 public:
     std::shared_ptr<DBTools> db;
     ComputingEngine();
