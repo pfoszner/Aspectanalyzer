@@ -14,12 +14,18 @@
 #include "common.h"
 #include "dbtools.h"
 #include "singlethreadworker.h"
+#include "server.h"
+#include "client.h"
 #include <QThreadPool>
+#include <QObject>
 
-class ComputingEngine
+class ComputingEngine : public QObject
 {
+    Q_OBJECT
+
 public:
     std::shared_ptr<Matrix> CurrentVmatrix;
+    Client aaclient;
 
 private:
     int runningTasks;
@@ -29,7 +35,7 @@ private:
 
 public:
     std::shared_ptr<DBTools> db;
-    ComputingEngine();
+    explicit ComputingEngine(QObject *parent = 0);
     void LoadDataMatrix(QString filename);
     void AddBiClusteringTask(std::shared_ptr<BiclusteringObject>);
     void ServeQueue();
@@ -39,6 +45,9 @@ public:
 
 private:
     QString GetHumanTime(double time);
+
+public slots:
+    void receiveData(QByteArray);
 };
 
 

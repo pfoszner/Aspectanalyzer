@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QThreadPool>
 #include "costmatrixworker.h"
+#include <QDataStream>
 //#include <armadillo>
 //#include "/usr/local/include/armadillo"
 
@@ -23,14 +24,15 @@ public:
     int idResult = -1;
     int idMethod = -1;
     int expectedBiClusterCount;
+    double time_spent;
+    QString sourceAddress = "";
     std::shared_ptr<Matrix> dataMatrix;
     std::vector<std::shared_ptr<Bicluster>> foundedBiclusters;
-    double time_spent;
     std::vector<FeatureResult> features;
     void GenerateARFFFile(QString path, int dim, std::vector<int> indexes = std::vector<int>());
 
-
 public:
+    BiclusteringObject(QByteArray);
     BiclusteringObject(std::shared_ptr<Matrix>&);
     BiclusteringObject(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time)
         : BiclusteringObject(Vmatrix)
@@ -39,6 +41,9 @@ public:
         idResult = IdResult;
         time_spent = time;
     }
+
+    QByteArray Serialize();
+
 
     virtual std::shared_ptr<BiclusteringObject> Compute(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params);
     virtual void ParseParameters(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>&);

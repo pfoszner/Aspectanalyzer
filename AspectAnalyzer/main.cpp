@@ -4,8 +4,7 @@
 #include <QQmlContext>
 #include "buttonhandlers.h"
 #include "addbiclusteringtask.h"
-
-
+#include "server.h"
 
 int main(int argc, char *argv[])
 {
@@ -48,6 +47,11 @@ int main(int argc, char *argv[])
 
     QObject::connect(window, SIGNAL(btnCustomSignal(QString)),
                          &btnHandlers, SLOT(btnCustomSlot(QString)));
+
+    Server aaServer;
+
+    QObject::connect(&aaServer, &Server::dataReceived,
+                         btnHandlers.engine.get(), &ComputingEngine::receiveData);
 
 
 

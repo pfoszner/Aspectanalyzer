@@ -1,7 +1,6 @@
 #include "buttonhandlers.h"
 
 
-
 //Ctr
 ButtonHandlers::ButtonHandlers(QObject *parent) :
     QObject(parent)
@@ -14,8 +13,6 @@ ButtonHandlers::ButtonHandlers(QObject *parent) :
 ButtonHandlers::~ButtonHandlers()
 {
 }
-
-
 
 //Add new bi-clustering task to worker
 void ButtonHandlers::btnAddTaskSlot(int methodID)
@@ -183,6 +180,32 @@ void ButtonHandlers::btnAddTaskSlot(int methodID)
 void ButtonHandlers::btnCustomSlot(QString mode)
 {
     qDebug() << "Starting custom calculation in mode = " << mode;
+
+//    std::shared_ptr<Matrix> matrix = engine->db->GetMatrix(1);
+
+//    QDir dir = QDir::current();
+
+//    if (!dir.cd("tmp"))
+//    {
+//        dir.mkdir("tmp");
+//    }
+
+//    QString filename = "tmp/dataToInsert.mat";
+
+//    matrix->data.save(filename.toStdString());
+
+//    QFile file(filename);
+
+//    file.open(QIODevice::ReadOnly);
+
+//    QByteArray rawData = file.readAll();
+
+//    engine->aaclient.connectToHost("10.10.10.35");
+
+    //engine->aaclient.writeData(rawData);
+
+    exper->Squro(mode);
+
 }
 
 void ButtonHandlers::btnPlaySlot()

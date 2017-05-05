@@ -28,8 +28,8 @@ unix {
 
 INCLUDEPATH += /usr/local/include/
 DEPENDPATH += /usr/local/include
-LIBS += -framework Accelerate
-LIBS += -L/usr/local/lib -larmadillo
+#LIBS += -framework Accelerate
+#LIBS += -L/usr/local/lib -larmadillo
 LIBS += -L/opt/local/lib
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../BiClusteringCommon/release/ -lBiClusteringCommon

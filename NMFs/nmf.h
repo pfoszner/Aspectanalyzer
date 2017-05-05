@@ -6,7 +6,7 @@
 #include "biclusteringcommon.h"
 #include "enums.h"
 #include <cstdlib>
-//#include <armadillo>
+#include <armadillo>
 
 class NMF : public BiclusteringObject, public std::enable_shared_from_this<NMF>
 {

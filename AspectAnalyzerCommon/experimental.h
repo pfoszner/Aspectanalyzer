@@ -33,6 +33,7 @@ public:
     void LoadKumalBiclusters();
     void RunAllConsensus();
     void RunAllTriclustering();
+    void Squro(QString mode);
 };
 
 #endif // EXPERIMENTAL_H

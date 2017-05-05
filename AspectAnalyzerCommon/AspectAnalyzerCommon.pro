@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT       += sql
+QT       += sql network
 
 DEFINES += _OSX
 
@@ -22,13 +22,17 @@ SOURCES += aspectanalyzercommon.cpp \
     dbtools.feature.cpp \
     singlethreadworker.cpp \
     dbtools.label.cpp \
-    experimental.cpp
+    experimental.cpp \
+    server.cpp \
+    client.cpp
 
 HEADERS += aspectanalyzercommon.h \
     computingengine.h \
     dbtools.h \
     singlethreadworker.h \
-    experimental.h
+    experimental.h \
+    server.h \
+    client.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
@@ -50,12 +54,12 @@ else:unix: PRE_TARGETDEPS += $$PWD/../NMFs/libNMFs.a
 INCLUDEPATH += /usr/local/include/
 DEPENDPATH += /usr/local/include
 #LIBS += -framework Accelerate
-LIBS += -L/usr/local/lib -larmadillo
+#LIBS += -L/usr/local/lib -larmadillo
 LIBS += -L/opt/local/lib
 
 INCLUDEPATH += /usr/include/
 DEPENDPATH += /usr/include
-LIBS += -L/usr/lib -larmadillo
+#LIBS += -L/usr/lib -larmadillo
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../BiClusteringCommon/release/ -lBiClusteringCommon
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../BiClusteringCommon/debug/ -lBiClusteringCommon

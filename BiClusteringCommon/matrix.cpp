@@ -254,7 +254,7 @@ void Matrix::LoadFromDataList(std::vector <QString>& sdata)
 
         if (i == startMainLoop + expectedBiClusterCount)
         {
-            data = arma::zeros<arma::mat>(sdata.size() - startMainLoop - expectedBiClusterCount,row.size()-startInnerLoop);
+            data = arma::zeros<arma::mat>(sdata.size() - startMainLoop - expectedBiClusterCount, row.size() - startInnerLoop);
         }
 
         for(int j = startInnerLoop; j < row.size(); ++j)

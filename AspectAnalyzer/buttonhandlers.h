@@ -13,6 +13,7 @@
 #include "triclustering.h"
 #include "experimental.h"
 #include "addbiclusteringtask.h"
+#include "client.h"
 
 class ButtonHandlers : public QObject
 {
@@ -25,6 +26,7 @@ public:
     std::shared_ptr<ComputingEngine> engine;
     std::shared_ptr<Experimental> exper;
 
+
 public slots:
     void btnAddTaskSlot(int);
     //void btnLoadFromFileSlot();
@@ -34,6 +36,7 @@ public slots:
     void btnPauseSlot();
     void btnStopSlot();
     void btnCustomSlot(QString);
+
 
 signals:
     void setMatrixLabels(const QString &text, const QString &nr, const QString &nc, const QString &min, const QString &max, const QString &dbID);

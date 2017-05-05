@@ -1,10 +1,15 @@
 #include "computingengine.h"
 
 
-ComputingEngine::ComputingEngine()
+ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
 {
     this->runningTasks = 0;
     this->db = std::make_shared<DBTools>("database.db");
+}
+
+void ComputingEngine::receiveData(QByteArray data)
+{
+    qDebug() << data.length();
 }
 
 void ComputingEngine::LoadDataMatrix(QString filename)

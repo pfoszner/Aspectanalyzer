@@ -579,6 +579,40 @@ void Experimental::RunConsensus()
     //engine->ServeQueue();
 }
 
+void Experimental::Squro(QString mode)
+{
+        QString fileName = "DataMatrixTCGA5_mutect2v2.vmatrix";
+
+        engine->LoadDataMatrix(fileName);
+
+        engine->db->SaveMatrix(engine->CurrentVmatrix->data, engine->CurrentVmatrix->name, engine->CurrentVmatrix->group, Enums::MatrixType::V, -1);
+
+    if (mode == "1")
+    {
+
+    }
+    else if (mode == "2")
+    {
+
+    }
+    else if (mode == "3")
+    {
+
+    }
+    else if (mode == "4")
+    {
+
+    }
+    else if (mode == "5")
+    {
+
+    }
+    else if (mode == "6")
+    {
+
+    }
+}
+
 void Experimental::LoadKumalBiclusters()
 {
     QFile file("/mnt/D/AppData/owncloud/Praca/Publikacje/2016/Elsevier/real_data_results/gds_results.txt");
