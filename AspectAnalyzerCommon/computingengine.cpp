@@ -85,6 +85,8 @@ QString ComputingEngine::GetHumanTime(double time)
 
 void ComputingEngine::ServeQueue()
 {
+    QThreadPool::globalInstance()->setMaxThreadCount(maxThreadAllowd);
+
     qDebug() << "Thread Count" << QThreadPool::globalInstance()->maxThreadCount();
 
     //QThreadPool::globalInstance()->setMaxThreadCount(1);

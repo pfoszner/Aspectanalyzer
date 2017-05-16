@@ -581,15 +581,38 @@ void Experimental::RunConsensus()
 
 void Experimental::Squro(QString mode)
 {
-        QString fileName = "DataMatrixTCGA5_mutect2v2.vmatrix";
-
-        engine->LoadDataMatrix(fileName);
-
-        engine->db->SaveMatrix(engine->CurrentVmatrix->data, engine->CurrentVmatrix->name, engine->CurrentVmatrix->group, Enums::MatrixType::V, -1);
-
     if (mode == "1")
     {
+        std::shared_ptr<Matrix> CurrentVmatrix = engine->db->GetMatrix(9);
 
+        for(int i = 0; i < 10; ++i)
+        {
+            for(int methodID = 0; methodID < 4; ++methodID)
+            {
+                std::shared_ptr<BiclusteringObject> newObject;
+
+                switch(methodID)
+                {
+                    case Enums::PLSA:
+                        newObject = std::make_shared<PLSA>(CurrentVmatrix);
+                        break;
+                    case Enums::LEAST_SQUARE_ERROR:
+                        newObject = std::make_shared<LSE>(CurrentVmatrix);
+                        break;
+                    case Enums::KULLBACK_LIEBER:
+                        newObject = std::make_shared<KullbackLeibler>(CurrentVmatrix);
+                        break;
+                    case Enums::NonSmooth_KULLBACK_LIEBER:
+                        newObject = std::make_shared<nsKullbackLeibler>(CurrentVmatrix, 0.5);
+                        break;
+                }
+
+                engine->AddBiClusteringTask(newObject);
+            }
+
+            engine->maxThreadAllowd = 1;
+            engine->ServeQueue();
+        }
     }
     else if (mode == "2")
     {
@@ -609,7 +632,11 @@ void Experimental::Squro(QString mode)
     }
     else if (mode == "6")
     {
+        QString fileName = "DataMatrixTCGA5_mutect2v2.vmatrix";
 
+        engine->LoadDataMatrix(fileName);
+
+        engine->db->SaveMatrix(engine->CurrentVmatrix->data, engine->CurrentVmatrix->name, engine->CurrentVmatrix->group, Enums::MatrixType::V, -1);
     }
 }
 

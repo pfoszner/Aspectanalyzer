@@ -241,7 +241,7 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
             divergence = DivernegceValue();
 
-            //qDebug() << numOfSteps << ": " << divergence;
+            qDebug() << numOfSteps << ": " << divergence << "Method: " << idMethod;
 
             features.emplace_back(Enums::Divergence, divergence, numOfSteps);
 
