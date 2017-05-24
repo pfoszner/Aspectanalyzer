@@ -5,7 +5,7 @@ QT += sql
 
 DEFINES += _OSX
 
-CONFIG += c++11
+CONFIG += c++11 release
 
 SOURCES += main.cpp \
     buttonhandlers.cpp \

@@ -21,6 +21,7 @@ class BiclusteringObject
 {
 
 public:
+    int idMatrix = -1;
     int idResult = -1;
     int idMethod = -1;
     int expectedBiClusterCount;

@@ -583,7 +583,7 @@ void Experimental::Squro(QString mode)
 {
     QProcess process;
 
-    process.start("echo \"start\" | nc -q 0 10.0.0.1 3333");
+    //process.start("echo \"start\" | nc -q 0 10.0.0.1 3333");
 
     if (mode == "1")
     {
@@ -657,7 +657,39 @@ void Experimental::Squro(QString mode)
     }
     else if (mode == "3")
     {
+        std::shared_ptr<Matrix> CurrentVmatrix = engine->db->GetMatrix(9);
 
+        for(int i = 0; i < 1; ++i)
+        {
+            for(int methodID = 0; methodID < 4; ++methodID)
+            {
+                std::shared_ptr<BiclusteringObject> newObject;
+
+                switch(methodID)
+                {
+                    case Enums::PLSA:
+                        newObject = std::make_shared<PLSA>(CurrentVmatrix);
+                        break;
+                    case Enums::LEAST_SQUARE_ERROR:
+                        newObject = std::make_shared<LSE>(CurrentVmatrix);
+                        break;
+                    case Enums::KULLBACK_LIEBER:
+                        newObject = std::make_shared<KullbackLeibler>(CurrentVmatrix);
+                        break;
+                    case Enums::NonSmooth_KULLBACK_LIEBER:
+                        newObject = std::make_shared<nsKullbackLeibler>(CurrentVmatrix, 0.5);
+                        break;
+                }
+
+                QByteArray rawData = newObject->Serialize();
+
+                engine->aaclient.connectToHost("localhost");
+
+                engine->aaclient.writeData(rawData);
+            }
+        }
+
+        //RunConsensus();
     }
     else if (mode == "4")
     {
@@ -672,7 +704,7 @@ void Experimental::Squro(QString mode)
 
     }
 
-    process.start("echo \"stop\" | nc -q 0 10.0.0.1 3333");
+    //process.start("echo \"stop\" | nc -q 0 10.0.0.1 3333");
 
     qDebug() << "Mission Acomplished";
 }

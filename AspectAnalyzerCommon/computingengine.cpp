@@ -10,6 +10,15 @@ ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
 void ComputingEngine::receiveData(QByteArray data)
 {
     qDebug() << data.length();
+
+    if (data.length() > 10)
+    {
+        std::shared_ptr<BiclusteringObject> task = std::make_shared<BiclusteringObject>(data);
+
+        task->dataMatrix = db->GetMatrix(task->idMatrix);
+
+        AddBiClusteringTask(task);
+    }
 }
 
 void ComputingEngine::LoadDataMatrix(QString filename)

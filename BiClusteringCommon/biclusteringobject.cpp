@@ -13,6 +13,10 @@ BiclusteringObject::BiclusteringObject(std::shared_ptr<Matrix>& dataMatrix)
 
 BiclusteringObject::BiclusteringObject(QByteArray deserialize)
 {
+
+    idMethod = ArrayToInt(deserialize.mid(0, 4));
+    deserialize.remove(0, 4);
+
     //    int idResult = -1;
 
         idResult = ArrayToInt(deserialize.mid(0, 4));
@@ -101,6 +105,7 @@ QByteArray BiclusteringObject::Serialize()
 {
     QByteArray buffer;
 
+    buffer.append(IntToArray(*this->dataMatrix->idMatrix));
 //    int idResult = -1;
     buffer.append(IntToArray(this->idResult));
 //    int idMethod = -1;
