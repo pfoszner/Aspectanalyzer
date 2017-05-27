@@ -172,7 +172,7 @@ ApplicationWindow {
                     maximumValue: 100.0
                 }
 
-                TextInput {
+                /*TextInput {
                     id: textInput
                     x: 438
                     y: 280
@@ -199,6 +199,7 @@ ApplicationWindow {
                         }
                     }
                 }
+                */
 
                 Connections {
                     target: lblTasks

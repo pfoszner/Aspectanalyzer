@@ -5,11 +5,12 @@ QT += sql
 
 DEFINES += _OSX
 
-CONFIG += c++11 release
+CONFIG += c++11
 
 SOURCES += main.cpp \
     buttonhandlers.cpp \
-    addbiclusteringtask.cpp
+    addbiclusteringtask.cpp \
+    simplewizard.cpp
 
 RESOURCES += qml.qrc
 
@@ -70,7 +71,8 @@ DISTFILES += \
 
 HEADERS += \
     buttonhandlers.h \
-    addbiclusteringtask.h
+    addbiclusteringtask.h \
+    simplewizard.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../AspectAnalyzerCommon/release/ -lAspectAnalyzerCommon
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../AspectAnalyzerCommon/debug/ -lAspectAnalyzerCommon

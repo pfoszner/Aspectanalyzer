@@ -29,7 +29,7 @@ void ButtonHandlers::btnAddTaskSlot(int methodID)
 
     AddBiclusteringTask wizard;
 
-    wizard.addTask();
+    wizard.exec();
 
 //    std::shared_ptr<BiclusteringObject> newObject;
 
