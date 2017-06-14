@@ -8,6 +8,7 @@ ButtonHandlers::ButtonHandlers(QObject *parent) :
     engine = std::make_shared<ComputingEngine>();
 
     exper = std::make_shared<Experimental>(engine);
+
 }
 
 ButtonHandlers::~ButtonHandlers()
@@ -27,9 +28,11 @@ void ButtonHandlers::btnAddTaskSlot(int methodID)
     //wizard.show();
     //wizard.exec();
 
-    AddBiclusteringTask wizard;
+    AddBiclusteringTask wizard(engine);
 
     wizard.exec();
+
+    setTasksLabels(QString::number(engine->GetRunning()), QString::number(engine->GetInQueue()));
 
 //    std::shared_ptr<BiclusteringObject> newObject;
 

@@ -25,10 +25,11 @@
 
     #include "addbiclusteringtask.h"
 
-    AddBiclusteringTask::AddBiclusteringTask(QWidget *parent)
-        : SimpleWizard(parent)
+    AddBiclusteringTask::AddBiclusteringTask(std::shared_ptr<ComputingEngine>& engine, QWidget *parent)
+        : engine(engine), SimpleWizard(parent)
     {
-        setNumPages(3);
+        setNumPages(5);
+        title = "Add Bi-clustering Task Wizard";
     }
 
     QWidget *AddBiclusteringTask::createPage(int index)
@@ -41,17 +42,14 @@
             dataSourcePage = new DataSourcePage(this);
             return dataSourcePage;
         case 2:
-            inputDataPage = new InputDataPage(this);
+            inputDataPage = new InputDataPage(this, engine);
             return inputDataPage;
-        //case 2:
-        //    firstPage = new FirstPage(this);
-        //    return firstPage;
-        //case 3:
-        //    secondPage = new SecondPage(this);
-        //    return secondPage;
-        //case 4:
-        //    thirdPage = new ThirdPage(this);
-        //    return thirdPage;
+        case 3:
+            methodPage = new MethodPage(this);
+            return methodPage;
+        case 4:
+            paramsPage = new ParamsPage(this);
+            return paramsPage;
         }
         return 0;
     }
@@ -59,169 +57,44 @@
     void AddBiclusteringTask::accept()
     {
         //Create Bi-clustering object;
+        std::shared_ptr<BiclusteringObject> newObject;
 
-        QDialog::accept();
-    }
+        int numOfRep = paramsPage->numRepLE->text().toInt();
+        int numOfBiclusters = paramsPage->bicNumLE->text().toInt();
 
-    FirstPage::FirstPage(AddBiclusteringTask *wizard)
-        : QWidget(wizard)
-    {
-        topLabel = new QLabel(tr("<center><b>Class information</b></center>"
-                                 "<p>This wizard will generate a skeleton class "
-                                 "definition and member function definitions."));
-        topLabel->setWordWrap(false);
+        for(int i = 0; i < numOfRep; ++i)
+        {
+            std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
 
-        classNameLabel = new QLabel(tr("Class &name:"));
-        classNameLineEdit = new QLineEdit;
-        classNameLabel->setBuddy(classNameLineEdit);
-        setFocusProxy(classNameLineEdit);
-
-        baseClassLabel = new QLabel(tr("&Base class:"));
-        baseClassLineEdit = new QLineEdit;
-        baseClassLabel->setBuddy(baseClassLineEdit);
-
-        qobjectMacroCheckBox = new QCheckBox(tr("&Generate Q_OBJECT macro"));
-
-        groupBox = new QGroupBox(tr("&Constructor"));
-
-        qobjectCtorRadioButton = new QRadioButton(tr("&QObject-style constructor"));
-        qwidgetCtorRadioButton = new QRadioButton(tr("Q&Widget-style constructor"));
-        defaultCtorRadioButton = new QRadioButton(tr("&Default constructor"));
-        copyCtorCheckBox = new QCheckBox(tr("&Also generate copy constructor and "
-                                            "assignment operator"));
-
-        defaultCtorRadioButton->setChecked(true);
-
-        connect(classNameLineEdit, SIGNAL(textChanged(const QString &)),
-                this, SLOT(classNameChanged()));
-        connect(defaultCtorRadioButton, SIGNAL(toggled(bool)),
-                copyCtorCheckBox, SLOT(setEnabled(bool)));
-
-        wizard->setButtonEnabled(false);
-
-        QVBoxLayout *groupBoxLayout = new QVBoxLayout;
-        groupBoxLayout->addWidget(qobjectCtorRadioButton);
-        groupBoxLayout->addWidget(qwidgetCtorRadioButton);
-        groupBoxLayout->addWidget(defaultCtorRadioButton);
-        groupBoxLayout->addWidget(copyCtorCheckBox);
-        groupBox->setLayout(groupBoxLayout);
-
-        QGridLayout *layout = new QGridLayout;
-        layout->addWidget(topLabel, 0, 0, 1, 2);
-        layout->setRowMinimumHeight(1, 10);
-        layout->addWidget(classNameLabel, 2, 0);
-        layout->addWidget(classNameLineEdit, 2, 1);
-        layout->addWidget(baseClassLabel, 3, 0);
-        layout->addWidget(baseClassLineEdit, 3, 1);
-        layout->addWidget(qobjectMacroCheckBox, 4, 0, 1, 2);
-        layout->addWidget(groupBox, 5, 0, 1, 2);
-        layout->setRowStretch(6, 1);
-        setLayout(layout);
-    }
-
-    void FirstPage::classNameChanged()
-    {
-        AddBiclusteringTask *wizard = qobject_cast<AddBiclusteringTask *>(parent());
-        wizard->setButtonEnabled(!classNameLineEdit->text().isEmpty());
-    }
-
-    SecondPage::SecondPage(AddBiclusteringTask *wizard)
-        : QWidget(wizard)
-    {
-        topLabel = new QLabel(tr("<center><b>Code style options</b></center>"));
-
-        commentCheckBox = new QCheckBox(tr("&Start generated files with a comment"));
-        commentCheckBox->setChecked(true);
-        setFocusProxy(commentCheckBox);
-
-        protectCheckBox = new QCheckBox(tr("&Protect header file against multiple "
-                                           "inclusions"));
-        protectCheckBox->setChecked(true);
-
-        macroNameLabel = new QLabel(tr("&Macro name:"));
-        macroNameLineEdit = new QLineEdit;
-        macroNameLabel->setBuddy(macroNameLineEdit);
-
-        includeBaseCheckBox = new QCheckBox(tr("&Include base class definition"));
-        baseIncludeLabel = new QLabel(tr("Base class include:"));
-        baseIncludeLineEdit = new QLineEdit;
-        baseIncludeLabel->setBuddy(baseIncludeLineEdit);
-
-        QString className = wizard->firstPage->classNameLineEdit->text();
-        macroNameLineEdit->setText(className.toUpper() + "_H");
-
-        QString baseClass = wizard->firstPage->baseClassLineEdit->text();
-        if (baseClass.isEmpty()) {
-            includeBaseCheckBox->setEnabled(false);
-            baseIncludeLabel->setEnabled(false);
-            baseIncludeLineEdit->setEnabled(false);
-        } else {
-            includeBaseCheckBox->setChecked(true);
-            if (QRegExp("Q[A-Z].*").exactMatch(baseClass)) {
-                baseIncludeLineEdit->setText("<" + baseClass + ">");
-            } else {
-                baseIncludeLineEdit->setText("\"" + baseClass.toLower() + ".h\"");
+            if (methodPage->plsa->isChecked())
+            {
+                newObject = std::make_shared<PLSA>(inputDataPage->loaddedVmatrix);
             }
+            else if (methodPage->lse->isChecked())
+            {
+                newObject = std::make_shared<LSE>(inputDataPage->loaddedVmatrix);
+            }
+            else if (methodPage->kl->isChecked())
+            {
+                newObject = std::make_shared<KullbackLeibler>(inputDataPage->loaddedVmatrix);
+            }
+            else if (methodPage->nskl->isChecked())
+            {
+                double theta = paramsPage->thetaLE->text().toDouble();
+                newObject = std::make_shared<nsKullbackLeibler>(inputDataPage->loaddedVmatrix, theta);
+                params.emplace_back(Enums::Theta, std::make_shared<double>(theta));
+            }
+
+
+            params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Average));
+            params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(numOfBiclusters));
+
+            newObject->ParseParameters(params);
+
+            engine->AddBiClusteringTask(newObject);
         }
 
-        connect(protectCheckBox, SIGNAL(toggled(bool)),
-                macroNameLabel, SLOT(setEnabled(bool)));
-        connect(protectCheckBox, SIGNAL(toggled(bool)),
-                macroNameLineEdit, SLOT(setEnabled(bool)));
-        connect(includeBaseCheckBox, SIGNAL(toggled(bool)),
-                baseIncludeLabel, SLOT(setEnabled(bool)));
-        connect(includeBaseCheckBox, SIGNAL(toggled(bool)),
-                baseIncludeLineEdit, SLOT(setEnabled(bool)));
-
-        QGridLayout *layout = new QGridLayout;
-        layout->setColumnMinimumWidth(0, 20);
-        layout->addWidget(topLabel, 0, 0, 1, 3);
-        layout->setRowMinimumHeight(1, 10);
-        layout->addWidget(commentCheckBox, 2, 0, 1, 3);
-        layout->addWidget(protectCheckBox, 3, 0, 1, 3);
-        layout->addWidget(macroNameLabel, 4, 1);
-        layout->addWidget(macroNameLineEdit, 4, 2);
-        layout->addWidget(includeBaseCheckBox, 5, 0, 1, 3);
-        layout->addWidget(baseIncludeLabel, 6, 1);
-        layout->addWidget(baseIncludeLineEdit, 6, 2);
-        layout->setRowStretch(7, 1);
-        setLayout(layout);
-    }
-
-    ThirdPage::ThirdPage(AddBiclusteringTask *wizard)
-        : QWidget(wizard)
-    {
-        topLabel = new QLabel(tr("<center><b>Output files</b></center>"));
-
-        outputDirLabel = new QLabel(tr("&Output directory:"));
-        outputDirLineEdit = new QLineEdit;
-        outputDirLabel->setBuddy(outputDirLineEdit);
-        setFocusProxy(outputDirLineEdit);
-
-        headerLabel = new QLabel(tr("&Header file name:"));
-        headerLineEdit = new QLineEdit;
-        headerLabel->setBuddy(headerLineEdit);
-
-        implementationLabel = new QLabel(tr("&Implementation file name:"));
-        implementationLineEdit = new QLineEdit;
-        implementationLabel->setBuddy(implementationLineEdit);
-
-        QString className = wizard->firstPage->classNameLineEdit->text();
-        headerLineEdit->setText(className.toLower() + ".h");
-        implementationLineEdit->setText(className.toLower() + ".cpp");
-        outputDirLineEdit->setText(QDir::toNativeSeparators(QDir::homePath()));
-
-        QGridLayout *layout = new QGridLayout;
-        layout->addWidget(topLabel, 0, 0, 1, 2);
-        layout->setRowMinimumHeight(1, 10);
-        layout->addWidget(outputDirLabel, 2, 0);
-        layout->addWidget(outputDirLineEdit, 2, 1);
-        layout->addWidget(headerLabel, 3, 0);
-        layout->addWidget(headerLineEdit, 3, 1);
-        layout->addWidget(implementationLabel, 4, 0);
-        layout->addWidget(implementationLineEdit, 4, 1);
-        layout->setRowStretch(5, 1);
-        setLayout(layout);
+        QDialog::accept();
     }
 
     IntroductionPage::IntroductionPage(AddBiclusteringTask *wizard)
@@ -281,26 +154,254 @@
         setLayout(layout);
     }
 
-    InputDataPage::InputDataPage(AddBiclusteringTask *wizard)
-        : QWidget(wizard)
+    InputDataPage::InputDataPage(AddBiclusteringTask *wizard, std::shared_ptr<ComputingEngine> &engine)
+        : QWidget(wizard), engine(engine), wizard(wizard)
     {
+        QGridLayout *layout = new QGridLayout;
+
         if (wizard->dataSourcePage->dbRadioButton->isChecked())
         {
             QString intro = "<center><b>You choose SQLite database.</center><p>";
 
+            matrixView = new QTableWidget(this);
+
+            engine->db->GetMatrixTableList(matrixView);
+
+            for(int i = 0; i < matrixView->rowCount(); ++i)
+            {
+                QPushButton* pButton = new QPushButton("Load Me", matrixView);
+                matrixView->setCellWidget(i, 4, pButton);
+
+                connect(pButton, SIGNAL(clicked()), &buttonSignalMapper, SLOT(map()));
+                buttonSignalMapper.setMapping(pButton, i);
+                connect(&buttonSignalMapper, SIGNAL(mapped(int)), this, SLOT(CellButtonClicked(int)));
+            }
+
             topLabel = new QLabel(intro);
+
+            matrixLabel = new QLabel("Loaded matrix id: no matrix loaded");
+
+            connect(this, SIGNAL(ChangeQLabelText(QString)), matrixLabel, SLOT(setText(QString)));
+
+            layout->addWidget(topLabel, 0, 0, 1, 2);
+
+            layout->addWidget(matrixLabel, 1, 0);
+
+            layout->addWidget(matrixView, 2, 0);
+
+            layout->setRowMinimumHeight(1, 10);
+
+            SetNextButton("id");
         }
         else
         {
-            QString intro = "<center><b>You choose VMATRIX filename.</center><p>";
+            QString intro = "<center><b>You choose VMATRIX/SOFT filename.</center><p>";
+
+            loadFile = new QPushButton("Load File", this);
+
+            loadFilelbl = new QLabel(tr("No Matrix loaded"));
+
+            connect(this, SIGNAL(ChangeQLabelmMain(QString)), loadFilelbl, SLOT(setText(QString)));
+
+            connect(loadFile, SIGNAL (released()),this, SLOT (handleloadFileButton()));
 
             topLabel = new QLabel(intro);
+
+            matrixLabel = new QLabel("Loaded matrix filename: no matrix loaded");
+
+            connect(this, SIGNAL(ChangeQLabelText(QString)), matrixLabel, SLOT(setText(QString)));
+
+            matrixSize = new QLabel("Loaded matrix size: no matrix loaded");
+
+            connect(this, SIGNAL(ChangeQLabelmSize(QString)), matrixSize, SLOT(setText(QString)));
+
+            layout->addWidget(topLabel, 0, 0, 1, 2);
+            layout->addWidget(loadFile, 1, 0);
+            layout->addWidget(loadFilelbl, 1, 1);
+            layout->addWidget(matrixLabel, 2, 0, 1, 2);
+            layout->addWidget(matrixSize, 3, 0, 1, 2);
+            layout->setRowMinimumHeight(1, 10);
+
+            SetNextButton("filename");
         }
 
+        layout->setRowStretch(5, 1);
+        setLayout(layout);
+    }
+
+    void InputDataPage::handleloadFileButton()
+    {
+        QString fileName = QFileDialog::getOpenFileName(nullptr,
+            tr("Open Image"), "", tr("AspectAnalyzer Files (*.vmatrix *.soft)"));
+
+        emit ChangeQLabelmMain("Matrix is loading please wait");
+
+        if (fileName.isEmpty() || fileName.isNull())
+        {
+            if (loaddedVmatrix == nullptr)
+            {
+                emit ChangeQLabelText("Loaded matrix filename: no matrix loaded");
+
+                emit ChangeQLabelmSize("Loaded matrix size: no matrix loaded");
+
+                emit ChangeQLabelmMain("No Matrix loaded");
+
+                wizard->setButtonEnabled(false);
+            }
+        }
+        else
+        {
+            QFileInfo fi(fileName);
+
+            emit ChangeQLabelText("Loaded matrix filename: " + fi.baseName());
+
+            loaddedVmatrix = std::make_shared<Matrix>(fileName);
+
+            emit ChangeQLabelmSize("Loaded matrix size: " + QString::number(loaddedVmatrix->data.n_rows) + "x" + QString::number(loaddedVmatrix->data.n_cols));
+
+            emit ChangeQLabelmMain("Matrix loaded sucessfully");
+
+            wizard->setButtonEnabled(true);
+        }
+    }
+
+    void InputDataPage::SetNextButton(QString mode)
+    {
+        if (loaddedVmatrix == nullptr)
+        {
+            emit ChangeQLabelText("Loaded matrix " + mode + ": no matrix loaded");
+
+            wizard->setButtonEnabled(false);
+        }
+        else
+        {
+            emit ChangeQLabelText("Loaded matrix " + mode + ": " + QString::number(*loaddedVmatrix->idMatrix));
+
+            wizard->setButtonEnabled(true);
+        }
+    }
+
+
+    void InputDataPage::CellButtonClicked(int rowNum)
+    {
+        emit ChangeQLabelText("Loaded matrix id: please wait while matrix is loading ...");
+        int idMatrix = matrixView->itemAt(rowNum, 0)->text().toInt();
+        loaddedVmatrix = engine->db->GetMatrix(idMatrix);
+        SetNextButton("id");
+    }
+
+    MethodPage::MethodPage(AddBiclusteringTask *wizard)
+        : QWidget(wizard)
+    {
+        QString intro = "<center><b>Method selection</center><p>";
+
+        topLabel = new QLabel(intro);
+
+        groupBox = new QGroupBox(tr("Choose bi-clustering methods:"));
+
+        plsa = new QRadioButton(tr("PLSA"));
+        lse = new QRadioButton(tr("Least Square Error"));
+        kl = new QRadioButton(tr("Kullback-Liebler"));
+        nskl = new QRadioButton(tr("non-smooth Kullback-Liebler"));
+
+        plsa->setChecked(true);
+
+        QVBoxLayout *groupBoxLayout = new QVBoxLayout;
+        groupBoxLayout->addWidget(plsa);
+        groupBoxLayout->addWidget(lse);
+        groupBoxLayout->addWidget(kl);
+        groupBoxLayout->addWidget(nskl);
+        groupBox->setLayout(groupBoxLayout);
 
         QGridLayout *layout = new QGridLayout;
-        layout->addWidget(topLabel, 0, 0, 1, 2);
+        layout->addWidget(topLabel);
         layout->setRowMinimumHeight(1, 10);
+        layout->addWidget(groupBox);
         layout->setRowStretch(5, 1);
+        setLayout(layout);
+    }
+
+    ParamsPage::ParamsPage(AddBiclusteringTask *wizard)
+        : QWidget(wizard)
+    {
+        QString methodS = "PLSA";
+
+        if (wizard->methodPage->lse->isChecked())
+        {
+            methodS = "Least Square Error";
+        }
+        else if (wizard->methodPage->kl->isChecked())
+        {
+            methodS = "Kullback-Liebler";
+        }
+        else if (wizard->methodPage->nskl->isChecked())
+        {
+            methodS = "non-smooth Kullback-Liebler";
+        }
+
+        QString intro = "<center><b>Parameters tunning method: " + methodS + "</center><p>";
+
+        topLabel = new QLabel(intro);
+
+        QGridLayout *layout = new QGridLayout;
+        layout->addWidget(topLabel);
+
+        int rowNum = 1;
+
+        QLocale locale;
+
+        QString separator = locale.decimalPoint();
+
+//number of bi-clusters
+        if (    wizard->methodPage->plsa->isChecked()
+             || wizard->methodPage->lse->isChecked()
+             || wizard->methodPage->kl->isChecked()
+             || wizard->methodPage->nskl->isChecked()
+           )
+        {
+            bicNum = new QLabel("Number of bi-clusters: <1 - 1024>");
+            layout->addWidget(bicNum, rowNum, 0);
+            bicNumLE = new QLineEdit;
+            bicNumLE->setText("8");
+            bicNumLE->setValidator(new QIntValidator(1,1024,bicNumLE));
+            layout->addWidget(bicNumLE, rowNum, 1);
+            rowNum++;
+
+            extrction = new QLabel("Extraction Type: ");
+            extrctionCB = new QComboBox;
+            extrctionCB->setEditable(false);
+            extrctionCB->addItem("Zero");
+            extrctionCB->addItem("Average");
+            extrctionCB->addItem("Quartile");
+            layout->addWidget(extrction, rowNum, 0);
+            layout->addWidget(extrctionCB, rowNum, 1);
+            rowNum++;
+
+            if (wizard->methodPage->nskl->isChecked())
+            {
+                theta = new QLabel("Theta: <0 - 1>");
+                layout->addWidget(theta, rowNum, 0);
+                thetaLE = new QLineEdit;
+
+                thetaLE->setText("0" + separator + "5");
+                thetaLE->setValidator(new QDoubleValidator(0.0,1.0,5,thetaLE));
+                layout->addWidget(thetaLE, rowNum, 1);
+                rowNum++;
+            }
+
+            numRep = new QLabel("Number of Repetition: <1 - 1000000>");
+            layout->addWidget(numRep, rowNum, 0);
+            numRepLE = new QLineEdit;
+            numRepLE->setText("10");
+            numRepLE->setValidator(new QIntValidator(1,1000000,numRepLE));
+            layout->addWidget(numRepLE, rowNum, 1);
+            rowNum++;
+        }
+
+//Extracion Type
+//Repetition
+
+
+        //layout->setRowStretch(5, 1);
         setLayout(layout);
     }

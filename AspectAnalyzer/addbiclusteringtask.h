@@ -33,25 +33,36 @@
 #include <QRadioButton>
 #include <QMessageBox>
 #include <QGridLayout>
+#include <QTableWidget>
 #include "biclusteringobject.h"
+#include "computingengine.h"
+#include <QFileDialog>
+#include <QComboBox>
+#include <QLocale>
+#include "computingengine.h"
+#include "plsa.h"
+#include "lse.h"
+#include "kullbackleibler.h"
+#include "nskullbackleibler.h"
 
-class FirstPage;
-class SecondPage;
-class ThirdPage;
+
 class IntroductionPage;
 class DataSourcePage;
 class InputDataPage;
+class MethodPage;
+class ParamsPage;
 
 class AddBiclusteringTask : public SimpleWizard
 {
     Q_OBJECT
 
 public:
-    AddBiclusteringTask(QWidget *parent = 0);
+    AddBiclusteringTask(std::shared_ptr<ComputingEngine>& engine, QWidget *parent = 0);
     std::vector<std::shared_ptr<BiclusteringObject>> result;
 
 protected:
     QWidget *createPage(int index);
+    std::shared_ptr<ComputingEngine> engine;
     void accept();
 
 private:
@@ -59,84 +70,16 @@ private:
     IntroductionPage *introductionPage;
     DataSourcePage *dataSourcePage;
     InputDataPage *inputDataPage;
-    FirstPage *firstPage;
-    SecondPage *secondPage;
-    ThirdPage *thirdPage;
+    MethodPage *methodPage;
+    ParamsPage *paramsPage;
 
     friend class IntroductionPage;
     friend class InputDataPage;
     friend class InputDataSource;
-    friend class FirstPage;
-    friend class SecondPage;
-    friend class ThirdPage;
+    friend class MethodPage;
+    friend class ParamsPage;
 
-};
 
-class FirstPage : public QWidget
-{
-    Q_OBJECT
-
-public:
-    FirstPage(AddBiclusteringTask *wizard);
-
-private slots:
-    void classNameChanged();
-
-public:
-    QLabel *topLabel;
-    QLabel *classNameLabel;
-    QLabel *baseClassLabel;
-    QLineEdit *classNameLineEdit;
-    QLineEdit *baseClassLineEdit;
-    QCheckBox *qobjectMacroCheckBox;
-    QGroupBox *groupBox;
-    QRadioButton *qobjectCtorRadioButton;
-    QRadioButton *qwidgetCtorRadioButton;
-    QRadioButton *defaultCtorRadioButton;
-    QCheckBox *copyCtorCheckBox;
-
-    friend class AddBiclusteringTask;
-    friend class SecondPage;
-    friend class ThirdPage;
-};
-
-class SecondPage : public QWidget
-{
-    Q_OBJECT
-
-public:
-    SecondPage(AddBiclusteringTask *wizard);
-
-public:
-    QLabel *topLabel;
-    QCheckBox *commentCheckBox;
-    QCheckBox *protectCheckBox;
-    QCheckBox *includeBaseCheckBox;
-    QLabel *macroNameLabel;
-    QLabel *baseIncludeLabel;
-    QLineEdit *macroNameLineEdit;
-    QLineEdit *baseIncludeLineEdit;
-
-    friend class AddBiclusteringTask;
-};
-
-class ThirdPage : public QWidget
-{
-    Q_OBJECT
-
-public:
-    ThirdPage(AddBiclusteringTask *wizard);
-
-public:
-    QLabel *topLabel;
-    QLabel *outputDirLabel;
-    QLabel *headerLabel;
-    QLabel *implementationLabel;
-    QLineEdit *outputDirLineEdit;
-    QLineEdit *headerLineEdit;
-    QLineEdit *implementationLineEdit;
-
-    friend class AddBiclusteringTask;
 };
 
 class IntroductionPage : public QWidget
@@ -169,15 +112,73 @@ public:
 };
 
 
-class InputDataPage: public QWidget
+class InputDataPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    InputDataPage(AddBiclusteringTask *wizard);
+    InputDataPage(AddBiclusteringTask *wizard, std::shared_ptr<ComputingEngine>& engine);
+    void SetNextButton(QString mode);
+
+public:
+    std::shared_ptr<ComputingEngine> engine;
+    QLabel *topLabel;
+    QLabel *matrixLabel;
+    QTableWidget *matrixView;
+    QSignalMapper buttonSignalMapper;
+    std::shared_ptr<Matrix> loaddedVmatrix;
+    AddBiclusteringTask *wizard;
+    QPushButton *loadFile;
+    QLabel *loadFilelbl;
+    QLabel *matrixSize;
+
+signals:
+    void ChangeQLabelText(QString text);
+    void ChangeQLabelmSize(QString text);
+    void ChangeQLabelmMain(QString text);
+
+public slots:
+    void CellButtonClicked(int rowNum);
+    void handleloadFileButton();
+
+    friend class AddBiclusteringTask;
+};
+
+class MethodPage : public QWidget
+{
+    Q_OBJECT
+
+public:
+    MethodPage(AddBiclusteringTask *wizard);
 
 public:
     QLabel *topLabel;
+    QGroupBox *groupBox;
+    QRadioButton *plsa;
+    QRadioButton *lse;
+    QRadioButton *kl;
+    QRadioButton *nskl;
+
+    friend class AddBiclusteringTask;
+};
+
+class ParamsPage : public QWidget
+{
+    Q_OBJECT
+
+public:
+    ParamsPage(AddBiclusteringTask *wizard);
+
+public:
+    QLabel *topLabel;
+    QLabel *bicNum;
+    QLineEdit *bicNumLE;
+    QLabel *numRep;
+    QLineEdit *numRepLE;
+    QLabel *extrction;
+    QComboBox *extrctionCB;
+    QLabel *theta;
+    QLineEdit *thetaLE;
 
     friend class AddBiclusteringTask;
 };

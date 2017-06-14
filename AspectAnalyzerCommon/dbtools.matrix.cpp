@@ -1,5 +1,50 @@
 #include "dbtools.h"
 
+void DBTools::GetMatrixTableList(QTableWidget *table)
+{
+    QSqlQuery query(db);
+
+    QString queryText = "SELECT id_matrix, name, dim1, dim2, [group]  FROM matrix WHERE id_matrix_type = " + QString::number(Enums::MatrixType::V);
+
+    query.exec(queryText);
+
+    //int numOfRows = query.numRowsAffected();
+
+    table->setColumnCount(5);
+
+    QStringList labels;
+
+    labels.append("Id Matrix");
+    labels.append("Name");
+    labels.append("Dimensions");
+    labels.append("Group");
+    labels.append("Load");
+
+    table->setHorizontalHeaderLabels(labels);
+
+    int row = 0;
+
+    while (query.next())
+    {
+        table->setRowCount(row + 1);
+
+        QTableWidgetItem *idMatrix = new QTableWidgetItem(query.value("id_matrix").toString());
+        idMatrix->setFlags(idMatrix->flags() &  ~Qt::ItemIsEditable);
+        QTableWidgetItem *name = new QTableWidgetItem(query.value("name").toString());
+        name->setFlags(name->flags() &  ~Qt::ItemIsEditable);
+        QTableWidgetItem *dim = new QTableWidgetItem(query.value("dim1").toString() + "x" + query.value("dim2").toString());
+        dim->setFlags(dim->flags() &  ~Qt::ItemIsEditable);
+        QTableWidgetItem *group = new QTableWidgetItem(query.value("group").toString());
+        group->setFlags(group->flags() &  ~Qt::ItemIsEditable);
+
+        table->setItem(row, 0, idMatrix);
+        table->setItem(row, 1, name);
+        table->setItem(row, 2, dim);
+        table->setItem(row, 3, group);
+
+    }
+}
+
 std::shared_ptr<Matrix> DBTools::GetMatrix(int idMatrix)
 {
     std::shared_ptr<Matrix> retVal;

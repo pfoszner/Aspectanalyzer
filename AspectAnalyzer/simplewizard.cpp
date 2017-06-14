@@ -106,7 +106,8 @@ void SimpleWizard::switchPage(QWidget *oldPage)
         finishButton->setEnabled(false);
     }
 
-    setWindowTitle(tr("Simple Wizard - Step %1 of %2")
+    setWindowTitle(tr("%3 - Step %1 of %2")
                    .arg(history.size())
-                   .arg(numPages));
+                   .arg(numPages)
+                   .arg(title));
 }

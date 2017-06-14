@@ -10,9 +10,14 @@
 #include <QSqlError>
 #include <QSqlRecord>
 #include <QDir>
+#include <QTableWidgetItem>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QSignalMapper>
 
 class DBTools
 {
+
 public:
     DBTools(const QString&);
     int SaveResult(std::shared_ptr<BiclusteringObject> taskToSave);
@@ -25,6 +30,7 @@ public:
     bool SaveLabels(std::vector<Label>& labels, int idMatrix);
     std::vector<Label> GetLabels(int idMatrix, int idLabelType);
     void GetMatrixData(int, int, std::shared_ptr<NMF>);
+    void GetMatrixTableList(QTableWidget *table);
 
 private:
     QString path;

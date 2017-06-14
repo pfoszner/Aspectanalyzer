@@ -43,6 +43,7 @@ public:
 protected:
     virtual QWidget *createPage(int index) = 0;
     void setNumPages(int n);
+    QString title;
 
 private slots:
     void backButtonClicked();
