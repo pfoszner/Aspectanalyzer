@@ -458,7 +458,12 @@ void Experimental::RunAllConsensus()
 
     for(uint i = 0; i < ids.size(); ++i)
     {
+        std::vector<std::shared_ptr<BiclusteringObject>> tricluster  = engine->db->GetResults(-1, ids[i], Enums::Methods::TRICLUSTERING, -1);
+
         test  = engine->db->GetResults(-1, ids[i], -1, -1);
+
+        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING; });
+        test.erase(riter, test.end());
 
         double average = 0;
 
@@ -469,7 +474,7 @@ void Experimental::RunAllConsensus()
 
         int bicCount = (int)(average / test.size());
 
-        qDebug() << "Matrix: " << test[0]->dataMatrix->name << " Average: " << bicCount;
+        qDebug() << "Matrix: " << test[0]->dataMatrix->name << " Average: " << bicCount << " Tricluster: " << tricluster[0]->foundedBiclusters.size();
 
         std::vector<Consensus::MergeType> mt;
 
@@ -483,9 +488,9 @@ void Experimental::RunAllConsensus()
 
             //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
 
-            newObject->expectedBiClusterCount = bicCount;
+            newObject->expectedBiClusterCount = tricluster[0]->foundedBiclusters.size();
 
-            newObject->dataMatrix->expectedBiClusterCount = bicCount;
+            newObject->dataMatrix->expectedBiClusterCount = tricluster[0]->foundedBiclusters.size();
 
             newObject->SetEnsemble(test);
 

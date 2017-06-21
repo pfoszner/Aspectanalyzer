@@ -207,8 +207,9 @@ void ButtonHandlers::btnCustomSlot(QString mode)
 
     //engine->aaclient.writeData(rawData);
 
-    exper->Squro(mode);
+    //exper->Squro(mode);
 
+    exper->RunAllConsensus();
 }
 
 void ButtonHandlers::btnPlaySlot()
@@ -235,64 +236,67 @@ void ButtonHandlers::btnPauseSlot()
 
 void ButtonHandlers::btnStopSlot()
 {
-//    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, Enums::Methods::TRICLUSTERING, -1);
+    for (int m = 9; m <= 18; ++m)
+    {
+        std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, m, -1);
 
-//    for(std::shared_ptr<BiclusteringObject> result : test)
-//    {
-//        //if (result->idMethod < 8)
-//        //    continue;
+        for(std::shared_ptr<BiclusteringObject> result : test)
+        {
+            //if (result->idMethod < 8)
+            //    continue;
 
-//        QDir dir = QDir::current();
+            QDir dir = QDir::current();
 
-//        if (!dir.cd("wyniki"))
-//        {
-//            dir.mkdir("wyniki");
-//        }
+            if (!dir.cd("wyniki"))
+            {
+                dir.mkdir("wyniki");
+            }
 
-//        int index = 0;
+            int index = 0;
 
-//        for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
-//        {
-//            QFile retVal("wyniki/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
+            for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
+            {
+                QFile retVal("wyniki/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
 
-//            retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+                retVal.open(QIODevice::WriteOnly | QIODevice::Text);
 
-//            QTextStream out(&retVal);
+                QTextStream out(&retVal);
 
-//            //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
+                //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
 
-//            //out << "Cluster1:\n";
+                //out << "Cluster1:\n";
 
-//            for(int c1 : bic->cluster1)
-//            {
-//                out << result->dataMatrix->rowLabels[c1].value << "\n";
-//                //out << c1 << "\n";
-//            }
+                for(int c1 : bic->cluster1)
+                {
+                    out << result->dataMatrix->rowLabels[c1].value << "\n";
+                    //out << c1 << "\n";
+                }
 
-//            //out << "\nCluster2:\n";
+                //out << "\nCluster2:\n";
 
-//            for(int c2 : bic->cluster2)
-//            {
-//                //out << result->dataMatrix->columnLabels[c2].value << "\n";
-//                //out << c2 << "\n";
-//            }
+                for(int c2 : bic->cluster2)
+                {
+                    //out << result->dataMatrix->columnLabels[c2].value << "\n";
+                    //out << c2 << "\n";
+                }
 
-//            out << "\n\n";
+                out << "\n\n";
 
-//            retVal.close();
-//        }
+                retVal.close();
+            }
 
-//        QFile labels("genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
+            QFile labels("genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
 
-//        labels.open(QIODevice::WriteOnly | QIODevice::Text);
+            labels.open(QIODevice::WriteOnly | QIODevice::Text);
 
-//        QTextStream outL(&labels);
+            QTextStream outL(&labels);
 
-//        for(Label item : result->dataMatrix->rowLabels)
-//        {
-//            outL << item.value << "\n";
-//        }
+            for(Label item : result->dataMatrix->rowLabels)
+            {
+                outL << item.value << "\n";
+            }
 
-//        labels.close();
-//    }
+            labels.close();
+        }
+    }
 }
