@@ -12,6 +12,7 @@
 #include "nskullbackleibler.h"
 #include "consensus.h"
 #include "triclustering.h"
+#include "ensembletask.h"
 
 class Experimental
 {
@@ -32,6 +33,7 @@ public:
     std::vector <QString> GetSignature();
     void LoadKumalBiclusters();
     void RunAllConsensus();
+    void RunAllConsensus2();
     void RunAllTriclustering();
     void Squro(QString mode);
 };

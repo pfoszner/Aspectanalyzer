@@ -15,12 +15,14 @@ DEFINES += _OSX
 SOURCES += ensemblebiclustering.cpp \
     ensembletask.cpp \
     consensus.cpp \
-    triclustering.cpp
+    triclustering.cpp \
+    consensusworker.cpp
 
 HEADERS += ensemblebiclustering.h \
     ensembletask.h \
     consensus.h \
-    triclustering.h
+    triclustering.h \
+    consensusworker.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

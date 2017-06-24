@@ -377,7 +377,7 @@ void Experimental::RunTriclustering()
         test.push_back(single[best]);
     }
 
-    std::vector<Consensus::MergeType> mt;
+    std::vector<MergeType> mt;
 
     //mt.push_back(Consensus::MergeType::ByACV);
     //mt.push_back(Consensus::MergeType::ByACVHeuristic);
@@ -452,13 +452,24 @@ void Experimental::RunAllConsensus()
 
     std::vector<int> ids;
 
-    //ids.push_back(8);
-    ids.push_back(5);
+    ids.push_back(1);
+    ids.push_back(2);
+    ids.push_back(3);
+    ids.push_back(4);
+    ids.push_back(6);
+    ids.push_back(7);
+    ids.push_back(8);
+
+
+    //ids.push_back(5);
 
 
     for(uint i = 0; i < ids.size(); ++i)
     {
         std::vector<std::shared_ptr<BiclusteringObject>> tricluster  = engine->db->GetResults(-1, ids[i], Enums::Methods::TRICLUSTERING, -1);
+
+        auto triter = std::remove_if(tricluster.begin(), tricluster.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->foundedBiclusters.size() == 0; });
+        tricluster.erase(triter, tricluster.end());
 
         test  = engine->db->GetResults(-1, ids[i], -1, -1);
 
@@ -476,13 +487,13 @@ void Experimental::RunAllConsensus()
 
         qDebug() << "Matrix: " << test[0]->dataMatrix->name << " Average: " << bicCount << " Tricluster: " << tricluster[0]->foundedBiclusters.size();
 
-        std::vector<Consensus::MergeType> mt;
+        std::vector<MergeType> mt;
 
         //mt.push_back(Consensus::MergeType::ByACV);
         //mt.push_back(Consensus::MergeType::ByACVHeuristic);
-        mt.push_back(Consensus::MergeType::Standard);
+        mt.push_back(MergeType::Standard);
 
-        for(Consensus::MergeType imt : mt)
+        for(MergeType imt : mt)
         {
             std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1);
 
@@ -506,6 +517,80 @@ void Experimental::RunAllConsensus()
                 engine->db->SaveResult(res);
         }
 
+        qDebug() << "Done ;]";
+    }
+}
+
+void Experimental::RunAllConsensus2()
+{
+    std::vector<std::shared_ptr<BiclusteringObject>> test;
+
+    std::vector<int> ids;
+
+    //ids.push_back(1);
+    ids.push_back(1);
+    ids.push_back(3);
+    ids.push_back(4);
+    ids.push_back(5);
+    ids.push_back(6);
+    ids.push_back(7);
+    ids.push_back(8);
+
+    for(uint i = 0; i < ids.size(); ++i)
+    {
+        uint start = 5;
+
+        if (i == 0)
+            start = 80;
+
+        for(uint s = start; s <= 100; s = s + 5)
+        {
+            test  = engine->db->GetResults(-1, ids[i], -1, -1);
+
+            auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING; });
+            test.erase(riter, test.end());
+
+            double average = 0;
+
+            for(std::shared_ptr<BiclusteringObject> dupa : test)
+            {
+                average += dupa->foundedBiclusters.size();
+            }
+
+            int bicCount = (int)(average / test.size());
+
+            qDebug() << "Matrix: (id=" << ids[i] << ") " << test[0]->dataMatrix->name << " Average: " << bicCount << " Step bicluster: " << s;
+
+            std::vector<MergeType> mt;
+
+            //mt.push_back(Consensus::MergeType::ByACV);
+            //mt.push_back(Consensus::MergeType::ByACVHeuristic);
+            mt.push_back(MergeType::Standard);
+
+            for(MergeType imt : mt)
+            {
+                std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1);
+
+                //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
+
+                newObject->expectedBiClusterCount = s;
+
+                newObject->dataMatrix->expectedBiClusterCount = s;
+
+                newObject->SetEnsemble(test);
+
+                newObject->ExtractType = imt;
+
+                std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
+
+                params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+
+                auto res = newObject->Compute(params);
+
+                if (res != nullptr)
+                    engine->db->SaveResult(res);
+            }
+        }
         qDebug() << "Done ;]";
     }
 }
@@ -550,13 +635,13 @@ void Experimental::RunConsensus()
         test.push_back(single[best]);
     }
 
-    std::vector<Consensus::MergeType> mt;
+    std::vector<MergeType> mt;
 
     //mt.push_back(Consensus::MergeType::ByACV);
     //mt.push_back(Consensus::MergeType::ByACVHeuristic);
-    mt.push_back(Consensus::MergeType::Standard);
+    mt.push_back(MergeType::Standard);
 
-    for(Consensus::MergeType imt : mt)
+    for(MergeType imt : mt)
     {
         //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1);
 

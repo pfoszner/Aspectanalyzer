@@ -209,7 +209,7 @@ void ButtonHandlers::btnCustomSlot(QString mode)
 
     //exper->Squro(mode);
 
-    exper->RunAllConsensus();
+    exper->RunAllConsensus2();
 }
 
 void ButtonHandlers::btnPlaySlot()
@@ -236,9 +236,48 @@ void ButtonHandlers::btnPauseSlot()
 
 void ButtonHandlers::btnStopSlot()
 {
-    for (int m = 9; m <= 18; ++m)
+    for (int f = 0; f <= 3; ++f)
     {
-        std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, m, -1);
+        std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, -1, -1);
+
+        QString folder = "dupa";
+
+        switch(f)
+        {
+            case 0:
+            {
+                folder = "ToSamoCoHanczar";
+                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->idMethod == Enums::Methods::CONSENSUS || r->idMethod <= Enums::Methods::TRICLUSTERING; });
+                test.erase(riter, test.end());
+                break;
+            }
+            case 1:
+            {
+                folder = "AnalogiaDoHAnczara";
+                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 115 && r->idResult <= 122); });
+                test.erase(riter, test.end());
+                break;
+            }
+            case 2:
+            {
+                folder = "WykresID1";
+                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 123 && r->idResult <= 142); });
+                test.erase(riter, test.end());
+                break;
+            }
+            case 3:
+            {
+                folder = "WykresID2";
+                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 143 && r->idResult <= 162); });
+                test.erase(riter, test.end());
+                break;
+            }
+        }
+
+
+
+
+
 
         for(std::shared_ptr<BiclusteringObject> result : test)
         {
@@ -247,16 +286,16 @@ void ButtonHandlers::btnStopSlot()
 
             QDir dir = QDir::current();
 
-            if (!dir.cd("wyniki"))
+            if (!dir.cd(folder))
             {
-                dir.mkdir("wyniki");
+                dir.mkdir(folder);
             }
 
             int index = 0;
 
             for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
             {
-                QFile retVal("wyniki/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
+                QFile retVal(folder + "/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
 
                 retVal.open(QIODevice::WriteOnly | QIODevice::Text);
 
@@ -285,7 +324,7 @@ void ButtonHandlers::btnStopSlot()
                 retVal.close();
             }
 
-            QFile labels("genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
+            QFile labels(folder + "/genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
 
             labels.open(QIODevice::WriteOnly | QIODevice::Text);
 
@@ -299,4 +338,6 @@ void ButtonHandlers::btnStopSlot()
             labels.close();
         }
     }
+
+        qDebug() << "Huuuurraaaa";
 }

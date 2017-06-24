@@ -2,17 +2,12 @@
 #define CONSENSUS_H
 
 #include "ensembletask.h"
+#include "consensusworker.h"
+
 
 class Consensus : public EnsembleTask
 {
 public:
-
-    enum MergeType
-        {
-            Standard = 0,
-            ByACV,
-            ByACVHeuristic
-        };
 
     MergeType ExtractType = MergeType::Standard;
 
@@ -33,31 +28,6 @@ public:
 
 
 
-class ClusterItem
-{
-
-public:
-    int Index;
-    uint Count;
-    std::vector<double> ACV;
-
-    ClusterItem(int Index, double Quality) : Index(Index), Count(1)
-        {
-            ACV.push_back(Quality);
-        }
-
-   void IncreaseWeight(double Quality)
-        {
-            Count++;
-            ACV.push_back(Quality);
-        }
-
-   double Weight() const
-        {
-            return (std::accumulate(ACV.begin(), ACV.end(), 0.0) / (double)ACV.size()) * Count;
-        }
-
-};
 
 class SortItem
 {
@@ -71,5 +41,8 @@ public:
 };
 
 };
+
+
+
 
 #endif // CONSENSUS_H
