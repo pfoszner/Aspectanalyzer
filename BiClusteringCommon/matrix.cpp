@@ -350,18 +350,22 @@ std::shared_ptr<double> Matrix::AverageCorrelationValue(const arma::mat& Amatrix
 
     for (int i = 0; i < dim1 - 1; ++i)
     {
+        arma::rowvec iRow = Amatrix.row(i);
+        iAverage = arma::mean(iRow);
+        double denominator1 = arma::accu((iRow - iAverage) % (iRow - iAverage));
+
+        denominator1 = std::sqrt(denominator1);
+
         for (int j = i + 1; j < dim1; ++j)
         {
             arma::rowvec jRow = Amatrix.row(j);
-            arma::rowvec iRow = Amatrix.row(i);
 
             jAverage = arma::mean(jRow);
-            iAverage = arma::mean(iRow);
 
             nominator = arma::accu((iRow - iAverage) % (jRow - jAverage));
-            double denominator1 = arma::accu((iRow - iAverage) % (iRow - iAverage));
+
             double denominator2 = arma::accu((jRow - jAverage) % (jRow - jAverage));
-            denominator = std::sqrt(denominator1)*std::sqrt(denominator2);
+            denominator = denominator1 * std::sqrt(denominator2);
 
             if (denominator != 0)
                 RowValue += std::abs(nominator / denominator);
@@ -380,18 +384,21 @@ std::shared_ptr<double> Matrix::AverageCorrelationValue(const arma::mat& Amatrix
 
     for (int i = 0; i < dim2 - 1; ++i)
     {
+        arma::colvec iCol = Amatrix.col(i);
+        iAverage = arma::mean(iCol);
+        double denominator1 = arma::accu((iCol - iAverage) % (iCol - iAverage));
+        denominator1 = std::sqrt(denominator1);
+
         for (int j = i + 1; j < dim2; ++j)
         {
             arma::colvec jCol = Amatrix.col(j);
-            arma::colvec iCol = Amatrix.col(i);
 
             jAverage = arma::mean(jCol);
-            iAverage = arma::mean(iCol);
 
             nominator = arma::accu((iCol - iAverage) % (jCol - jAverage));
-            double denominator1 = arma::accu((iCol - iAverage) % (iCol - iAverage));
+
             double denominator2 = arma::accu((jCol - jAverage) % (jCol - jAverage));
-            denominator = std::sqrt(denominator1)*std::sqrt(denominator2);
+            denominator = denominator1 * std::sqrt(denominator2);
 
             if (denominator != 0)
                 ColumnValue += std::abs(nominator / denominator);

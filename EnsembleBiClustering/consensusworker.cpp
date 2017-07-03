@@ -160,7 +160,7 @@ void ConsensusWorker::run()
 
                 candidateValue = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
 
-                qDebug() << "ByACV: Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size();
+                qDebug() << "ByACV: (" << *candidateValue << ") Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size() << "Final Size 1: " << FinalCluster1.size() << " Final Size 2: " << FinalCluster2.size();
 
                 if (*candidateValue <= currentValue)
                 {
@@ -271,7 +271,7 @@ void ConsensusWorker::run()
                 Cluster2.erase(riter, Cluster2.end());
             }
 
-            qDebug() << "ByACVHeuristic: Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size();
+            qDebug() << "ByACVHeuristic (" << *currentValue <<  "): Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size() << "Final Size 1: " << FinalCluster1.size() << " Final Size 2: " << FinalCluster2.size();
 
             if (Cluster1.size() == 0 && Cluster2.size() == 0)
                 done = true;
