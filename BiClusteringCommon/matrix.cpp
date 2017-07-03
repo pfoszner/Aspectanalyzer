@@ -344,89 +344,65 @@ std::shared_ptr<double> Matrix::AverageCorrelationValue(const arma::mat& Amatrix
     double iAverage;
     double jAverage;
     double nominator;
-    double denominator1;
-    double denominator2;
-    std::vector<double> iRow;
-    std::vector<double> jRow;
-    std::vector<double> iColumn;
-    std::vector<double> jColumn;
+    double denominator;
 
-    for (int i = 0; i < dim1; ++i)
+    int div = 0;
+
+    for (int i = 0; i < dim1 - 1; ++i)
     {
-        for (int j = 0; j < dim1; ++j)
+        for (int j = i + 1; j < dim1; ++j)
         {
-            iRow.clear();
-            jRow.clear();
+            arma::rowvec jRow = Amatrix.row(j);
+            arma::rowvec iRow = Amatrix.row(i);
 
-            for (int k = 0; k < dim2; ++k)
-            {
-                iRow.push_back(Amatrix(i, k));
-                jRow.push_back(Amatrix(j, k));
-            }
+            jAverage = arma::mean(jRow);
+            iAverage = arma::mean(iRow);
 
-            iAverage = std::accumulate(iRow.begin(), iRow.end(), 0.0) / iRow.size();
-            jAverage = std::accumulate(jRow.begin(), jRow.end(), 0.0) / jRow.size();
-            nominator = 0;
-            denominator1 = 0;
-            denominator2 = 0;
+            nominator = arma::accu((iRow - iAverage) % (jRow - jAverage));
+            double denominator1 = arma::accu((iRow - iAverage) % (iRow - iAverage));
+            double denominator2 = arma::accu((jRow - jAverage) % (jRow - jAverage));
+            denominator = std::sqrt(denominator1)*std::sqrt(denominator2);
 
-            for (int k = 0; k < dim2; ++k)
-            {
-                nominator += (iRow[k] - iAverage) * (jRow[k] - jAverage);
-                denominator1 += (iRow[k] - iAverage)*(iRow[k] - iAverage);
-                denominator2 += (jRow[k] - jAverage)*(jRow[k] - jAverage);
-            }
-
-            if (denominator1 != 0 && denominator2 != 0)
-                RowValue += std::abs(nominator / (std::sqrt(denominator1) * std::sqrt(denominator2)));
+            if (denominator != 0)
+                RowValue += std::abs(nominator / denominator);
             else
                 RowValue += 1;
 
+            div++;
         }
     }
 
-    RowValue -= dim1;
-    RowValue /= (dim1 * dim1) - dim1;
+    RowValue /= div;
 
     double ColumnValue = 0;
 
-    for (int i = 0; i < dim2; ++i)
+    div = 0;
+
+    for (int i = 0; i < dim2 - 1; ++i)
     {
-        for (int j = 0; j < dim2; ++j)
+        for (int j = i + 1; j < dim2; ++j)
         {
-            iColumn.clear();
-            jColumn.clear();
+            arma::colvec jCol = Amatrix.col(j);
+            arma::colvec iCol = Amatrix.col(i);
 
-            for (int k = 0; k < dim1; ++k)
-            {
-                iColumn.push_back(Amatrix(k, i));
-                jColumn.push_back(Amatrix(k, j));
-            }
+            jAverage = arma::mean(jCol);
+            iAverage = arma::mean(iCol);
 
-            iAverage = std::accumulate(iColumn.begin(), iColumn.end(), 0.0) / iColumn.size();
-            jAverage = std::accumulate(jColumn.begin(), jColumn.end(), 0.0) / jColumn.size();
-            nominator = 0;
-            denominator1 = 0;
-            denominator2 = 0;
+            nominator = arma::accu((iCol - iAverage) % (jCol - jAverage));
+            double denominator1 = arma::accu((iCol - iAverage) % (iCol - iAverage));
+            double denominator2 = arma::accu((jCol - jAverage) % (jCol - jAverage));
+            denominator = std::sqrt(denominator1)*std::sqrt(denominator2);
 
-            for (int k = 0; k < dim1; ++k)
-            {
-                nominator += (iColumn[k] - iAverage) * (jColumn[k] - jAverage);
-                denominator1 += (iColumn[k] - iAverage)*(iColumn[k] - iAverage);
-                denominator2 += (jColumn[k] - jAverage)*(jColumn[k] - jAverage);
-            }
-
-            if (denominator1 != 0 && denominator2 != 0)
-                ColumnValue += std::abs(nominator / (std::sqrt(denominator1) * std::sqrt(denominator2)));
+            if (denominator != 0)
+                ColumnValue += std::abs(nominator / denominator);
             else
                 ColumnValue += 1;
 
-
+            div++;
         }
     }
 
-    ColumnValue -= dim2;
-    ColumnValue /= (dim2 * dim2) - dim2;
+    ColumnValue /= div;
 
     if (RowValue > ColumnValue)
         return std::make_shared<double>(RowValue);

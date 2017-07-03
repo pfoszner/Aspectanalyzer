@@ -90,6 +90,8 @@ void ConsensusWorker::run()
 
         bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2), nullptr);
 
+
+
     }
     else if (extractType == MergeType::ByACV)
     {
@@ -133,6 +135,8 @@ void ConsensusWorker::run()
 
                 candidateValue = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
 
+                qDebug() << "ByACV: Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size();
+
                 if (*candidateValue <= currentValue)
                 {
                     FinalCluster1.push_back(Index);
@@ -155,6 +159,8 @@ void ConsensusWorker::run()
                 Cluster2.erase(criter, Cluster2.end());
 
                 candidateValue = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
+
+                qDebug() << "ByACV: Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size();
 
                 if (*candidateValue <= currentValue)
                 {
@@ -264,6 +270,8 @@ void ConsensusWorker::run()
                 auto riter = std::remove_if(Cluster2.begin(), Cluster2.end(), [index2](const ClusterItem& r) { return r.Index == index2; });
                 Cluster2.erase(riter, Cluster2.end());
             }
+
+            qDebug() << "ByACVHeuristic: Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size();
 
             if (Cluster1.size() == 0 && Cluster2.size() == 0)
                 done = true;

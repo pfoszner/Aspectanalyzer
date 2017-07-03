@@ -31,6 +31,8 @@ public:
     std::vector<std::shared_ptr<Bicluster>> expectedBiClusters;
     std::shared_ptr<double> AverageCorrelationValue(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
     std::shared_ptr<double> AverageCorrelationValue(const arma::mat& Amatrix);
+    std::shared_ptr<double> AverageCorrelationValue2(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
+    std::shared_ptr<double> AverageCorrelationValue2(const arma::mat& Amatrix);
     std::vector<Label> rowLabels;
     std::vector<Label> columnLabels;
     std::vector<Label> classLabels;

@@ -209,7 +209,7 @@ void ButtonHandlers::btnCustomSlot(QString mode)
 
     //exper->Squro(mode);
 
-    exper->RunAllConsensus2();
+    exper->RunAllConsensus();
 }
 
 void ButtonHandlers::btnPlaySlot()
