@@ -452,7 +452,6 @@ void Experimental::RunAllConsensus()
 
     std::vector<int> ids;
 
-
     ids.push_back(2);
     ids.push_back(3);
     ids.push_back(4);
@@ -460,8 +459,7 @@ void Experimental::RunAllConsensus()
     ids.push_back(7);
     ids.push_back(8);
     ids.push_back(1);
-
-    //ids.push_back(5);
+    ids.push_back(5);
 
 
     for(uint i = 0; i < ids.size(); ++i)
@@ -489,9 +487,10 @@ void Experimental::RunAllConsensus()
 
         std::vector<MergeType> mt;
 
-        mt.push_back(MergeType::ByACVHeuristic);
-        mt.push_back(MergeType::ByACV);
-        mt.push_back(MergeType::Standard);
+        //mt.push_back(MergeType::ByACVHeuristic);
+        //mt.push_back(MergeType::ByACV);
+        //mt.push_back(MergeType::Standard);
+        mt.push_back(MergeType::None);
 
         for(MergeType imt : mt)
         {

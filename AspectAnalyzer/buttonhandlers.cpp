@@ -236,7 +236,7 @@ void ButtonHandlers::btnPauseSlot()
 
 void ButtonHandlers::btnStopSlot()
 {
-    for (int f = 0; f <= 3; ++f)
+    for (int f = 4; f <= 4; ++f)
     {
         std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, -1, -1);
 
@@ -269,6 +269,13 @@ void ButtonHandlers::btnStopSlot()
             {
                 folder = "WykresID2";
                 auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 143 && r->idResult <= 162); });
+                test.erase(riter, test.end());
+                break;
+            }
+            case 4:
+            {
+                folder = "AnalogiaDoHAnczara_v2";
+                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 203); });
                 test.erase(riter, test.end());
                 break;
             }

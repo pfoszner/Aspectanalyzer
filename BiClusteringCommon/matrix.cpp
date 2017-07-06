@@ -359,9 +359,7 @@ std::shared_ptr<double> Matrix::AverageCorrelationValue(const arma::mat& Amatrix
         for (int j = i + 1; j < dim1; ++j)
         {
             arma::rowvec jRow = Amatrix.row(j);
-
             jAverage = arma::mean(jRow);
-
             nominator = arma::accu((iRow - iAverage) % (jRow - jAverage));
 
             double denominator2 = arma::accu((jRow - jAverage) % (jRow - jAverage));

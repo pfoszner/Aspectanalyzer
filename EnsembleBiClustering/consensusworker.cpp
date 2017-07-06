@@ -280,4 +280,14 @@ void ConsensusWorker::run()
         bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2), nullptr);
 
     }
+    else if (extractType == MergeType::None)
+    {
+        std::vector<int> FinalCluster1(Cluster1.size());
+        std::vector<int> FinalCluster2(Cluster2.size());
+
+        std::transform(Cluster1.begin(), Cluster1.end(), FinalCluster1.begin(), [](const ClusterItem& c){ return c.Index; });
+        std::transform(Cluster2.begin(), Cluster2.end(), FinalCluster2.begin(), [](const ClusterItem& c){ return c.Index; });
+
+        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2), nullptr);
+    }
 }
