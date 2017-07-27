@@ -520,6 +520,65 @@ void Experimental::RunAllConsensus()
     }
 }
 
+void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
+{
+    for(int mat = matrix; mat <=matrix; ++mat)
+    {
+        std::shared_ptr<Matrix> vMatrix = engine->db->GetMatrix(mat);
+
+        int count = 0;
+
+        for(uint s = start; s <= stop; s = s + step)
+        {
+            for(uint r = 0; r < rep; r++)
+            {
+                for(uint m = 0; m < 4; ++m)
+                {
+                    std::shared_ptr<BiclusteringObject> newObject;
+
+                    switch(m)
+                    {
+                        case Enums::PLSA:
+                            newObject = std::make_shared<PLSA>(vMatrix);
+                            break;
+                        case Enums::LEAST_SQUARE_ERROR:
+                            newObject = std::make_shared<LSE>(vMatrix);
+                            break;
+                        case Enums::KULLBACK_LIEBER:
+                            newObject = std::make_shared<KullbackLeibler>(vMatrix);
+                            break;
+                        case Enums::NonSmooth_KULLBACK_LIEBER:
+                            newObject = std::make_shared<nsKullbackLeibler>(vMatrix, 0.5);
+                            break;
+                    }
+
+                    newObject->expectedBiClusterCount = s;
+
+                    newObject->dataMatrix->expectedBiClusterCount = s;
+
+                    std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
+
+                    params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+
+                    engine->AddBiClusteringTask(newObject);
+
+                    count++;
+
+                    qDebug() << "Matrix " << mat << " Run Bi-cluster: " << s << ", Repetition: " << r;
+
+                    if (count >= 16)
+                    {
+                        engine->ServeQueue();
+                        count = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    engine->ServeQueue();
+}
+
 void Experimental::RunAllConsensus2()
 {
     std::vector<std::shared_ptr<BiclusteringObject>> test;
@@ -592,6 +651,93 @@ void Experimental::RunAllConsensus2()
         }
         qDebug() << "Done ;]";
     }
+}
+
+void Experimental::RunStepConsensus(int matrix, int start, int stop, int step)
+{
+    std::shared_ptr<Matrix> vMatrix = engine->db->GetMatrix(matrix);
+
+    for(uint s = start; s <= stop; s = s + step)
+    {
+        std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(vMatrix, -1);;
+
+        std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, matrix, -1, s);
+
+        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult <= 128); });
+        test.erase(riter, test.end());
+
+        newObject->expectedBiClusterCount = s;
+
+        newObject->dataMatrix->expectedBiClusterCount = s;
+
+        newObject->SetEnsemble(test);
+
+        newObject->ExtractType = MergeType::ByACVHeuristic;
+
+        std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
+
+        params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+
+        auto res = newObject->Compute(params);
+
+        engine->db->SaveResult(res);
+
+        qDebug() << "Done s = " << s;
+    }
+
+    //engine->ServeQueue();
+}
+
+void Experimental::RunStepTricluster(int matrix, int start)
+{
+    std::shared_ptr<Matrix> vMatrix = engine->db->GetMatrix(matrix);
+
+    //mt.push_back(Consensus::MergeType::ByACV);
+    //mt.push_back(Consensus::MergeType::ByACVHeuristic);
+    //mt.push_back(MergeType::Standard);
+
+    for(uint s = start; s <= 100; s = s + 5)
+    {
+        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(vMatrix, -1);;
+
+        std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, matrix, -1, s);
+
+        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 583); });
+        test.erase(riter, test.end());
+
+//        for(std::shared_ptr<BiclusteringObject> item : test)
+//        {
+//            std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(item);
+
+//            tmpPtr->foundedBiclusters.clear();
+
+//            tmpPtr->expectedBiClusterCount = s;
+
+//            tmpPtr->dataMatrix->expectedBiClusterCount = s;
+
+//            tmpPtr->RebuildBiclusters();
+//        }
+
+        newObject->expectedBiClusterCount = s;
+
+        newObject->dataMatrix->expectedBiClusterCount = s;
+
+        newObject->SetEnsemble(test);
+
+        //newObject->ExtractType = MergeType::ByACVHeuristic;
+
+        std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
+
+        params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+
+        auto res = newObject->Compute(params);
+
+        engine->db->SaveResult(res);
+
+        qDebug() << "Done s = " << s;
+    }
+
+    //engine->ServeQueue();
 }
 
 void Experimental::RunConsensus()
@@ -908,4 +1054,227 @@ void Experimental::LoadKumalBiclusters()
             }
         }
     }
+}
+
+
+void Experimental::Muszki()
+{
+    Matrix test("/mnt/D/tmp/est_counts.vmatrix");
+
+    engine->db->SaveLabels(test.rowLabels, 1);
+    engine->db->SaveLabels(test.columnLabels, 1);
+
+    Matrix test2("/mnt/D/tmp/tmp.vmatrix");
+
+    engine->db->SaveLabels(test2.rowLabels, 2);
+    engine->db->SaveLabels(test2.columnLabels, 2);
+
+    //engine->db->SaveMatrix(test.data, test.name, test.group, Enums::MatrixType::V, -1);
+}
+
+void Experimental::PLATResults(QString folder, int startId, int stopID, int classNum)
+{
+
+    QFile textFile("/mnt/D/AppData/owncloud/Praca/tmp/labels.csv");
+
+    textFile.open(QIODevice::ReadOnly | QIODevice::Text);
+
+    QTextStream textStream(&textFile);
+
+    std::vector<QString> sex;
+    std::vector<QString> strim;
+    std::vector<QString> env;
+    std::vector<QString> strimSex;
+
+    while (true)
+    {
+        QString line = textStream.readLine();
+        if (line.isNull())
+            break;
+        else
+        {
+            QStringList tmp = line.split(';');
+
+            strim.push_back(tmp[1]);
+            sex.push_back(tmp[2]);
+            env.push_back(tmp[3]);
+            strimSex.push_back(tmp[4]);
+        }
+    }
+
+    std::vector<std::shared_ptr<BiclusteringObject>> test;
+
+    for(int r = startId; r <= stopID; ++r)
+    {
+        std::vector<std::shared_ptr<BiclusteringObject>> single = engine->db->GetResults(r, -1, -1, -1);
+
+        test.push_back(single[0]);
+    }
+
+    for(std::shared_ptr<BiclusteringObject> result : test)
+    {
+        QDir dir = QDir::current();
+
+        if (!dir.cd(folder))
+        {
+            dir.mkdir(folder);
+        }
+
+        QFile retVal(folder + "/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
+
+        retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+
+        QTextStream out(&retVal);
+
+        for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
+        {
+            QHash<QString, int> percentage;
+
+            //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
+
+            //out << "Cluster1:\n";
+
+            for(int c1 : bic->cluster1)
+            {
+                //out << result->dataMatrix->rowLabels[c1].value << "\n";
+                //out << c1 << "\n";
+            }
+
+            //out << "\nCluster2:\n";
+
+            for(int c2 : bic->cluster2)
+            {
+                QString label;
+
+                //out << result->dataMatrix->columnLabels[c2].value << "\n";
+                if (classNum == 1)
+                {
+                    label = sex[c2];
+                }
+                else if (classNum == 2)
+                {
+                    label = strim[c2];
+                }
+                else if (classNum == 3)
+                {
+                    label = env[c2];
+                }
+                else if (classNum == 4)
+                {
+                    label = strimSex[c2];
+                }
+
+                //out << sex[c2] << "\n";
+
+                if (percentage.contains(label))
+                {
+                    percentage[label]++;
+                }
+                else
+                {
+                    percentage[label] = 1;
+                }
+                //out << c2 << "\n";
+            }
+
+            for(QString key : percentage.keys())
+            {
+                out << key << ": " << percentage[key] << " - " << ((double)percentage[key] / bic->cluster2.size()) << "\n";
+            }
+
+            out << "\n\n";
+        }
+
+        retVal.close();
+
+        QFile labels(folder + "/genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
+
+        labels.open(QIODevice::WriteOnly | QIODevice::Text);
+
+        QTextStream outL(&labels);
+
+        for(Label item : result->dataMatrix->rowLabels)
+        {
+            outL << item.value << "\n";
+        }
+
+        labels.close();
+    }
+
+
+    qDebug() << "Huuuurraaaa";
+}
+
+
+void Experimental::ExportResults(QString folder, int startId, int stopID)
+{
+
+
+        std::vector<std::shared_ptr<BiclusteringObject>> test;
+
+        for(int r = startId; r <= stopID; ++r)
+        {
+            std::vector<std::shared_ptr<BiclusteringObject>> single = engine->db->GetResults(r, -1, -1, -1);
+
+            test.push_back(single[0]);
+        }
+
+        for(std::shared_ptr<BiclusteringObject> result : test)
+        {
+            QDir dir = QDir::current();
+
+            if (!dir.cd(folder))
+            {
+                dir.mkdir(folder);
+            }
+
+            int index = 0;
+
+            for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
+            {
+                QFile retVal(folder + "/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
+
+                retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+
+                QTextStream out(&retVal);
+
+                //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
+
+                //out << "Cluster1:\n";
+
+                for(int c1 : bic->cluster1)
+                {
+                    out << result->dataMatrix->rowLabels[c1].value << "\n";
+                    //out << c1 << "\n";
+                }
+
+                //out << "\nCluster2:\n";
+
+                for(int c2 : bic->cluster2)
+                {
+                    //out << result->dataMatrix->columnLabels[c2].value << "\n";
+                    //out << c2 << "\n";
+                }
+
+                out << "\n\n";
+
+                retVal.close();
+            }
+
+            QFile labels(folder + "/genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
+
+            labels.open(QIODevice::WriteOnly | QIODevice::Text);
+
+            QTextStream outL(&labels);
+
+            for(Label item : result->dataMatrix->rowLabels)
+            {
+                outL << item.value << "\n";
+            }
+
+            labels.close();
+        }
+
+
+        qDebug() << "Huuuurraaaa";
 }

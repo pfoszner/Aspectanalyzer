@@ -15,9 +15,9 @@ void SingleThreadWorker::run()
 
     params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Average));
 
-    //params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(task->dataMatrix->expectedBiClusterCount));
+    params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(task->dataMatrix->expectedBiClusterCount));
 
-    params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(3));
+    //params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(3));
 
     std::shared_ptr<BiclusteringObject> test = task->Compute(params);
 

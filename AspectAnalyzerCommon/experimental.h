@@ -36,6 +36,12 @@ public:
     void RunAllConsensus2();
     void RunAllTriclustering();
     void Squro(QString mode);
+    void RunNMF(int matrix, int start, int stop, int step, uint rep);
+    void RunStepConsensus(int matrix, int start, int stop, int step);
+    void RunStepTricluster(int matrix, int start);
+    void Muszki();
+    void ExportResults(QString folder, int startId, int stopID);
+    void PLATResults(QString folder, int startId, int stopID, int classNum);
 };
 
 #endif // EXPERIMENTAL_H

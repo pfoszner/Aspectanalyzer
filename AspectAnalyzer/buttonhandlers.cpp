@@ -207,9 +207,13 @@ void ButtonHandlers::btnCustomSlot(QString mode)
 
     //engine->aaclient.writeData(rawData);
 
-    //exper->Squro(mode);
+    //exper->Muszki();
 
-    exper->RunAllConsensus();
+    //exper->ExportResults("MuszkiOwocowki", 129, 136);
+    //exper->PLATResults("Test1", 129, 136, 1);
+    //exper->PLATResults("Test2", 129, 136, 2);
+    exper->PLATResults("Test4", 129, 136, 4);
+
 }
 
 void ButtonHandlers::btnPlaySlot()
@@ -219,132 +223,10 @@ void ButtonHandlers::btnPlaySlot()
 
 void ButtonHandlers::btnPauseSlot()
 {
-//    engine->LoadDataMatrix("/mnt/E/TCGA/DataMatrixTCGAThyroid carcinoma.vmatrix");
 
-//    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 1);
-//    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 1);
-
-//    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 4);
-//    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 4);
-
-//    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 7);
-//    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 7);
-
-//    engine->db->SaveLabels(engine->CurrentVmatrix->rowLabels, 10);
-//    engine->db->SaveLabels(engine->CurrentVmatrix->columnLabels, 10);
 }
 
 void ButtonHandlers::btnStopSlot()
 {
-    for (int f = 4; f <= 4; ++f)
-    {
-        std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, -1, -1);
 
-        QString folder = "dupa";
-
-        switch(f)
-        {
-            case 0:
-            {
-                folder = "ToSamoCoHanczar";
-                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->idMethod == Enums::Methods::CONSENSUS || r->idMethod <= Enums::Methods::TRICLUSTERING; });
-                test.erase(riter, test.end());
-                break;
-            }
-            case 1:
-            {
-                folder = "AnalogiaDoHAnczara";
-                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 115 && r->idResult <= 122); });
-                test.erase(riter, test.end());
-                break;
-            }
-            case 2:
-            {
-                folder = "WykresID1";
-                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 123 && r->idResult <= 142); });
-                test.erase(riter, test.end());
-                break;
-            }
-            case 3:
-            {
-                folder = "WykresID2";
-                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 143 && r->idResult <= 162); });
-                test.erase(riter, test.end());
-                break;
-            }
-            case 4:
-            {
-                folder = "AnalogiaDoHAnczara_v2";
-                auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 203); });
-                test.erase(riter, test.end());
-                break;
-            }
-        }
-
-
-
-
-
-
-        for(std::shared_ptr<BiclusteringObject> result : test)
-        {
-            //if (result->idMethod < 8)
-            //    continue;
-
-            QDir dir = QDir::current();
-
-            if (!dir.cd(folder))
-            {
-                dir.mkdir(folder);
-            }
-
-            int index = 0;
-
-            for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
-            {
-                QFile retVal(folder + "/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
-
-                retVal.open(QIODevice::WriteOnly | QIODevice::Text);
-
-                QTextStream out(&retVal);
-
-                //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
-
-                //out << "Cluster1:\n";
-
-                for(int c1 : bic->cluster1)
-                {
-                    out << result->dataMatrix->rowLabels[c1].value << "\n";
-                    //out << c1 << "\n";
-                }
-
-                //out << "\nCluster2:\n";
-
-                for(int c2 : bic->cluster2)
-                {
-                    //out << result->dataMatrix->columnLabels[c2].value << "\n";
-                    //out << c2 << "\n";
-                }
-
-                out << "\n\n";
-
-                retVal.close();
-            }
-
-            QFile labels(folder + "/genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
-
-            labels.open(QIODevice::WriteOnly | QIODevice::Text);
-
-            QTextStream outL(&labels);
-
-            for(Label item : result->dataMatrix->rowLabels)
-            {
-                outL << item.value << "\n";
-            }
-
-            labels.close();
-        }
-    }
-
-        qDebug() << "Huuuurraaaa";
 }

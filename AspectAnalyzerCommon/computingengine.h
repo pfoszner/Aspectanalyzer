@@ -26,7 +26,7 @@ class ComputingEngine : public QObject
 public:
     std::shared_ptr<Matrix> CurrentVmatrix;
     Client aaclient;
-    int maxThreadAllowd = 4;
+    int maxThreadAllowd = 8;
 
 private:
     int runningTasks;
