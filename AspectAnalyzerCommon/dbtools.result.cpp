@@ -42,14 +42,13 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
             if (Result->foundedBiclusters.size() == 0)
                 Result->foundedBiclusters = GetBiclusters(*Result->dataMatrix->idMatrix, Result->idResult);
 
-//            std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(Result);
+            std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(Result);
 
-//            if (tmpPtr != nullptr)
-//            {
-//                GetMatrixData(ID, Enums::MatrixType::W, tmpPtr);
-//                GetMatrixData(ID, Enums::MatrixType::H, tmpPtr);
-//                arma::mat testM = tmpPtr->WMatrix * tmpPtr->HMatrix;
-//            }
+            if (tmpPtr != nullptr)
+            {
+                GetMatrixData(tmpPtr->idResult, Enums::MatrixType::W, tmpPtr);
+                GetMatrixData(tmpPtr->idResult, Enums::MatrixType::H, tmpPtr);
+            }
             retVal.push_back(Result);
             Result = nullptr;
         }
@@ -58,7 +57,11 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
         {
             std::shared_ptr<Matrix> dataMatrix = GetMatrix(Vmatrix);
 
-            if (method < 8)
+            if (   Enums::Methods(method) == Enums::Methods::PLSA
+                || Enums::Methods(method) == Enums::Methods::LEAST_SQUARE_ERROR
+                || Enums::Methods(method) == Enums::Methods::KULLBACK_LIEBER
+                || Enums::Methods(method) == Enums::Methods::NonSmooth_KULLBACK_LIEBER
+            )
                 Result = std::make_shared<NMF>(dataMatrix, Enums::Methods(method), ID, time);
             else
                 Result = std::make_shared<BiclusteringObject>(dataMatrix, Enums::Methods(method), ID, time);
@@ -85,6 +88,20 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
     {
         if (Result->foundedBiclusters.size() == 0)
             Result->foundedBiclusters = GetBiclusters(*Result->dataMatrix->idMatrix, Result->idResult);
+
+        std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(Result);
+
+        if (tmpPtr != nullptr)
+        {
+            GetMatrixData(tmpPtr->idResult, Enums::MatrixType::W, tmpPtr);
+            GetMatrixData(tmpPtr->idResult, Enums::MatrixType::H, tmpPtr);
+
+            qDebug() << tmpPtr->WMatrix.n_cols;
+            qDebug() << tmpPtr->WMatrix.n_rows;
+
+            qDebug() << tmpPtr->HMatrix.n_cols;
+            qDebug() << tmpPtr->HMatrix.n_rows;
+        }
 
         retVal.push_back(Result);
         Result = nullptr;

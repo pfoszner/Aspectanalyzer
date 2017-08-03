@@ -212,7 +212,9 @@ void ButtonHandlers::btnCustomSlot(QString mode)
     //exper->ExportResults("MuszkiOwocowki", 129, 136);
     //exper->PLATResults("Test1", 129, 136, 1);
     //exper->PLATResults("Test2", 129, 136, 2);
-    exper->PLATResults("Test4", 129, 136, 4);
+    //exper->PLATResults("Test4", 129, 136, 4);
+
+    exper->StartCustom();
 
 }
 

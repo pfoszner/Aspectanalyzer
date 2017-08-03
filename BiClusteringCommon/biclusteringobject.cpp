@@ -94,7 +94,7 @@ BiclusteringObject::BiclusteringObject(QByteArray deserialize)
             type = (Enums::FeatureType)ArrayToInt(deserialize.mid(0, 4));
             deserialize.remove(0, 4);
 
-            value = (Enums::FeatureType)ArrayToDouble(deserialize.mid(0, 8));
+            value = ArrayToDouble(deserialize.mid(0, 8));
             deserialize.remove(0, 8);
 
             features.emplace_back(type, value, indexNbr);

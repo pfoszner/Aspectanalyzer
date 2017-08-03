@@ -1,0 +1,15 @@
+*.obj
+*.user
+*.stash
+*.lib
+*.a
+AspectAnalyzerCommon/Makefile
+*.Debug
+*.Release
+*.db
+*.db-journal
+AspectAnalyzerCommon/release/moc_client.cpp
+AspectAnalyzerCommon/release/moc_server.cpp
+AspectAnalyzerCommon/release/moc_computingengine.cpp
+BiClusteringCommon/Makefile
+Pierscalla/Makefile

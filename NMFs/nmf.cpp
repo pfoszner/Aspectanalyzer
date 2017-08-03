@@ -246,7 +246,9 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
             //Logger.Log(String.Format("Method: {0}, Step: {1}, Divergence Value: {2}. Count {3}", (Methods)Method, NumOfSteps, divergence, count), LogTypes.Info);
 
-            if (std::abs(divergence - lastDivergance) < 10e-16)
+            if (   (std::abs(divergence - lastDivergance) < 10e-16)
+                || (lastDivergance != 0 && std::abs(divergence) > std::abs(lastDivergance))
+            )
             {
                 break;
             }
@@ -660,7 +662,7 @@ int NMF::maxRowH(int c)
 
 bool NMF::ConnectivityMatrix()
 {
-    uint new_cc[n][n];
+    Array<uint> new_cc(n,n);
 
     for (int i = 0; i < n; ++i)
     {

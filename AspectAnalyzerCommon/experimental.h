@@ -23,6 +23,7 @@ public:
     Experimental(std::shared_ptr<ComputingEngine>& engine) : engine(engine)
     {}
 
+
     void StartCustom();
     void TestTriclustering();
     void RunConsensus();
@@ -33,7 +34,7 @@ public:
     std::vector <QString> GetSignature();
     void LoadKumalBiclusters();
     void RunAllConsensus();
-    void RunAllConsensus2();
+    void RunAllConsensus2(int idMeter);
     void RunAllTriclustering();
     void Squro(QString mode);
     void RunNMF(int matrix, int start, int stop, int step, uint rep);
@@ -42,6 +43,8 @@ public:
     void Muszki();
     void ExportResults(QString folder, int startId, int stopID);
     void PLATResults(QString folder, int startId, int stopID, int classNum);
+    void InputForBingo(QString file, int startID, int endID);
+    void CheckSimiliarity();
 };
 
 #endif // EXPERIMENTAL_H

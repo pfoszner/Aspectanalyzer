@@ -74,6 +74,8 @@ std::shared_ptr<Matrix> DBTools::GetMatrix(int idMatrix)
 
     tmpFile.write(rawData);
 
+    tmpFile.close();
+
     arma::mat data;
 
     data.load(filename.toStdString());
@@ -119,11 +121,15 @@ void DBTools::GetMatrixData(int idResult, int idType, std::shared_ptr<NMF> resul
 
     QString filename = "tmp/dataToInsert.mat";
 
+    QFile::remove(filename);
+
     QFile tmpFile(filename);
 
     tmpFile.open(QIODevice::WriteOnly);
 
-    tmpFile.write(rawData);
+    auto writeResult = tmpFile.write(rawData);
+
+    tmpFile.close();
 
     if (idType == Enums::MatrixType::W)
         result->WMatrix.load(filename.toStdString());

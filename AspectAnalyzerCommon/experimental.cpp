@@ -247,8 +247,94 @@ void Experimental::CompareGrandTruthMiRNA()
 
 void Experimental::StartCustom()
 {
-    //CompareGrandTruth();
-    //ARFFPlay();
+    //InputForBingo("BingoKumalmusculus", 1, 90);
+
+    //CheckSimiliarity();
+
+    //RunNMF(1, 5, 100, 5, 10);
+
+    RunStepConsensus(1, 5, 100, 5);
+
+    RunStepTricluster(1, 5);
+
+    //std::vector<std::shared_ptr<BiclusteringObject>> single1 = engine->db->GetResults(1931, -1, -1, -1);
+
+    //std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(single1[0]);
+
+    //tmpPtr->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
+
+    //tmpPtr->RebuildBiclusters();
+}
+
+
+void Experimental::CheckSimiliarity()
+{
+    std::vector<std::shared_ptr<BiclusteringObject>> single1 = engine->db->GetResults(1330, -1, -1, -1);
+    std::vector<std::shared_ptr<BiclusteringObject>> single2 = engine->db->GetResults(1331, -1, -1, -1);
+
+    ClassicalHungarian hungarianEngine;
+
+    Array<double> CM = single1[0]->GetCostMatrixForBiclusters(single1[0]->foundedBiclusters, single2[0]->foundedBiclusters, Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
+
+    hungarianEngine.SetCostMatrix(CM, ClassicalHungarian::MunkresFunc::Max);
+
+    double test = hungarianEngine.RunMunkres();
+
+    qDebug() << test / single1[0]->foundedBiclusters.size();
+}
+
+void Experimental::InputForBingo(QString file, int startID, int endID)
+{
+    std::vector<std::shared_ptr<BiclusteringObject>> test;
+
+    /*
+     *   1,3,7 - Homo Sapiens
+     *   2,4 - Rattus norvegicus
+     *   5 - Caenorhabditis elegans
+     *   6,8 - Mus musculus
+
+     */
+
+    for(int r = startID; r <= endID; ++r)
+    {
+        std::vector<std::shared_ptr<BiclusteringObject>> single = engine->db->GetResults(r, -1, -1, -1);
+
+        qDebug() << *single[0]->dataMatrix->idMatrix;
+
+        if (*single[0]->dataMatrix->idMatrix == 6 || *single[0]->dataMatrix->idMatrix == 6 || *single[0]->dataMatrix->idMatrix == 8)
+            test.push_back(single[0]);
+
+        qDebug() << QString::number(r - startID + 1) << " done, " << QString::number(endID - r) << " to go.";
+    }
+
+    QFile retVal(file + ".txt");
+
+    retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    QTextStream out(&retVal);
+
+
+    for(std::shared_ptr<BiclusteringObject> result : test)
+    {
+        int index = 0;
+
+        int foundedBiClusterSize = result->foundedBiclusters.size();
+
+        for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
+        {
+            out << "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index++) << "\n";
+
+            for(int c1 : bic->cluster1)
+            {
+                out << result->dataMatrix->rowLabels[c1].value << "\n";
+                //out << c1 << "\n";
+            }
+
+            out << "batch\n";
+        }
+    }
+
+    retVal.close();
 }
 
 void Experimental::CompareGrandTruth()
@@ -566,7 +652,7 @@ void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
 
                     qDebug() << "Matrix " << mat << " Run Bi-cluster: " << s << ", Repetition: " << r;
 
-                    if (count >= 16)
+                    if (count >= 4 * rep)
                     {
                         engine->ServeQueue();
                         count = 0;
@@ -579,31 +665,15 @@ void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
     engine->ServeQueue();
 }
 
-void Experimental::RunAllConsensus2()
+void Experimental::RunAllConsensus2(int idMatrix)
 {
     std::vector<std::shared_ptr<BiclusteringObject>> test;
 
-    std::vector<int> ids;
-
-    //ids.push_back(1);
-    //ids.push_back(2);
-    ids.push_back(3);
-    ids.push_back(4);
-    ids.push_back(5);
-    ids.push_back(6);
-    ids.push_back(7);
-    ids.push_back(8);
-
-    for(uint i = 0; i < ids.size(); ++i)
-    {
         uint start = 5;
-
-        if (i == 0)
-            start = 40;
 
         for(uint s = start; s <= 100; s = s + 5)
         {
-            test  = engine->db->GetResults(-1, ids[i], -1, -1);
+            test  = engine->db->GetResults(-1, idMatrix, -1, -1);
 
             auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING; });
             test.erase(riter, test.end());
@@ -617,7 +687,7 @@ void Experimental::RunAllConsensus2()
 
             int bicCount = (int)(average / test.size());
 
-            qDebug() << "Matrix: (id=" << ids[i] << ") " << test[0]->dataMatrix->name << " Average: " << bicCount << " Step bicluster: " << s;
+            qDebug() << "Matrix: (id=" << idMatrix << ") " << test[0]->dataMatrix->name << " Average: " << bicCount << " Step bicluster: " << s;
 
             std::vector<MergeType> mt;
 
@@ -650,7 +720,7 @@ void Experimental::RunAllConsensus2()
             }
         }
         qDebug() << "Done ;]";
-    }
+
 }
 
 void Experimental::RunStepConsensus(int matrix, int start, int stop, int step)
@@ -663,8 +733,13 @@ void Experimental::RunStepConsensus(int matrix, int start, int stop, int step)
 
         std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, matrix, -1, s);
 
-        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult <= 128); });
+        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult > 128); });
         test.erase(riter, test.end());
+
+        riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return (r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING); });
+        test.erase(riter, test.end());
+
+        qDebug() << "Results to merge: " << test.size();
 
         newObject->expectedBiClusterCount = s;
 
@@ -702,8 +777,13 @@ void Experimental::RunStepTricluster(int matrix, int start)
 
         std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, matrix, -1, s);
 
-        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult >= 583); });
+        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult > 583); });
         test.erase(riter, test.end());
+
+        riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return (r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING); });
+        test.erase(riter, test.end());
+
+        qDebug() << "Results to merge: " << test.size();
 
 //        for(std::shared_ptr<BiclusteringObject> item : test)
 //        {
