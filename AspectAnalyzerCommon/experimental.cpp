@@ -247,15 +247,16 @@ void Experimental::CompareGrandTruthMiRNA()
 
 void Experimental::StartCustom()
 {
-    //InputForBingo("BingoKumalmusculus", 1, 90);
+    InputForBingo("Bingo1", 1931, 2770);
+    //InputForBingo("Bingo8", 2771, 3610);
 
     //CheckSimiliarity();
 
-    //RunNMF(1, 5, 100, 5, 10);
+    //RunNMF(8, 5, 100, 5, 10);
 
-    RunStepConsensus(1, 5, 100, 5);
+    //RunStepConsensus(8, 5, 100, 5);
 
-    RunStepTricluster(1, 5);
+    //RunStepTricluster(8, 5);
 
     //std::vector<std::shared_ptr<BiclusteringObject>> single1 = engine->db->GetResults(1931, -1, -1, -1);
 
@@ -301,10 +302,10 @@ void Experimental::InputForBingo(QString file, int startID, int endID)
 
         qDebug() << *single[0]->dataMatrix->idMatrix;
 
-        if (*single[0]->dataMatrix->idMatrix == 6 || *single[0]->dataMatrix->idMatrix == 6 || *single[0]->dataMatrix->idMatrix == 8)
+        //if (*single[0]->dataMatrix->idMatrix == 6 || *single[0]->dataMatrix->idMatrix == 6 || *single[0]->dataMatrix->idMatrix == 8)
             test.push_back(single[0]);
 
-        qDebug() << QString::number(r - startID + 1) << " done, " << QString::number(endID - r) << " to go.";
+        qDebug() << QString::number(r - startID + 1) << " done, " << QString::number(endID - r) << " to go. In ensemble: " << QString::number(test.size());
     }
 
     QFile retVal(file + ".txt");
