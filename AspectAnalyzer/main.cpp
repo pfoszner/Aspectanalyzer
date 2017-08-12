@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     QQmlContext* ctx = engine.rootContext();
     ctx->setContextProperty("lblreceiver", &btnHandlers);
     ctx->setContextProperty("lblTasks", &btnHandlers);
+    ctx->setContextProperty("lblProgressBar", btnHandlers.engine.get());
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 

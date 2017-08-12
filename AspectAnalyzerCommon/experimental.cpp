@@ -247,7 +247,7 @@ void Experimental::CompareGrandTruthMiRNA()
 
 void Experimental::StartCustom()
 {
-    InputForBingo("Bingo1", 1931, 2770);
+    //InputForBingo("Bingo1", 1931, 2770);
     //InputForBingo("Bingo8", 2771, 3610);
 
     //CheckSimiliarity();
@@ -265,6 +265,8 @@ void Experimental::StartCustom()
     //tmpPtr->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
 
     //tmpPtr->RebuildBiclusters();
+
+    //setProgressChange(90);
 }
 
 

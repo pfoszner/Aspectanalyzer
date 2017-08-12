@@ -40,7 +40,7 @@ void DBTools::GetMatrixTableList(QTableWidget *table)
         table->setItem(row, 0, idMatrix);
         table->setItem(row, 1, name);
         table->setItem(row, 2, dim);
-        table->setItem(row, 3, group);
+        table->setItem(row++, 3, group);
 
     }
 }

@@ -94,6 +94,8 @@ QString ComputingEngine::GetHumanTime(double time)
 
 void ComputingEngine::ServeQueue()
 {
+    setProgressChange(90);
+
     QThreadPool::globalInstance()->setMaxThreadCount(maxThreadAllowd);
 
     qDebug() << "Thread Count" << QThreadPool::globalInstance()->maxThreadCount();

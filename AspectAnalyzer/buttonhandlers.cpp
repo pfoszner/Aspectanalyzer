@@ -184,36 +184,6 @@ void ButtonHandlers::btnCustomSlot(QString mode)
 {
     qDebug() << "Starting custom calculation in mode = " << mode;
 
-//    std::shared_ptr<Matrix> matrix = engine->db->GetMatrix(1);
-
-//    QDir dir = QDir::current();
-
-//    if (!dir.cd("tmp"))
-//    {
-//        dir.mkdir("tmp");
-//    }
-
-//    QString filename = "tmp/dataToInsert.mat";
-
-//    matrix->data.save(filename.toStdString());
-
-//    QFile file(filename);
-
-//    file.open(QIODevice::ReadOnly);
-
-//    QByteArray rawData = file.readAll();
-
-//    engine->aaclient.connectToHost("10.10.10.35");
-
-    //engine->aaclient.writeData(rawData);
-
-    //exper->Muszki();
-
-    //exper->ExportResults("MuszkiOwocowki", 129, 136);
-    //exper->PLATResults("Test1", 129, 136, 1);
-    //exper->PLATResults("Test2", 129, 136, 2);
-    //exper->PLATResults("Test4", 129, 136, 4);
-
     exper->StartCustom();
 
 }

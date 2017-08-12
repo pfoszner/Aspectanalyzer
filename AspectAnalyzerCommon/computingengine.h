@@ -49,6 +49,9 @@ private:
 
 public slots:
     void receiveData(QByteArray);
+
+signals:
+    void setProgressChange(const int newValue);
 };
 
 

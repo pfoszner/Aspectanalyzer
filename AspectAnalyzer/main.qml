@@ -16,6 +16,7 @@ ApplicationWindow {
     signal btnStopSignal()
     signal btnCustomSignal(string mode)
 
+
     TabView {
         id: tabView1
         x: 0
@@ -170,6 +171,7 @@ ApplicationWindow {
                     height: 32
                     minimumValue: 0.0
                     maximumValue: 100.0
+                    value: 0.0
                 }
 
                 TextInput {
@@ -208,6 +210,15 @@ ApplicationWindow {
                     onSetTasksLabels : {
                         lblRunning.text = running + " tasks running"
                         lblInQueue.text = inqueue + " tasks in queue"
+                    }
+                }
+
+                Connections {
+                    target: lblProgressBar
+                    ignoreUnknownSignals: true
+
+                    onSetProgressChange : {
+                        progressBar.value = newValue
                     }
                 }
 

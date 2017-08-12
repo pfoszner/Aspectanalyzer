@@ -86,7 +86,15 @@
             }
 
 
-            params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Average));
+            if (paramsPage->extrctionCB->currentIndex() == 0)
+                params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Zero));
+            else if (paramsPage->extrctionCB->currentIndex() == 1)
+                params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Average));
+            else if (paramsPage->extrctionCB->currentIndex() == 2)
+                params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Quadrille));
+            else
+                params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Average));
+
             params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(numOfBiclusters));
 
             newObject->ParseParameters(params);
@@ -285,8 +293,13 @@
     void InputDataPage::CellButtonClicked(int rowNum)
     {
         emit ChangeQLabelText("Loaded matrix id: please wait while matrix is loading ...");
-        int idMatrix = matrixView->itemAt(rowNum, 0)->text().toInt();
-        loaddedVmatrix = engine->db->GetMatrix(idMatrix);
+        int idMatrix = matrixView->item(rowNum, 0)->text().toInt();
+
+        if ((loaddedVmatrix == nullptr) || (*loaddedVmatrix->idMatrix != idMatrix))
+        {
+            loaddedVmatrix = engine->db->GetMatrix(idMatrix);
+        }
+
         SetNextButton("id");
     }
 

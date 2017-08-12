@@ -42,6 +42,7 @@ signals:
     void setMatrixLabels(const QString &text, const QString &nr, const QString &nc, const QString &min, const QString &max, const QString &dbID);
     void setTasksLabels(const QString &running, const QString &inqueue);
 
+
 };
 
 #endif // BUTTONHANDLERS_H
