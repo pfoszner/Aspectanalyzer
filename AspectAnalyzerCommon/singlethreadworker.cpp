@@ -25,6 +25,8 @@ void SingleThreadWorker::run()
 
     tmpQueue.push(test);
 
+    emit ReportDone();
+
     qDebug() << s << " Items left";
 
     m.unlock();

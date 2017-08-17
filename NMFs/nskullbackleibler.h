@@ -5,6 +5,7 @@
 
 class nsKullbackLeibler : public NMF
 {
+    Q_OBJECT
 
 private:
     arma::mat Smatrix;

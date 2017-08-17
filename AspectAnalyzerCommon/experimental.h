@@ -43,7 +43,7 @@ public:
     void Muszki();
     void ExportResults(QString folder, int startId, int stopID);
     void PLATResults(QString folder, int startId, int stopID, int classNum);
-    void InputForBingo(QString file, int startID, int endID);
+    void InputForBingo(QString file, std::vector<int> startID, int endID);
     void CheckSimiliarity();
 };
 

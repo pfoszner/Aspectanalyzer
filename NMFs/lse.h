@@ -3,8 +3,10 @@
 
 #include "nmf.h"
 
-class LSE : public NMF
+class LSE : public NMF, QObject
 {
+    Q_OBJECT
+
 public:
     LSE(std::shared_ptr<Matrix>& matrixData);
     virtual double DivernegceValue();

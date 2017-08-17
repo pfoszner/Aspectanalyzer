@@ -17,8 +17,10 @@
 //#include <armadillo>
 //#include "/usr/local/include/armadillo"
 
-class BiclusteringObject
+class BiclusteringObject : public QObject
 {
+
+    Q_OBJECT
 
 public:
     int idMatrix = -1;
@@ -52,8 +54,13 @@ public:
 
     virtual ~BiclusteringObject(){}
 
+
+
 //protected:
     void PostProcessingTask();
+
+signals:
+    void ReportProgress(int steps);
 };
 
 #endif // BICLUSTERINGOBJECT_H

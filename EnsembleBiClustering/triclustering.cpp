@@ -93,7 +93,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
             if (removeF.size() > 0)
                 RemoveCubeRow(removeF);
 
-            for(int f = removeF.size()-1; f >= 0; --f)
+            for(int f = (int)removeF.size()-1; f >= 0; --f)
             {
                 F.erase(F.begin()+removeF[f]);
             }
@@ -126,7 +126,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
             if (removeE.size() > 0)
                 RemoveCubeColumn(removeE);
 
-            for(int e = removeE.size()-1; e >= 0; --e)
+            for(int e = (int)removeE.size()-1; e >= 0; --e)
             {
                 E.erase(E.begin()+removeE[e]);
             }
@@ -150,7 +150,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                 {
                     for(uint f = 0; f < F.size(); ++f)
                     {
-                        arma::ucube rowF = cube.tube(f,0,f,E.size()-1);
+                        arma::ucube rowF = cube.tube(f,0,f,(arma::uword)E.size()-1);
 
                         double onesOut = arma::accu(rowF);
                         double zerosOut = rowF.n_elem - onesOut;

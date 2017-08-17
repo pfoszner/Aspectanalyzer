@@ -8,6 +8,8 @@
 
 class TriClustering : public EnsembleTask
 {
+    Q_OBJECT
+
 public:
 
     arma::ucube cube;
@@ -22,11 +24,12 @@ public:
     {
 
     }
-    TriClustering(const TriClustering& Copy)
-        : EnsembleTask(Copy)
-    {
 
-    }
+    //TriClustering(const TriClustering& Copy)
+    //    : EnsembleTask(Copy)
+    //{
+
+    //}
 
     std::shared_ptr<BiclusteringObject> Compute(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params);
 

@@ -8,8 +8,9 @@
 #include <cstdlib>
 #include <armadillo>
 
-class NMF : public BiclusteringObject, public std::enable_shared_from_this<NMF>
+class NMF : public BiclusteringObject, public std::enable_shared_from_this<NMF>, public QObject
 {
+    Q_OBJECT
 
 public:
     NMF(std::shared_ptr<Matrix>&);

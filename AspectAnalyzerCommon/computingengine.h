@@ -29,10 +29,14 @@ public:
     int maxThreadAllowd = 8;
 
 private:
-    int runningTasks;
+    int runningTasks = 0;
+    int taskToComputute = 0;
     std::queue<std::shared_ptr<BiclusteringObject>> queue;
     std::vector<SingleThreadWorker> threadArray;
     std::queue<std::shared_ptr<BiclusteringObject>> resultsToWrite;
+    int progressSteps = 0;
+    int currentProgressSteps = 0;
+    time_t queueStart;
 
 public:
     std::shared_ptr<DBTools> db;
@@ -49,9 +53,12 @@ private:
 
 public slots:
     void receiveData(QByteArray);
+    void UpdateProgress(int);
+    void CheckWriteResult();
 
 signals:
-    void setProgressChange(const int newValue);
+    void setProgressChange(const int newValue, const QString eta);
+    void setTasksLabels(const QString &running, const QString &inqueue);
 };
 
 

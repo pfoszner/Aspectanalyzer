@@ -141,8 +141,14 @@ void NMF::InitializateFirstValues()
 
 std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params)
 {
+    int progressStepsToSend = 100;
+
     try
     {
+        int sendInterval = std::round((double)maxNumberOfSteps / (double)progressStepsToSend);
+
+        qDebug() << "Send interval" << sendInterval;
+
         if (params.size() > 0)
             ParseParameters(params);
 
@@ -240,6 +246,12 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
             divergence = DivernegceValue();
 
+            if (numOfSteps % sendInterval == 0 && progressStepsToSend > 1)
+            {
+                emit ReportProgress(1);
+                progressStepsToSend--;
+            }
+
             //qDebug() << numOfSteps << ": " << divergence << "Method: " << idMethod;
 
             features.emplace_back(Enums::Divergence, divergence, numOfSteps);
@@ -301,6 +313,8 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
         qDebug() << "Time spend: " << time_spent;
 
+        emit ReportProgress(progressStepsToSend);
+
         return shared_from_this();
         //return std::shared_ptr<BiclusteringObject>(this);
     }
@@ -309,6 +323,8 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
         //Logger.Log(String.Format("Error in Compute. Message: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace), LogTypes.Error);
 
         std::shared_ptr<BiclusteringObject> null;
+
+        emit ReportProgress(progressStepsToSend);
 
         return null;
     }
@@ -512,7 +528,7 @@ void NMF::TrimCluster1(std::shared_ptr<Bicluster>& bic, int bicNumber)
     {
         //clock_t begin = clock();
 
-        clust1 = GetWBicluster(bicNumber, exMethod, 0, clust1.size() - 1);
+        clust1 = GetWBicluster(bicNumber, exMethod, 0, (uint)clust1.size() - 1);
 
         std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2, dataMatrix->AverageCorrelationValue(clust1, clust2), nullptr);
 
@@ -544,7 +560,7 @@ void NMF::TrimCluster2(std::shared_ptr<Bicluster>& bic, int bicNumber)
     {
         //clock_t begin = clock();
 
-        clust2 = GetHBicluster(bicNumber, exMethod, 0, clust2.size() - 1);
+        clust2 = GetHBicluster(bicNumber, exMethod, 0, (uint)clust2.size() - 1);
 
         std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2, dataMatrix->AverageCorrelationValue(clust1, clust2), nullptr);
 

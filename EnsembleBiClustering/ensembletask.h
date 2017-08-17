@@ -13,6 +13,8 @@ enum class MergeType
 
 class EnsembleTask : public BiclusteringObject, public std::enable_shared_from_this<EnsembleTask>
 {
+    Q_OBJECT
+
 public:
 
     EnsembleTask(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult)

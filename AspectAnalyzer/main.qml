@@ -202,6 +202,17 @@ ApplicationWindow {
                     }
                 }
 
+                Text {
+                    id: lblProgress
+                    x: 50
+                    y: 401
+                    width: 434
+                    height: 29
+                    text: qsTr("Iddle")
+                    font.bold: true
+                    font.pixelSize: 20
+                }
+
 
                 Connections {
                     target: lblTasks
@@ -219,10 +230,13 @@ ApplicationWindow {
 
                     onSetProgressChange : {
                         progressBar.value = newValue
+                        lblProgress.text = newValue + "% ETA: " + eta
                     }
                 }
 
             }
+
+
         }
 
         Tab {

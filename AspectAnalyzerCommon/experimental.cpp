@@ -247,7 +247,13 @@ void Experimental::CompareGrandTruthMiRNA()
 
 void Experimental::StartCustom()
 {
-    //InputForBingo("Bingo1", 1931, 2770);
+    std::vector<int> resultIDs = engine->db->GetResultsIDs();
+
+    for(int m = 1; m <= 8; ++m)
+    {
+    //int m=8;
+        InputForBingo("Bingo" + QString::number(m), resultIDs, m);
+    }
     //InputForBingo("Bingo8", 2771, 3610);
 
     //CheckSimiliarity();
@@ -286,7 +292,7 @@ void Experimental::CheckSimiliarity()
     qDebug() << test / single1[0]->foundedBiclusters.size();
 }
 
-void Experimental::InputForBingo(QString file, int startID, int endID)
+void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matID)
 {
     std::vector<std::shared_ptr<BiclusteringObject>> test;
 
@@ -298,16 +304,18 @@ void Experimental::InputForBingo(QString file, int startID, int endID)
 
      */
 
-    for(int r = startID; r <= endID; ++r)
+    int index = 0;
+
+    for(int r : resIDs)
     {
         std::vector<std::shared_ptr<BiclusteringObject>> single = engine->db->GetResults(r, -1, -1, -1);
 
         qDebug() << *single[0]->dataMatrix->idMatrix;
 
-        //if (*single[0]->dataMatrix->idMatrix == 6 || *single[0]->dataMatrix->idMatrix == 6 || *single[0]->dataMatrix->idMatrix == 8)
+        if (*single[0]->dataMatrix->idMatrix == matID && (single[0]->idMethod == Enums::Methods::CONSENSUS || single[0]->idMethod == Enums::Methods::TRICLUSTERING))
             test.push_back(single[0]);
 
-        qDebug() << QString::number(r - startID + 1) << " done, " << QString::number(endID - r) << " to go. In ensemble: " << QString::number(test.size());
+        qDebug() << QString::number(++index) << " done, " << QString::number(resIDs.size() - index) << " to go. In ensemble: " << QString::number(test.size());
     }
 
     QFile retVal(file + ".txt");
@@ -1217,11 +1225,11 @@ void Experimental::PLATResults(QString folder, int startId, int stopID, int clas
 
             //out << "Cluster1:\n";
 
-            for(int c1 : bic->cluster1)
-            {
+            //for(int c1 : bic->cluster1)
+            //{
                 //out << result->dataMatrix->rowLabels[c1].value << "\n";
                 //out << c1 << "\n";
-            }
+            //}
 
             //out << "\nCluster2:\n";
 
@@ -1333,11 +1341,11 @@ void Experimental::ExportResults(QString folder, int startId, int stopID)
 
                 //out << "\nCluster2:\n";
 
-                for(int c2 : bic->cluster2)
-                {
+                //for(int c2 : bic->cluster2)
+                //{
                     //out << result->dataMatrix->columnLabels[c2].value << "\n";
                     //out << c2 << "\n";
-                }
+                //}
 
                 out << "\n\n";
 

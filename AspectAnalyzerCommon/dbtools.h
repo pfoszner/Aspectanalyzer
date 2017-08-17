@@ -31,6 +31,7 @@ public:
     std::vector<Label> GetLabels(int idMatrix, int idLabelType);
     void GetMatrixData(int, int, std::shared_ptr<NMF>);
     void GetMatrixTableList(QTableWidget *table);
+    std::vector<int> GetResultsIDs();
 
 private:
     QString path;

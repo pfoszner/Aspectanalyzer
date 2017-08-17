@@ -21,7 +21,7 @@ public:
     Matrix(std::shared_ptr<int>& idMatrix, const arma::mat& data, const QString& name, const QString& group, const std::vector<std::shared_ptr<Bicluster>>& biclusters)
         : idMatrix(idMatrix), data(data), name(name), group(group), expectedBiClusters(biclusters)
     {
-        expectedBiClusterCount = biclusters.size();
+        expectedBiClusterCount = (uint)biclusters.size();
     }
     std::shared_ptr<int> idMatrix;
     arma::mat data;

@@ -48,6 +48,8 @@ void ComputingEngine::LoadDataMatrix(QString filename)
 
 void ComputingEngine::AddBiClusteringTask(std::shared_ptr<BiclusteringObject> task)
 {
+    connect(task.get(), SIGNAL(ReportProgress(int)), this, SLOT(UpdateProgress(int)));
+
     queue.push(task);
 }
 
@@ -92,27 +94,59 @@ QString ComputingEngine::GetHumanTime(double time)
     return retVal;
 }
 
+void ComputingEngine::UpdateProgress(int value)
+{
+    currentProgressSteps += value;
+
+    int progresValue = std::trunc(((double)currentProgressSteps / (double)progressSteps)*100);
+
+    if (progresValue < 100)
+    {
+        double elapsed = time(0) - queueStart;
+
+        double togo = ((progressSteps - currentProgressSteps)*elapsed)/currentProgressSteps;
+
+        setProgressChange(progresValue, GetHumanTime(togo));
+    }
+    else
+    {
+        setProgressChange(progresValue, "Done");
+    }
+}
+
+void ComputingEngine::CheckWriteResult()
+{
+    if (taskToComputute > 0)
+        taskToComputute--;
+    else
+        runningTasks--;
+
+    setTasksLabels(QString::number(GetRunning()), QString::number(GetInQueue()));
+
+    qDebug() << "Result done";
+}
+
 void ComputingEngine::ServeQueue()
 {
-    setProgressChange(90);
+    setProgressChange(0, "-");
 
     QThreadPool::globalInstance()->setMaxThreadCount(maxThreadAllowd);
 
-    qDebug() << "Thread Count" << QThreadPool::globalInstance()->maxThreadCount();
+    qDebug() << "Thread Count" << QThreadPool::globalInstance()->maxThreadCount() << " Current Time: " << time(0);
 
-    //QThreadPool::globalInstance()->setMaxThreadCount(1);
+    taskToComputute = queue.size();
+
+    progressSteps = taskToComputute * 100;
+
+    queueStart = time(0);
 
     while ( queue.size() > 0 )
     {
+        currentProgressSteps = 0;
+
         std::shared_ptr<BiclusteringObject> task = queue.front();
 
         queue.pop();
-
-//        std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
-
-//        params.emplace_back(Enums::Theta, std::make_shared<double>(0.5));
-
-//        params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(task->data[0]->dataMatrix->expectedBiClusterCount));
 
         auto& tmpQueue = resultsToWrite;
 
@@ -120,33 +154,39 @@ void ComputingEngine::ServeQueue()
 
         SingleThreadWorker *st = new SingleThreadWorker(tmpQueue, task, s);
 
+        connect(st, SIGNAL(ReportDone()), this, SLOT(CheckWriteResult()));
+
         QThreadPool::globalInstance()->start(st);
-
-//        std::shared_ptr<BiclusteringObject> test = task->data[0]->Compute(params);
-
-//        times.push_back(test->time_spent);
-
-//        double averageTime = (std::accumulate(times.begin(), times.end(), 0.0) / times.size()) * queue.size();
-
-//        QString HumanTime = GetHumanTime(averageTime);
-
-//        qDebug() << queue.size() << " Items left (" << test->time_spent << " sec). Time left: " << HumanTime << "sec";
-
-//        resultsToWrite.push(test);
     }
 
-    QThreadPool::globalInstance()->waitForDone();
+    if (QThreadPool::globalInstance()->maxThreadCount() > taskToComputute)
+    {
+        runningTasks = taskToComputute;
+    }
+    else
+    {
+        runningTasks = QThreadPool::globalInstance()->maxThreadCount();
+        taskToComputute = taskToComputute - runningTasks;
+    }
 
-    CheckResultsToWrite();
+    setTasksLabels(QString::number(GetRunning()), QString::number(GetInQueue()));
+
+    //QThreadPool::globalInstance()->waitForDone();
+
+    //CheckResultsToWrite();
+
+    //setProgressChange(100);
 
     qDebug() << "Serve Queue Done!";
-
 }
 
 
 int ComputingEngine::GetInQueue()
 {
-    return queue.size();
+    if (taskToComputute > 0)
+        return taskToComputute;
+    else
+        return queue.size();
 }
 
 int ComputingEngine::GetRunning()

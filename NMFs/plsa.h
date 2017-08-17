@@ -5,6 +5,7 @@
 
 class PLSA : public NMF
 {
+    Q_OBJECT
 
 private:
     /// <summary>

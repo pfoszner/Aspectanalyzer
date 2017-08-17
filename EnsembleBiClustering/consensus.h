@@ -7,6 +7,8 @@
 
 class Consensus : public EnsembleTask
 {
+    Q_OBJECT
+
 public:
 
     MergeType ExtractType = MergeType::Standard;

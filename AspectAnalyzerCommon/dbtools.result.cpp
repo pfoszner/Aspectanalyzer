@@ -1,5 +1,25 @@
 #include "dbtools.h"
 
+std::vector<int> DBTools::GetResultsIDs()
+{
+    std::vector<int> retVal;
+
+    QString queryString = "SELECT id_result FROM result where id_method > 4";
+
+    QSqlQuery query(db);
+
+    query.exec(queryString);
+
+    while (query.next())
+    {
+        int ID = query.value("id_result").toInt();
+
+        retVal.push_back(ID);
+    }
+
+    return retVal;
+}
+
 std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResult, int VmatrixID, int idMethod, int DbK)
 {
     std::vector<std::shared_ptr<BiclusteringObject>> retVal;
