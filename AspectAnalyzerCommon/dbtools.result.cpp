@@ -1,10 +1,10 @@
 #include "dbtools.h"
 
-std::vector<int> DBTools::GetResultsIDs()
+std::vector<int> DBTools::GetResultsIDs(int m)
 {
     std::vector<int> retVal;
 
-    QString queryString = "SELECT id_result FROM result where id_method > 4";
+    QString queryString = "SELECT id_result FROM result where id_matrix = " + QString::number(m);
 
     QSqlQuery query(db);
 

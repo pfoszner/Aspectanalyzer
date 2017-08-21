@@ -245,12 +245,13 @@ void Experimental::CompareGrandTruthMiRNA()
 
 }
 
-void Experimental::StartCustom()
+void Experimental::StartCustom(QString mode)
 {
-    std::vector<int> resultIDs = engine->db->GetResultsIDs();
+
 
     for(int m = 1; m <= 8; ++m)
     {
+        std::vector<int> resultIDs = engine->db->GetResultsIDs(m);
     //int m=8;
         InputForBingo("Bingo" + QString::number(m), resultIDs, m);
     }
@@ -258,12 +259,18 @@ void Experimental::StartCustom()
 
     //CheckSimiliarity();
 
-    //RunNMF(8, 5, 100, 5, 10);
+    //int matrix = mode.toInt();
 
-    //RunStepConsensus(8, 5, 100, 5);
+    //for(int m = 1; m <= 8; ++m)
+    //{
+        //RunNMF(m, 2, 5, 1, 10);
 
-    //RunStepTricluster(8, 5);
+        //QThreadPool::globalInstance()->waitForDone();
 
+        //RunStepConsensus(m, 2, 5, 1);
+
+        //RunStepTricluster(m, 2);
+    //}
     //std::vector<std::shared_ptr<BiclusteringObject>> single1 = engine->db->GetResults(1931, -1, -1, -1);
 
     //std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(single1[0]);
@@ -312,7 +319,15 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
         qDebug() << *single[0]->dataMatrix->idMatrix;
 
-        if (*single[0]->dataMatrix->idMatrix == matID && (single[0]->idMethod == Enums::Methods::CONSENSUS || single[0]->idMethod == Enums::Methods::TRICLUSTERING))
+        if (    *single[0]->dataMatrix->idMatrix == matID
+             && (   //single[0]->idMethod == Enums::Methods::CONSENSUS
+                 //|| single[0]->idMethod == Enums::Methods::TRICLUSTERING
+                  single[0]->idMethod == Enums::Methods::PLSA
+                 || single[0]->idMethod == Enums::Methods::LEAST_SQUARE_ERROR
+                 || single[0]->idMethod == Enums::Methods::KULLBACK_LIEBER
+                 || single[0]->idMethod == Enums::Methods::NonSmooth_KULLBACK_LIEBER
+                )
+           )
             test.push_back(single[0]);
 
         qDebug() << QString::number(++index) << " done, " << QString::number(resIDs.size() - index) << " to go. In ensemble: " << QString::number(test.size());
@@ -665,7 +680,7 @@ void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
 
                     if (count >= 4 * rep)
                     {
-                        engine->ServeQueue();
+                        //engine->ServeQueue();
                         count = 0;
                     }
                 }
@@ -673,7 +688,7 @@ void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
         }
     }
 
-    engine->ServeQueue();
+    //engine->ServeQueue();
 }
 
 void Experimental::RunAllConsensus2(int idMatrix)
@@ -782,7 +797,7 @@ void Experimental::RunStepTricluster(int matrix, int start)
     //mt.push_back(Consensus::MergeType::ByACVHeuristic);
     //mt.push_back(MergeType::Standard);
 
-    for(uint s = start; s <= 100; s = s + 5)
+    for(uint s = start; s <= 5; s = s + 1)
     {
         std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(vMatrix, -1);;
 

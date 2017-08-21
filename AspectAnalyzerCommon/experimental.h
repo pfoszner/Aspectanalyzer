@@ -24,7 +24,7 @@ public:
     {}
 
 
-    void StartCustom();
+    void StartCustom(QString mode);
     void TestTriclustering();
     void RunConsensus();
     void RunTriclustering();

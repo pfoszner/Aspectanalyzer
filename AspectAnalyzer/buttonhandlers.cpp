@@ -29,7 +29,7 @@ void ButtonHandlers::btnCustomSlot(QString mode)
 {
     qDebug() << "Starting custom calculation in mode = " << mode;
 
-    exper->StartCustom();
+    exper->StartCustom(mode);
 
 }
 

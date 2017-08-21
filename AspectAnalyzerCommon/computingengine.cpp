@@ -51,6 +51,8 @@ void ComputingEngine::AddBiClusteringTask(std::shared_ptr<BiclusteringObject> ta
     connect(task.get(), SIGNAL(ReportProgress(int)), this, SLOT(UpdateProgress(int)));
 
     queue.push(task);
+
+    setTasksLabels(QString::number(GetRunning()), QString::number(GetInQueue()));
 }
 
 void ComputingEngine::CheckResultsToWrite()
@@ -111,6 +113,7 @@ void ComputingEngine::UpdateProgress(int value)
     else
     {
         setProgressChange(progresValue, "Done");
+        CheckResultsToWrite();
     }
 }
 
