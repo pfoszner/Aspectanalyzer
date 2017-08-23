@@ -67,14 +67,15 @@ void ComputingEngine::CheckResultsToWrite()
         while (queueSize) {
 
             lock.lock();
+
             ResultPointer taskToSave = resultsToWrite.front();
+
             resultsToWrite.pop();
-            lock.unlock();
 
             db->SaveResult(taskToSave);
 
-            lock.lock();
             queueSize = resultsToWrite.size();
+
             lock.unlock();
         }
     }
@@ -105,6 +106,8 @@ QString ComputingEngine::GetHumanTime(double time)
 
 void ComputingEngine::UpdateProgress(int value)
 {
+    lock.lock();
+
     currentProgressSteps += value;
 
     int progresValue = std::trunc(((double)currentProgressSteps / (double)progressSteps)*100);
@@ -116,16 +119,21 @@ void ComputingEngine::UpdateProgress(int value)
         double togo = ((progressSteps - currentProgressSteps)*elapsed)/currentProgressSteps;
 
         setProgressChange(progresValue, GetHumanTime(togo));
+
+        lock.unlock();
     }
     else
     {
         setProgressChange(progresValue, "Done");
+        lock.unlock();
         CheckResultsToWrite();
     }
 }
 
 void ComputingEngine::CheckWriteResult(ResultPointer jobDone)
 {
+    lock.lock();
+
     if (taskToComputute > 0)
         taskToComputute--;
     else
@@ -133,12 +141,11 @@ void ComputingEngine::CheckWriteResult(ResultPointer jobDone)
 
     setTasksLabels(QString::number(GetRunning()), QString::number(GetInQueue()));
 
-    lock.lock();
     resultsToWrite.push(jobDone);
     int count = resultsToWrite.size();
     lock.unlock();
 
-    if (count >= 10)
+    if (count >= 1)
         CheckResultsToWrite();
 
     qDebug() << "Result done";
