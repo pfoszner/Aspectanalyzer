@@ -12,18 +12,15 @@ class SingleThreadWorker : public QObject, public QRunnable
     Q_OBJECT
 
 public:
-    std::queue<std::shared_ptr<BiclusteringObject>>& tmpQueue;
-    QMutex m;
-    std::shared_ptr<BiclusteringObject> task;
-    int s;
+    ResultPointer task;
 
 public:
-    SingleThreadWorker(std::queue<std::shared_ptr<BiclusteringObject>>&, std::shared_ptr<BiclusteringObject>, int);
+    SingleThreadWorker(ResultPointer);
 
     void run();
 
 signals:
-    void ReportDone();
+    void ReportDone(ResultPointer);
 };
 
 #endif // SINGLETHREADWORKER_H

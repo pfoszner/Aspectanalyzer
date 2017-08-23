@@ -19,7 +19,6 @@
 
 class BiclusteringObject : public QObject
 {
-
     Q_OBJECT
 
 public:
@@ -52,9 +51,7 @@ public:
     virtual void ParseParameters(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>&);
     Array<double> GetCostMatrixForBiclusters(const std::vector<std::shared_ptr<Bicluster>>&, const std::vector<std::shared_ptr<Bicluster>>&, Enums::BiclusterCompareMode, Enums::SimilarityMethods);
 
-    virtual ~BiclusteringObject(){}
-
-
+    //virtual ~BiclusteringObject(){}
 
 //protected:
     void PostProcessingTask();
@@ -62,5 +59,7 @@ public:
 signals:
     void ReportProgress(int steps);
 };
+
+typedef std::shared_ptr<BiclusteringObject> ResultPointer;
 
 #endif // BICLUSTERINGOBJECT_H

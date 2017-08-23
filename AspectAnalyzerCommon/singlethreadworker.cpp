@@ -1,9 +1,7 @@
 #include "singlethreadworker.h"
 
-SingleThreadWorker::SingleThreadWorker(std::queue<std::shared_ptr<BiclusteringObject>>& tmpQueue, std::shared_ptr<BiclusteringObject> task, int s) : tmpQueue(tmpQueue), task(task), s(s)
+SingleThreadWorker::SingleThreadWorker(std::shared_ptr<BiclusteringObject> task) : task(task)
 {
-    //this->tmpQueue = tmpQueue;
-    //this->task = task;
     //this->s = s;
 }
 
@@ -19,15 +17,7 @@ void SingleThreadWorker::run()
 
     //params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(3));
 
-    std::shared_ptr<BiclusteringObject> test = task->Compute(params);
+    std::shared_ptr<BiclusteringObject> jobDone = task->Compute(params);
 
-    m.lock();
-
-    tmpQueue.push(test);
-
-    emit ReportDone();
-
-    qDebug() << s << " Items left";
-
-    m.unlock();
+    emit ReportDone(jobDone);
 }

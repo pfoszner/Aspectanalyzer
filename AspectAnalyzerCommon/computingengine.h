@@ -31,18 +31,19 @@ public:
 private:
     int runningTasks = 0;
     int taskToComputute = 0;
-    std::queue<std::shared_ptr<BiclusteringObject>> queue;
+    std::queue<ResultPointer> queue;
     std::vector<SingleThreadWorker> threadArray;
-    std::queue<std::shared_ptr<BiclusteringObject>> resultsToWrite;
+    std::queue<ResultPointer> resultsToWrite;
     int progressSteps = 0;
     int currentProgressSteps = 0;
     time_t queueStart;
+    QMutex lock;
 
 public:
     std::shared_ptr<DBTools> db;
     explicit ComputingEngine(QObject *parent = 0);
     void LoadDataMatrix(QString filename);
-    void AddBiClusteringTask(std::shared_ptr<BiclusteringObject>);
+    void AddBiClusteringTask(ResultPointer);
     void ServeQueue();
     int GetInQueue();
     int GetRunning();
@@ -54,7 +55,7 @@ private:
 public slots:
     void receiveData(QByteArray);
     void UpdateProgress(int);
-    void CheckWriteResult();
+    void CheckWriteResult(ResultPointer);
 
 signals:
     void setProgressChange(const int newValue, const QString eta);

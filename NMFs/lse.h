@@ -3,7 +3,7 @@
 
 #include "nmf.h"
 
-class LSE : public NMF, QObject
+class LSE : public NMF
 {
     Q_OBJECT
 

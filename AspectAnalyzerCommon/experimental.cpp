@@ -249,28 +249,33 @@ void Experimental::StartCustom(QString mode)
 {
 
 
-    for(int m = 1; m <= 8; ++m)
-    {
-        std::vector<int> resultIDs = engine->db->GetResultsIDs(m);
+    //for(int m = 1; m <= 8; ++m)
+    //{
+        //std::vector<int> resultIDs = engine->db->GetResultsIDs(m);
     //int m=8;
-        InputForBingo("Bingo" + QString::number(m), resultIDs, m);
-    }
+        //InputForBingo("Bingo" + QString::number(m), resultIDs, m);
+    //}
     //InputForBingo("Bingo8", 2771, 3610);
 
     //CheckSimiliarity();
 
-    //int matrix = mode.toInt();
+    QStringList params = mode.split(';');
 
-    //for(int m = 1; m <= 8; ++m)
-    //{
-        //RunNMF(m, 2, 5, 1, 10);
+    int start = params[0].toInt();
+    int stop = params[1].toInt();
+    int matrixS = params[2].toInt();
+    int matrixE = params[3].toInt();
+
+    for(int m = matrixS; m <= matrixE; ++m)
+    {
+        RunNMF(m, start, stop, 5, 25);
 
         //QThreadPool::globalInstance()->waitForDone();
 
         //RunStepConsensus(m, 2, 5, 1);
 
         //RunStepTricluster(m, 2);
-    //}
+    }
     //std::vector<std::shared_ptr<BiclusteringObject>> single1 = engine->db->GetResults(1931, -1, -1, -1);
 
     //std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(single1[0]);
@@ -640,7 +645,7 @@ void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
 
         int count = 0;
 
-        for(uint s = start; s <= stop; s = s + step)
+        for(uint s = stop; s >= start; s = s - step)
         {
             for(uint r = 0; r < rep; r++)
             {

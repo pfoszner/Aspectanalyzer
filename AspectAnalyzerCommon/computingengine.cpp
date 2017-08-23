@@ -5,6 +5,7 @@ ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
 {
     this->runningTasks = 0;
     this->db = std::make_shared<DBTools>("database.db");
+    qRegisterMetaType<ResultPointer>("ResultPointer");
 }
 
 void ComputingEngine::receiveData(QByteArray data)
@@ -46,7 +47,7 @@ void ComputingEngine::LoadDataMatrix(QString filename)
     }
 }
 
-void ComputingEngine::AddBiClusteringTask(std::shared_ptr<BiclusteringObject> task)
+void ComputingEngine::AddBiClusteringTask(ResultPointer task)
 {
     connect(task.get(), SIGNAL(ReportProgress(int)), this, SLOT(UpdateProgress(int)));
 
@@ -57,18 +58,24 @@ void ComputingEngine::AddBiClusteringTask(std::shared_ptr<BiclusteringObject> ta
 
 void ComputingEngine::CheckResultsToWrite()
 {
-    if (resultsToWrite.size() > 0)
-    {
-        uint queueSize = resultsToWrite.size();
+    lock.lock();
+    uint queueSize = resultsToWrite.size();
+    lock.unlock();
 
+    if (queueSize > 0)
+    {
         while (queueSize) {
 
-            std::shared_ptr<BiclusteringObject> taskToSave = resultsToWrite.front();
+            lock.lock();
+            ResultPointer taskToSave = resultsToWrite.front();
             resultsToWrite.pop();
+            lock.unlock();
 
             db->SaveResult(taskToSave);
 
+            lock.lock();
             queueSize = resultsToWrite.size();
+            lock.unlock();
         }
     }
 }
@@ -117,7 +124,7 @@ void ComputingEngine::UpdateProgress(int value)
     }
 }
 
-void ComputingEngine::CheckWriteResult()
+void ComputingEngine::CheckWriteResult(ResultPointer jobDone)
 {
     if (taskToComputute > 0)
         taskToComputute--;
@@ -125,6 +132,14 @@ void ComputingEngine::CheckWriteResult()
         runningTasks--;
 
     setTasksLabels(QString::number(GetRunning()), QString::number(GetInQueue()));
+
+    lock.lock();
+    resultsToWrite.push(jobDone);
+    int count = resultsToWrite.size();
+    lock.unlock();
+
+    if (count >= 10)
+        CheckResultsToWrite();
 
     qDebug() << "Result done";
 }
@@ -147,17 +162,13 @@ void ComputingEngine::ServeQueue()
     {
         currentProgressSteps = 0;
 
-        std::shared_ptr<BiclusteringObject> task = queue.front();
+        ResultPointer task = queue.front();
 
         queue.pop();
 
-        auto& tmpQueue = resultsToWrite;
+        SingleThreadWorker *st = new SingleThreadWorker(task);
 
-        int s = queue.size();
-
-        SingleThreadWorker *st = new SingleThreadWorker(tmpQueue, task, s);
-
-        connect(st, SIGNAL(ReportDone()), this, SLOT(CheckWriteResult()));
+        connect(st, SIGNAL(ReportDone(ResultPointer)), this, SLOT(CheckWriteResult(ResultPointer)), Qt::ConnectionType::QueuedConnection);
 
         QThreadPool::globalInstance()->start(st);
     }
