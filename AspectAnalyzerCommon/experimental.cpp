@@ -242,7 +242,6 @@ void Experimental::CompareGrandTruthMiRNA()
 
         qDebug() << "IdResult: " << res->idResult << "Method: " << res->idMethod << ", Value: " << Value << " NumberofBic: " << res->foundedBiclusters.size();
     }
-
 }
 
 void Experimental::StartCustom(QString mode)
@@ -251,14 +250,16 @@ void Experimental::StartCustom(QString mode)
 
     //for(int m = 1; m <= 8; ++m)
     //{
-        //std::vector<int> resultIDs = engine->db->GetResultsIDs(m);
+        //std::vector<int> resultIDs = engine->db->GetResultsIDs(4);
     //int m=8;
-        //InputForBingo("Bingo" + QString::number(m), resultIDs, m);
+        //InputForBingo("Bingo4_100", resultIDs, 4);
     //}
-    //InputForBingo("Bingo8", 2771, 3610);
+    //InputForBingo("Bingo4_100", 2771, 3610);
 
     //CheckSimiliarity();
 
+
+    //return;
     QStringList params = mode.split(';');
 
     int start = params[0].toInt();
@@ -268,13 +269,13 @@ void Experimental::StartCustom(QString mode)
 
     for(int m = matrixS; m <= matrixE; ++m)
     {
-        RunNMF(m, start, stop, 5, 25);
+        //RunNMF(m, start, stop, 5, 25);
 
         //QThreadPool::globalInstance()->waitForDone();
 
         //RunStepConsensus(m, 2, 5, 1);
 
-        //RunStepTricluster(m, 2);
+        RunStepTricluster(m, 5);
     }
     //std::vector<std::shared_ptr<BiclusteringObject>> single1 = engine->db->GetResults(1931, -1, -1, -1);
 
@@ -325,9 +326,9 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
         qDebug() << *single[0]->dataMatrix->idMatrix;
 
         if (    *single[0]->dataMatrix->idMatrix == matID
-             && (   //single[0]->idMethod == Enums::Methods::CONSENSUS
-                 //|| single[0]->idMethod == Enums::Methods::TRICLUSTERING
-                  single[0]->idMethod == Enums::Methods::PLSA
+             && (   single[0]->idMethod == Enums::Methods::CONSENSUS
+                 || single[0]->idMethod == Enums::Methods::TRICLUSTERING
+                 || single[0]->idMethod == Enums::Methods::PLSA
                  || single[0]->idMethod == Enums::Methods::LEAST_SQUARE_ERROR
                  || single[0]->idMethod == Enums::Methods::KULLBACK_LIEBER
                  || single[0]->idMethod == Enums::Methods::NonSmooth_KULLBACK_LIEBER
@@ -802,7 +803,7 @@ void Experimental::RunStepTricluster(int matrix, int start)
     //mt.push_back(Consensus::MergeType::ByACVHeuristic);
     //mt.push_back(MergeType::Standard);
 
-    for(uint s = start; s <= 5; s = s + 1)
+    for(uint s = start; s <= 100; s = s + 5)
     {
         std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(vMatrix, -1);;
 

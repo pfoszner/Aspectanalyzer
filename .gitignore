@@ -13,3 +13,4 @@ AspectAnalyzerCommon/release/moc_server.cpp
 AspectAnalyzerCommon/release/moc_computingengine.cpp
 BiClusteringCommon/Makefile
 Pierscalla/Makefile
+*.pdb

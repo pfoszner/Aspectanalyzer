@@ -4,7 +4,7 @@ std::vector<int> DBTools::GetResultsIDs(int m)
 {
     std::vector<int> retVal;
 
-    QString queryString = "SELECT id_result FROM result where id_matrix = " + QString::number(m);
+    QString queryString = "SELECT id_result FROM result where id_matrix = " + QString::number(m) + " and id_method in (8,9)";
 
     QSqlQuery query(db);
 
