@@ -127,6 +127,9 @@ void ComputingEngine::UpdateProgress(int value)
         setProgressChange(progresValue, "Done");
         lock.unlock();
         CheckResultsToWrite();
+
+        if (queue.size() > 0)
+            ServeQueue();
     }
 }
 
@@ -161,11 +164,18 @@ void ComputingEngine::ServeQueue()
 
     taskToComputute = queue.size();
 
-    progressSteps = taskToComputute * 100;
+    int maxSize = 32;
+
+    if (queue.size() > maxSize)
+        progressSteps = maxSize * 100;
+    else
+        progressSteps = taskToComputute * 100;
 
     queueStart = time(0);
 
-    while ( queue.size() > 0 )
+    int resCount = 0;
+
+    while ( queue.size() > 0 && resCount++ < maxSize )
     {
         currentProgressSteps = 0;
 
