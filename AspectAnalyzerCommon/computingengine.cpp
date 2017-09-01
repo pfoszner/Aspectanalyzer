@@ -6,6 +6,7 @@ ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
     this->runningTasks = 0;
     this->db = std::make_shared<DBTools>("database.db");
     qRegisterMetaType<ResultPointer>("ResultPointer");
+    slaves.push_back("157.158.80.80");
 }
 
 void ComputingEngine::receiveData(QByteArray data)
@@ -24,6 +25,7 @@ void ComputingEngine::receiveData(QByteArray data)
         }
         else if (task->mode == BiclusteringObject::ComputingMode::RemoteDone)
         {
+            UpdateProgress(100);
             lock.lock();
             resultsToWrite.push(task);
             lock.unlock();
@@ -200,7 +202,7 @@ void ComputingEngine::ServeQueue()
 
         queue.pop();
 
-        if (index++ < 0)
+        if (index < 0)
         {
             SingleThreadWorker *st = new SingleThreadWorker(task);
 
@@ -214,10 +216,14 @@ void ComputingEngine::ServeQueue()
 
             if (connected)
             {
+                task->sourceAddress = "157.158.80.10";
+                task->mode = BiclusteringObject::ComputingMode::RemoteToCompute;
                 aaclient.writeData(task->Serialize());
                 aaclient.disconnectFromHost();
             }
         }
+
+        index++;
 
         if (index >= slaves.size())
         {

@@ -16,7 +16,7 @@ BiclusteringObject::BiclusteringObject(QByteArray deserialize)
     mode = (ComputingMode)ArrayToInt(deserialize.mid(0, 4));
     deserialize.remove(0, 4);
 
-    idMethod = ArrayToInt(deserialize.mid(0, 4));
+    idMatrix = ArrayToInt(deserialize.mid(0, 4));
     deserialize.remove(0, 4);
 
     //    int idResult = -1;
@@ -42,6 +42,7 @@ BiclusteringObject::BiclusteringObject(QByteArray deserialize)
         deserialize.remove(0, 4);
 
         sourceAddress = QString::fromUtf8(deserialize.mid(0, addresLen));
+        deserialize.remove(0, addresLen);
 
     //    std::shared_ptr<Matrix> dataMatrix; not nedeed becouse of idMethod
     //    std::vector<std::shared_ptr<Bicluster>> foundedBiclusters;
@@ -125,18 +126,24 @@ QByteArray BiclusteringObject::Serialize()
 //    std::shared_ptr<Matrix> dataMatrix; not nedeed becouse of idMethod
 //    std::vector<std::shared_ptr<Bicluster>> foundedBiclusters;
 
-    buffer.append(IntToArray(this->foundedBiclusters.size()));
+    qint32 temp = this->foundedBiclusters.size();
+
+    buffer.append(IntToArray(temp));
 
     for(std::shared_ptr<Bicluster> bic : this->foundedBiclusters)
     {
-        buffer.append(IntToArray(bic->cluster1.size()));
+        temp = bic->cluster1.size();
+
+        buffer.append(IntToArray(temp));
 
         for(int c1 : bic->cluster1)
         {
             buffer.append(IntToArray(c1));
         }
 
-        buffer.append(IntToArray(bic->cluster2.size()));
+        temp = bic->cluster2.size();
+
+        buffer.append(IntToArray(temp));
 
         for(int c2 : bic->cluster2)
         {
@@ -146,7 +153,9 @@ QByteArray BiclusteringObject::Serialize()
 
 //    std::vector<FeatureResult> features;
 
-    buffer.append(IntToArray(this->features.size()));
+    temp = this->features.size();
+
+    buffer.append(IntToArray(temp));
 
     for(FeatureResult f : this->features)
     {
