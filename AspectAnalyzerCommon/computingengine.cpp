@@ -6,7 +6,7 @@ ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
     this->runningTasks = 0;
     this->db = std::make_shared<DBTools>("database.db");
     qRegisterMetaType<ResultPointer>("ResultPointer");
-    slaves.push_back("157.158.80.80");
+    slaves.push_back("157.158.80.10");
 }
 
 void ComputingEngine::receiveData(QByteArray data)
@@ -15,7 +15,7 @@ void ComputingEngine::receiveData(QByteArray data)
 
     if (data.length() > 10)
     {
-        std::shared_ptr<BiclusteringObject> task = std::make_shared<BiclusteringObject>(data);
+        std::shared_ptr<BiclusteringObject> task = std::make_shared<NMF>(data);
 
         task->dataMatrix = db->GetMatrix(task->idMatrix);
 
@@ -204,11 +204,11 @@ void ComputingEngine::ServeQueue()
 
         if (index < 0)
         {
-            SingleThreadWorker *st = new SingleThreadWorker(task);
+            //SingleThreadWorker *st = new SingleThreadWorker(task);
 
-            connect(st, SIGNAL(ReportDone(ResultPointer)), this, SLOT(CheckWriteResult(ResultPointer)), Qt::ConnectionType::QueuedConnection);
+            //connect(st, SIGNAL(ReportDone(ResultPointer)), this, SLOT(CheckWriteResult(ResultPointer)), Qt::ConnectionType::QueuedConnection);
 
-            QThreadPool::globalInstance()->start(st);
+            //QThreadPool::globalInstance()->start(st);
         }
         else
         {
@@ -218,7 +218,7 @@ void ComputingEngine::ServeQueue()
             {
                 task->sourceAddress = "157.158.80.10";
                 task->mode = BiclusteringObject::ComputingMode::RemoteToCompute;
-                aaclient.writeData(task->Serialize());
+                aaclient.writeData(task->Serialize(true));
                 aaclient.disconnectFromHost();
             }
         }

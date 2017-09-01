@@ -15,6 +15,11 @@ class Matrix
 
 
 public:
+    Matrix(int id, const arma::mat& data) : data(data)
+    {
+        idMatrix = std::make_shared<int>(id);
+    }
+
     Matrix(QString filename);
     Matrix(std::vector <QString>&);
     Matrix(const Matrix&);

@@ -23,13 +23,13 @@ void SingleThreadWorker::run()
         emit ReportDone(jobDone);
     else
     {
-        task->mode = BiclusteringObject::ComputingMode::RemoteDone;
+        jobDone->mode = BiclusteringObject::ComputingMode::RemoteDone;
 
         Client aaclient;
-        bool connected = aaclient.connectToHost(task->sourceAddress);
+        bool connected = aaclient.connectToHost(jobDone->sourceAddress);
         if (connected)
         {
-            aaclient.writeData(task->Serialize());
+            aaclient.writeData(jobDone->Serialize(true));
             aaclient.disconnectFromHost();
         }
 

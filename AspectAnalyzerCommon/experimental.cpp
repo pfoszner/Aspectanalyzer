@@ -1028,7 +1028,7 @@ void Experimental::Squro(QString mode)
                         break;
                 }
 
-                QByteArray rawData = newObject->Serialize();
+                QByteArray rawData = newObject->Serialize(true);
 
                 engine->aaclient.connectToHost("localhost");
 

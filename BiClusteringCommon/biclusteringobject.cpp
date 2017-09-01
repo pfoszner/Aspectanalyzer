@@ -102,9 +102,39 @@ BiclusteringObject::BiclusteringObject(QByteArray deserialize)
 
             features.emplace_back(type, value, indexNbr);
         }
+
+        if (deserialize.size() > 0)
+        {
+            QDir dir = QDir::current();
+
+            if (!dir.cd("tmp"))
+            {
+                dir.mkdir("tmp");
+            }
+
+            QString filename = "tmp/dataToInsert.mat";
+
+            QFile tmpFile(filename);
+
+            tmpFile.open(QIODevice::WriteOnly);
+
+            tmpFile.write(deserialize);
+
+            tmpFile.close();
+
+            arma::mat data;
+
+            data.load(filename.toStdString());
+
+            this->dataMatrix = std::make_shared<Matrix>(idMatrix, data);
+
+            //qDebug() << "Size: " << data.n_rows << ", " << data.n_cols;
+
+            QFile::remove(filename);
+        }
 }
 
-QByteArray BiclusteringObject::Serialize()
+QByteArray BiclusteringObject::Serialize(bool withData)
 {
     QByteArray buffer;
 
@@ -164,6 +194,30 @@ QByteArray BiclusteringObject::Serialize()
         buffer.append(IntToArray(f.indexNbr));
         buffer.append(IntToArray(f.type));
         buffer.append(DoubleToArray(f.value));
+    }
+
+    if (withData)
+    {
+        QDir dir = QDir::current();
+
+        if (!dir.cd("tmp"))
+        {
+            dir.mkdir("tmp");
+        }
+
+        QString filename = "tmp/dataToInsert.mat";
+
+        this->dataMatrix->data.save(filename.toStdString());
+
+        QFile file(filename);
+
+        file.open(QIODevice::ReadOnly);
+
+        QByteArray rawData = file.readAll();
+
+        buffer.append(rawData);
+
+        QFile::remove(filename);
     }
 
     return buffer;

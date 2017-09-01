@@ -14,6 +14,7 @@
 #include <QThreadPool>
 #include "costmatrixworker.h"
 #include <QDataStream>
+#include <QDir>
 //#include <armadillo>
 //#include "/usr/local/include/armadillo"
 
@@ -55,7 +56,7 @@ public:
         time_spent = time;
     }
 
-    QByteArray Serialize();
+    QByteArray Serialize(bool withData);
 
 
     virtual std::shared_ptr<BiclusteringObject> Compute(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params);
