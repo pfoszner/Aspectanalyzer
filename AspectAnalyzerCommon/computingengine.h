@@ -19,6 +19,10 @@
 #include <QThreadPool>
 #include <QObject>
 #include "biclusteringobject.h"
+#include "plsa.h"
+#include "kullbackleibler.h"
+#include "lse.h"
+#include "nskullbackleibler.h"
 
 class ComputingEngine : public QObject
 {

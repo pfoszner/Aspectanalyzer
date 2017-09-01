@@ -11,6 +11,12 @@ NMF::NMF(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, 
 
 }
 
+NMF::NMF(QByteArray deserialize)
+    : BiclusteringObject(deserialize)
+{
+
+}
+
 double NMF::DivernegceValue()
 {
     return 0.0;

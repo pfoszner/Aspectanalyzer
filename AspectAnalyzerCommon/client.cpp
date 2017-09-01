@@ -29,7 +29,10 @@ bool Client::disconnectFromHost()
 {
     if(socket->state() == QAbstractSocket::ConnectedState)
     {
+        socket->flush();
+        socket->close();
         socket->disconnectFromHost();
+        socket->waitForDisconnected();
         return true;
     }
     else

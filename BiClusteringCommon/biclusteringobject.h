@@ -57,7 +57,7 @@ public:
     }
 
     QByteArray Serialize(bool withData);
-
+    void Deserialize(QByteArray deserialize);
 
     virtual std::shared_ptr<BiclusteringObject> Compute(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params);
     virtual void ParseParameters(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>&);

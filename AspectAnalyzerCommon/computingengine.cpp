@@ -6,7 +6,7 @@ ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
     this->runningTasks = 0;
     this->db = std::make_shared<DBTools>("database.db");
     qRegisterMetaType<ResultPointer>("ResultPointer");
-    slaves.push_back("157.158.80.10");
+    //slaves.push_back("157.158.80.10");
 }
 
 void ComputingEngine::receiveData(QByteArray data)
@@ -15,19 +15,37 @@ void ComputingEngine::receiveData(QByteArray data)
 
     if (data.length() > 10)
     {
-        std::shared_ptr<BiclusteringObject> task = std::make_shared<NMF>(data);
+        std::shared_ptr<BiclusteringObject> taskTmp = std::make_shared<BiclusteringObject>(data);
 
-        task->dataMatrix = db->GetMatrix(task->idMatrix);
+        std::shared_ptr<BiclusteringObject> newObject;
 
-        if (task->mode == BiclusteringObject::ComputingMode::RemoteToCompute)
+        switch(taskTmp->idMethod)
         {
-            AddBiClusteringTask(task);
+            case Enums::PLSA:
+                newObject = std::make_shared<PLSA>(taskTmp->dataMatrix);
+                break;
+            case Enums::LEAST_SQUARE_ERROR:
+                newObject = std::make_shared<LSE>(taskTmp->dataMatrix);
+                break;
+            case Enums::KULLBACK_LIEBER:
+                newObject = std::make_shared<KullbackLeibler>(taskTmp->dataMatrix);
+                break;
+            case Enums::NonSmooth_KULLBACK_LIEBER:
+                newObject = std::make_shared<nsKullbackLeibler>(taskTmp->dataMatrix, 0.5);
+                break;
         }
-        else if (task->mode == BiclusteringObject::ComputingMode::RemoteDone)
+
+        newObject->Deserialize(data);
+
+        if (newObject->mode == BiclusteringObject::ComputingMode::RemoteToCompute)
+        {
+            AddBiClusteringTask(newObject);
+        }
+        else if (newObject->mode == BiclusteringObject::ComputingMode::RemoteDone)
         {
             UpdateProgress(100);
             lock.lock();
-            resultsToWrite.push(task);
+            resultsToWrite.push(newObject);
             lock.unlock();
             CheckResultsToWrite();
         }
@@ -204,11 +222,11 @@ void ComputingEngine::ServeQueue()
 
         if (index < 0)
         {
-            //SingleThreadWorker *st = new SingleThreadWorker(task);
+            SingleThreadWorker *st = new SingleThreadWorker(task);
 
-            //connect(st, SIGNAL(ReportDone(ResultPointer)), this, SLOT(CheckWriteResult(ResultPointer)), Qt::ConnectionType::QueuedConnection);
+            connect(st, SIGNAL(ReportDone(ResultPointer)), this, SLOT(CheckWriteResult(ResultPointer)), Qt::ConnectionType::QueuedConnection);
 
-            //QThreadPool::globalInstance()->start(st);
+            QThreadPool::globalInstance()->start(st);
         }
         else
         {

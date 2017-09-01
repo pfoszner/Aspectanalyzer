@@ -13,6 +13,11 @@ BiclusteringObject::BiclusteringObject(std::shared_ptr<Matrix>& dataMatrix)
 
 BiclusteringObject::BiclusteringObject(QByteArray deserialize)
 {
+    Deserialize(deserialize);
+}
+
+void BiclusteringObject::Deserialize(QByteArray deserialize)
+{
     mode = (ComputingMode)ArrayToInt(deserialize.mid(0, 4));
     deserialize.remove(0, 4);
 
