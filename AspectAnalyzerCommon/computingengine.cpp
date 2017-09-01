@@ -6,7 +6,7 @@ ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
     this->runningTasks = 0;
     this->db = std::make_shared<DBTools>("database.db");
     qRegisterMetaType<ResultPointer>("ResultPointer");
-    //slaves.push_back("157.158.80.80");
+    slaves.push_back("157.158.80.80");
 }
 
 void ComputingEngine::receiveData(QByteArray data)
@@ -54,6 +54,9 @@ void ComputingEngine::receiveData(QByteArray data)
                 taskToComputute--;
             else
                 runningTasks--;
+
+            setTasksLabels(QString::number(GetRunning()), QString::number(GetInQueue()));
+
             lock.unlock();
             CheckResultsToWrite();
         }
