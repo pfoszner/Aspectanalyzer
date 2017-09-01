@@ -6,7 +6,7 @@ ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
     this->runningTasks = 0;
     this->db = std::make_shared<DBTools>("database.db");
     qRegisterMetaType<ResultPointer>("ResultPointer");
-    //slaves.push_back("157.158.80.10");
+    slaves.push_back("157.158.80.80");
 }
 
 void ComputingEngine::receiveData(QByteArray data)
@@ -40,6 +40,9 @@ void ComputingEngine::receiveData(QByteArray data)
         if (newObject->mode == BiclusteringObject::ComputingMode::RemoteToCompute)
         {
             AddBiClusteringTask(newObject);
+
+            if (queue.size() == 4)
+                ServeQueue();
         }
         else if (newObject->mode == BiclusteringObject::ComputingMode::RemoteDone)
         {
@@ -59,7 +62,7 @@ void ComputingEngine::receiveData(QByteArray data)
 
         if (command == CommandType::StartQueue)
         {
-            ServeQueue();
+            //ServeQueue();
         }
     }
 }
@@ -230,6 +233,8 @@ void ComputingEngine::ServeQueue()
         }
         else
         {
+            taskToComputute--;
+
             bool connected = aaclient.connectToHost(slaves[index]);
 
             if (connected)
@@ -249,6 +254,8 @@ void ComputingEngine::ServeQueue()
         }
     }
 
+    QThread::sleep(2);
+
     for(QString slave : slaves)
     {
         bool connected = aaclient.connectToHost(slave);
@@ -267,6 +274,7 @@ void ComputingEngine::ServeQueue()
     if (QThreadPool::globalInstance()->maxThreadCount() > taskToComputute)
     {
         runningTasks = taskToComputute;
+        taskToComputute = 0;
     }
     else
     {

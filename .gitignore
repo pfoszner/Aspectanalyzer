@@ -11,3 +11,4 @@ AspectAnalyzerCommon/Makefile
 debug/
 release/
 Makefile
+*.mat
