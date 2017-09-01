@@ -6,7 +6,7 @@ ComputingEngine::ComputingEngine(QObject *parent) : QObject(parent)
     this->runningTasks = 0;
     this->db = std::make_shared<DBTools>("database.db");
     qRegisterMetaType<ResultPointer>("ResultPointer");
-    slaves.push_back("157.158.80.80");
+    //slaves.push_back("157.158.80.80");
 }
 
 void ComputingEngine::receiveData(QByteArray data)
@@ -49,6 +49,11 @@ void ComputingEngine::receiveData(QByteArray data)
             UpdateProgress(100);
             lock.lock();
             resultsToWrite.push(newObject);
+
+            if (taskToComputute > 0)
+                taskToComputute--;
+            else
+                runningTasks--;
             lock.unlock();
             CheckResultsToWrite();
         }
@@ -189,13 +194,27 @@ void ComputingEngine::CheckWriteResult(ResultPointer jobDone)
 
     setTasksLabels(QString::number(GetRunning()), QString::number(GetInQueue()));
 
-    resultsToWrite.push(jobDone);
-    int count = resultsToWrite.size();
-    lock.unlock();
+    if (jobDone->mode == BiclusteringObject::ComputingMode::Local)
+    {
+        resultsToWrite.push(jobDone);
+        int count = resultsToWrite.size();
+        lock.unlock();
 
-    if (count >= 1)
-        CheckResultsToWrite();
+        if (count >= 1)
+            CheckResultsToWrite();
+    }
+    else
+    {
+        jobDone->mode = BiclusteringObject::ComputingMode::RemoteDone;
 
+        bool connected = aaclient.connectToHost(jobDone->sourceAddress);
+        if (connected)
+        {
+            aaclient.writeData(jobDone->Serialize(true));
+            aaclient.disconnectFromHost();
+        }
+        lock.unlock();
+    }
     qDebug() << "Result done";
 }
 
@@ -233,8 +252,6 @@ void ComputingEngine::ServeQueue()
         }
         else
         {
-            taskToComputute--;
-
             bool connected = aaclient.connectToHost(slaves[index]);
 
             if (connected)

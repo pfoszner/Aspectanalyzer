@@ -19,19 +19,19 @@ void SingleThreadWorker::run()
 
     std::shared_ptr<BiclusteringObject> jobDone = task->Compute(params);
 
-    if (task->mode == BiclusteringObject::ComputingMode::Local)
+    //if (task->mode == BiclusteringObject::ComputingMode::Local)
         emit ReportDone(jobDone);
-    else
-    {
-        jobDone->mode = BiclusteringObject::ComputingMode::RemoteDone;
+//    else
+//    {
+//        jobDone->mode = BiclusteringObject::ComputingMode::RemoteDone;
 
-        Client aaclient;
-        bool connected = aaclient.connectToHost(jobDone->sourceAddress);
-        if (connected)
-        {
-            aaclient.writeData(jobDone->Serialize(true));
-            aaclient.disconnectFromHost();
-        }
+//        Client aaclient;
+//        bool connected = aaclient.connectToHost(jobDone->sourceAddress);
+//        if (connected)
+//        {
+//            aaclient.writeData(jobDone->Serialize(true));
+//            aaclient.disconnectFromHost();
+//        }
 
-    }
+//    }
 }
