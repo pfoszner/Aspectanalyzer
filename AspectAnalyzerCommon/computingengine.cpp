@@ -18,7 +18,29 @@ void ComputingEngine::receiveData(QByteArray data)
 
         task->dataMatrix = db->GetMatrix(task->idMatrix);
 
-        AddBiClusteringTask(task);
+        if (task->mode == BiclusteringObject::ComputingMode::RemoteToCompute)
+        {
+            AddBiClusteringTask(task);
+        }
+        else if (task->mode == BiclusteringObject::ComputingMode::RemoteDone)
+        {
+            lock.lock();
+            resultsToWrite.push(task);
+            lock.unlock();
+            CheckResultsToWrite();
+        }
+    }
+    else if (data.length() == 4)
+    {
+        QByteArray source = data.mid(0, 4);
+        qint32 command;
+        QDataStream data(&source, QIODevice::ReadWrite);
+        data >> command;
+
+        if (command == CommandType::StartQueue)
+        {
+            ServeQueue();
+        }
     }
 }
 
@@ -164,18 +186,13 @@ void ComputingEngine::ServeQueue()
 
     taskToComputute = queue.size();
 
-    int maxSize = 32;
-
-    if (queue.size() > maxSize)
-        progressSteps = maxSize * 100;
-    else
-        progressSteps = taskToComputute * 100;
+    progressSteps = taskToComputute * 100;
 
     queueStart = time(0);
 
-    int resCount = 0;
+    int index = -1;
 
-    while ( queue.size() > 0 && resCount++ < maxSize )
+    while ( queue.size() > 0)
     {
         currentProgressSteps = 0;
 
@@ -183,11 +200,44 @@ void ComputingEngine::ServeQueue()
 
         queue.pop();
 
-        SingleThreadWorker *st = new SingleThreadWorker(task);
+        if (index++ < 0)
+        {
+            SingleThreadWorker *st = new SingleThreadWorker(task);
 
-        connect(st, SIGNAL(ReportDone(ResultPointer)), this, SLOT(CheckWriteResult(ResultPointer)), Qt::ConnectionType::QueuedConnection);
+            connect(st, SIGNAL(ReportDone(ResultPointer)), this, SLOT(CheckWriteResult(ResultPointer)), Qt::ConnectionType::QueuedConnection);
 
-        QThreadPool::globalInstance()->start(st);
+            QThreadPool::globalInstance()->start(st);
+        }
+        else
+        {
+            bool connected = aaclient.connectToHost(slaves[index]);
+
+            if (connected)
+            {
+                aaclient.writeData(task->Serialize());
+                aaclient.disconnectFromHost();
+            }
+        }
+
+        if (index >= slaves.size())
+        {
+            index = -1;
+        }
+    }
+
+    for(QString slave : slaves)
+    {
+        bool connected = aaclient.connectToHost(slave);
+
+        if (connected)
+        {
+            QByteArray temp;
+            QDataStream data(&temp, QIODevice::ReadWrite);
+            data << (qint32)CommandType::StartQueue;
+
+            aaclient.writeData(temp);
+            aaclient.disconnectFromHost();
+        }
     }
 
     if (QThreadPool::globalInstance()->maxThreadCount() > taskToComputute)

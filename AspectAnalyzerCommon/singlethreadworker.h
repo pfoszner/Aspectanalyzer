@@ -6,6 +6,7 @@
 #include <QRunnable>
 #include <QMutex>
 #include <queue>
+#include "client.h"
 
 class SingleThreadWorker : public QObject, public QRunnable
 {

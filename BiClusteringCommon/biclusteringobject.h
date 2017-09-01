@@ -21,17 +21,28 @@ class BiclusteringObject : public QObject
 {
     Q_OBJECT
 
-public:
+public :
+
+enum ComputingMode
+{
+    Local = 0,
+    RemoteToCompute,
+    ReadyToSend,
+    RemoteDone,
+};
+
     int idMatrix = -1;
     int idResult = -1;
     int idMethod = -1;
     int expectedBiClusterCount;
     double time_spent;
+    ComputingMode mode = Local;
     QString sourceAddress = "";
     std::shared_ptr<Matrix> dataMatrix;
     std::vector<std::shared_ptr<Bicluster>> foundedBiclusters;
     std::vector<FeatureResult> features;
     void GenerateARFFFile(QString path, int dim, std::vector<int> indexes = std::vector<int>());
+
 
 public:
     BiclusteringObject(QByteArray);

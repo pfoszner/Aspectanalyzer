@@ -18,10 +18,16 @@
 #include "client.h"
 #include <QThreadPool>
 #include <QObject>
+#include "biclusteringobject.h"
 
 class ComputingEngine : public QObject
 {
     Q_OBJECT
+
+enum CommandType
+{
+    StartQueue = 0,
+};
 
 public:
     std::shared_ptr<Matrix> CurrentVmatrix;
@@ -38,6 +44,7 @@ private:
     int currentProgressSteps = 0;
     time_t queueStart;
     QMutex lock;
+    std::vector<QString> slaves;
 
 public:
     std::shared_ptr<DBTools> db;
@@ -61,7 +68,5 @@ signals:
     void setProgressChange(const int newValue, const QString eta);
     void setTasksLabels(const QString &running, const QString &inqueue);
 };
-
-
 
 #endif // COMPUTINGENGINE_H

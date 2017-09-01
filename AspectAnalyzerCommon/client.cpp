@@ -25,6 +25,19 @@ bool Client::writeData(QByteArray data)
         return false;
 }
 
+bool Client::disconnectFromHost()
+{
+    if(socket->state() == QAbstractSocket::ConnectedState)
+    {
+        socket->disconnectFromHost();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 QByteArray IntToArray(qint32 source) //Use qint32 to ensure that the number have 4 bytes
 {
     //Avoid use of cast, this is the Qt way to serialize objects

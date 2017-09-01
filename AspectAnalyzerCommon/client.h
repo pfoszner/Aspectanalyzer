@@ -14,6 +14,7 @@ public:
 public slots:
     bool connectToHost(QString host);
     bool writeData(QByteArray data);
+    bool disconnectFromHost();
 
 private:
     QTcpSocket *socket;
