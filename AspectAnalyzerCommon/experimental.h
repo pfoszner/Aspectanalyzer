@@ -23,7 +23,6 @@ public:
     Experimental(std::shared_ptr<ComputingEngine>& engine) : engine(engine)
     {}
 
-
     void StartCustom(QString mode);
     void TestTriclustering();
     void RunConsensus();
@@ -45,6 +44,7 @@ public:
     void PLATResults(QString folder, int startId, int stopID, int classNum);
     void InputForBingo(QString file, std::vector<int> startID, int endID);
     void CheckSimiliarity();
+    void DividePowerlogs();
 };
 
 #endif // EXPERIMENTAL_H

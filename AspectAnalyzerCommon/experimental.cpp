@@ -247,6 +247,11 @@ void Experimental::CompareGrandTruthMiRNA()
 void Experimental::StartCustom(QString mode)
 {
 
+    ExportResults("", 1, 360);
+
+    //DividePowerlogs();
+
+    return;
 
     //for(int m = 1; m <= 8; ++m)
     //{
@@ -1320,45 +1325,58 @@ void Experimental::PLATResults(QString folder, int startId, int stopID, int clas
 
 void Experimental::ExportResults(QString folder, int startId, int stopID)
 {
+        QFile retVal("results.csv");
+
+        retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+
+        QTextStream out(&retVal);
 
 
-        std::vector<std::shared_ptr<BiclusteringObject>> test;
+        std::vector<std::shared_ptr<BiclusteringObject>> test;// = engine->db->GetResults(-1, -1, -1, -1);;
 
         for(int r = startId; r <= stopID; ++r)
         {
             std::vector<std::shared_ptr<BiclusteringObject>> single = engine->db->GetResults(r, -1, -1, -1);
 
-            test.push_back(single[0]);
-        }
 
-        for(std::shared_ptr<BiclusteringObject> result : test)
-        {
-            QDir dir = QDir::current();
+            std::shared_ptr<BiclusteringObject> result = single[0];
+        //    test.push_back(single[0]);
+        //}
 
-            if (!dir.cd(folder))
-            {
-                dir.mkdir(folder);
-            }
+        //for(std::shared_ptr<BiclusteringObject> result : test)
+        //{
+            result->PostProcessingTask();
+
+//            QDir dir = QDir::current();
+
+//            if (!dir.cd(folder))
+//            {
+//                dir.mkdir(folder);
+//            }
 
             int index = 0;
 
             for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
             {
-                QFile retVal(folder + "/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
+                //QFile retVal(folder + "/result_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(index++) + ".txt");
 
-                retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+                //retVal.open(QIODevice::WriteOnly | QIODevice::Text);
 
-                QTextStream out(&retVal);
+                //QTextStream out(&retVal);
 
                 //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
 
+                qDebug() << *result->dataMatrix->idMatrix << ";" << result->idResult << ";" << result->idMethod << ";Bicluster " << index << ";" << *bic->ACV << "\n";
+
+                out << *result->dataMatrix->idMatrix << ";" << result->idResult << ";" << result->idMethod << ";Bicluster " << ++index << ";" << *bic->ACV << "\n";
+
                 //out << "Cluster1:\n";
 
-                for(int c1 : bic->cluster1)
-                {
-                    out << result->dataMatrix->rowLabels[c1].value << "\n";
+                //for(int c1 : bic->cluster1)
+                //{
+                    //out << result->dataMatrix->rowLabels[c1].value << "\n";
                     //out << c1 << "\n";
-                }
+                //}
 
                 //out << "\nCluster2:\n";
 
@@ -1368,25 +1386,146 @@ void Experimental::ExportResults(QString folder, int startId, int stopID)
                     //out << c2 << "\n";
                 //}
 
-                out << "\n\n";
+                //out << "\n\n";
 
-                retVal.close();
+                //retVal.close();
             }
 
-            QFile labels(folder + "/genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
+//            QFile labels(folder + "/genes_" + QString::number(*result->dataMatrix->idMatrix) + ".txt");
 
-            labels.open(QIODevice::WriteOnly | QIODevice::Text);
+//            labels.open(QIODevice::WriteOnly | QIODevice::Text);
 
-            QTextStream outL(&labels);
+//            QTextStream outL(&labels);
 
-            for(Label item : result->dataMatrix->rowLabels)
-            {
-                outL << item.value << "\n";
-            }
+//            for(Label item : result->dataMatrix->rowLabels)
+//            {
+//                outL << item.value << "\n";
+//            }
 
-            labels.close();
+//            labels.close();
         }
 
+        retVal.close();
 
         qDebug() << "Huuuurraaaa";
+}
+
+void Experimental::DividePowerlogs()
+{
+    QFile file("log.txt");
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        //QMessageBox::information(0, "error", file.errorString());
+    }
+    else
+    {
+        QTextStream in(&file);
+
+        long start = -1;
+        long stop = -1;
+        long prevTime = -1;
+        int id = -1;
+
+        while(!in.atEnd()) {
+            QString line = in.readLine().trimmed();
+
+            QStringList tmp = line.split(';');
+
+            int tmpID = tmp[1].toInt();;
+
+            if (id == -1)
+            {
+                id = tmpID;
+
+                start = tmp[0].toLong() - 153;
+
+                qDebug() << "New id found: " << id << " start time: " << start;
+            }
+            else if (tmpID != id)
+            {
+                stop = prevTime;
+
+                qDebug() << "Analysis of id " << id << " time: " << start << " to " << stop;
+
+                QFile powerfile("powerlog.log");
+
+                powerfile.open(QIODevice::ReadOnly);
+
+                QTextStream powerin(&powerfile);
+
+
+                QFile retVal(QString::number(id) + ".log");
+
+                retVal.open(QIODevice::WriteOnly | QIODevice::Text);
+
+                QTextStream out(&retVal);
+
+                out << powerin.readLine();
+
+                while(!powerin.atEnd()) {
+                    QString powerline = powerin.readLine().trimmed();
+
+                    QStringList powerTmp = powerline.split(',');
+
+                    double powertime = powerTmp[0].toDouble();
+
+                    if (powertime >= start && powertime <= stop)
+                    {
+                        out << powerline << "\n";
+                    }
+                }
+
+                retVal.close();
+
+                powerfile.close();
+
+                id = tmpID;
+
+                start = tmp[0].toLong() - 153;
+
+                qDebug() << "New id found: " << id << " start time: " << start;
+            }
+
+            prevTime = tmp[0].toLong() - 153;
+        }
+
+        stop = prevTime;
+
+        qDebug() << "Analysis of id " << id << " time: " << start << " to " << stop;
+
+        QFile powerfile2("powerlog.log");
+
+        powerfile2.open(QIODevice::ReadOnly);
+
+        QTextStream powerin2(&powerfile2);
+
+        QFile retVal2(QString::number(id) + ".log");
+
+        retVal2.open(QIODevice::WriteOnly | QIODevice::Text);
+
+        QTextStream out2(&retVal2);
+
+        out2 << powerin2.readLine();
+
+        while(!powerin2.atEnd()) {
+            QString powerline2 = powerin2.readLine().trimmed();
+
+            QStringList powerTmp2 = powerline2.split(',');
+
+            double powertime2 = powerTmp2[0].toDouble();
+
+            if (powertime2 >= start && powertime2 <= stop)
+            {
+                out2 << powerline2 << "\n";
+            }
+        }
+
+        retVal2.close();
+
+        powerfile2.close();
+
+        file.close();
+    }
+
+    qDebug() << "Done";
 }
