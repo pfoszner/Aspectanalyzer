@@ -247,17 +247,27 @@ void Experimental::CompareGrandTruthMiRNA()
 void Experimental::StartCustom(QString mode)
 {
 
-    ExportResults("", 1, 360);
+    //ExportResults("", 1, 360);
 
     //DividePowerlogs();
 
-    return;
+    //RunAllConsensus2(7);
 
-    //for(int m = 1; m <= 8; ++m)
+    //RunStepTricluster(7, 5);
+
+    //return;
+
+    //std::vector<int> resultIDs;
+
+    //for(int m = 1931; m <= 3610; ++m)
     //{
+        //resultIDs.push_back(m);
         //std::vector<int> resultIDs = engine->db->GetResultsIDs(4);
     //int m=8;
-        //InputForBingo("Bingo4_100", resultIDs, 4);
+    //}
+
+    //InputForBingo("Bingo1_Final", resultIDs, 1);
+    //InputForBingo("Bingo8_Final", resultIDs, 8);
     //}
     //InputForBingo("Bingo4_100", 2771, 3610);
 
@@ -274,13 +284,13 @@ void Experimental::StartCustom(QString mode)
 
     for(int m = matrixS; m <= matrixE; ++m)
     {
-        //RunNMF(m, start, stop, 5, 25);
+        RunNMF(m, start, stop, 5, 10);
 
         //QThreadPool::globalInstance()->waitForDone();
 
         //RunStepConsensus(m, 2, 5, 1);
 
-        RunStepTricluster(m, 5);
+        //RunStepTricluster(m, 5);
     }
     //std::vector<std::shared_ptr<BiclusteringObject>> single1 = engine->db->GetResults(1931, -1, -1, -1);
 
@@ -330,15 +340,15 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
         qDebug() << *single[0]->dataMatrix->idMatrix;
 
-        if (    *single[0]->dataMatrix->idMatrix == matID
-             && (   single[0]->idMethod == Enums::Methods::CONSENSUS
-                 || single[0]->idMethod == Enums::Methods::TRICLUSTERING
-                 || single[0]->idMethod == Enums::Methods::PLSA
-                 || single[0]->idMethod == Enums::Methods::LEAST_SQUARE_ERROR
-                 || single[0]->idMethod == Enums::Methods::KULLBACK_LIEBER
-                 || single[0]->idMethod == Enums::Methods::NonSmooth_KULLBACK_LIEBER
-                )
-           )
+        if (    *single[0]->dataMatrix->idMatrix == matID )
+//             && (   single[0]->idMethod == Enums::Methods::CONSENSUS
+//                 || single[0]->idMethod == Enums::Methods::TRICLUSTERING
+//                 || single[0]->idMethod == Enums::Methods::PLSA
+//                 || single[0]->idMethod == Enums::Methods::LEAST_SQUARE_ERROR
+//                 || single[0]->idMethod == Enums::Methods::KULLBACK_LIEBER
+//                 || single[0]->idMethod == Enums::Methods::NonSmooth_KULLBACK_LIEBER
+//                )
+//           )
             test.push_back(single[0]);
 
         qDebug() << QString::number(++index) << " done, " << QString::number(resIDs.size() - index) << " to go. In ensemble: " << QString::number(test.size());
@@ -350,6 +360,7 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
     QTextStream out(&retVal);
 
+    //QString path = "D:\\AppData\\KumalData\\10\\7\\";
 
     for(std::shared_ptr<BiclusteringObject> result : test)
     {
@@ -357,9 +368,21 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
         int foundedBiClusterSize = result->foundedBiclusters.size();
 
+        //result->PostProcessingTask();
+
         for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
         {
-            out << "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index++) << "\n";
+            //QString oldName = path + "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index) + ".bgo";
+
+            //QString newName = path + "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index) + "_" + QString::number(*bic->ACV) + ".bgo";
+
+            //bool resultRename = QFile::rename(oldName, newName);
+
+            //qDebug() << oldName << " -> " << newName << " = " << resultRename;
+
+            //out << "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index++) << "\n";
+
+            out << QString::number(result->idResult) + ";" + QString::number(result->idMethod) + ";" + QString::number(*result->dataMatrix->idMatrix) + ";" + QString::number(foundedBiClusterSize) + ";" + QString::number(index++) << ";" << QString::number(*bic->ACV) << "\n";
 
             for(int c1 : bic->cluster1)
             {
@@ -367,9 +390,11 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
                 //out << c1 << "\n";
             }
 
-            out << "batch\n";
+            //out << "batch\n";
         }
     }
+
+    qDebug() << "Hurra";
 
     retVal.close();
 }
@@ -649,13 +674,13 @@ void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
     {
         std::shared_ptr<Matrix> vMatrix = engine->db->GetMatrix(mat);
 
-        int count = 0;
-
         for(uint s = stop; s >= start; s = s - step)
         {
-            for(uint r = 0; r < rep; r++)
+            for(uint m = 0; m < 4; ++m)
             {
-                for(uint m = 0; m < 4; ++m)
+                int currRep = rep - engine->db->GetResultsCount(-1, mat, m, s);
+
+                for(uint r = 0; r < currRep; r++)
                 {
                     std::shared_ptr<BiclusteringObject> newObject;
 
@@ -685,15 +710,7 @@ void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
 
                     engine->AddBiClusteringTask(newObject);
 
-                    count++;
-
                     qDebug() << "Matrix " << mat << " Run Bi-cluster: " << s << ", Repetition: " << r;
-
-                    if (count >= 4 * rep)
-                    {
-                        //engine->ServeQueue();
-                        count = 0;
-                    }
                 }
             }
         }
@@ -710,9 +727,9 @@ void Experimental::RunAllConsensus2(int idMatrix)
 
         for(uint s = start; s <= 100; s = s + 5)
         {
-            test  = engine->db->GetResults(-1, idMatrix, -1, -1);
+            test = engine->db->GetResults(-1, idMatrix, -1, s);
 
-            auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING; });
+            auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING || r->idResult < 100; });
             test.erase(riter, test.end());
 
             double average = 0;
@@ -728,8 +745,8 @@ void Experimental::RunAllConsensus2(int idMatrix)
 
             std::vector<MergeType> mt;
 
-            //mt.push_back(Consensus::MergeType::ByACV);
-            //mt.push_back(Consensus::MergeType::ByACVHeuristic);
+            mt.push_back(MergeType::ByACV);
+            mt.push_back(MergeType::ByACVHeuristic);
             mt.push_back(MergeType::Standard);
 
             for(MergeType imt : mt)
@@ -814,10 +831,7 @@ void Experimental::RunStepTricluster(int matrix, int start)
 
         std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, matrix, -1, s);
 
-        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return !(r->idResult > 583); });
-        test.erase(riter, test.end());
-
-        riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return (r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING); });
+        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r){ return r->idMethod == Enums::Methods::CONSENSUS || r->idMethod == Enums::Methods::TRICLUSTERING || r->idResult < 100; });
         test.erase(riter, test.end());
 
         qDebug() << "Results to merge: " << test.size();
@@ -870,7 +884,7 @@ void Experimental::RunConsensus()
 
     for(Enums::Methods method : methods)
     {
-        std::vector<std::shared_ptr<BiclusteringObject>> single  = engine->db->GetResults(-1, 1, method, -1);
+        std::vector<std::shared_ptr<BiclusteringObject>> single  = engine->db->GetResults(-1, 7, method, -1);
 
         double bestValue = -1;
         int best = 0;
@@ -899,8 +913,8 @@ void Experimental::RunConsensus()
 
     std::vector<MergeType> mt;
 
-    //mt.push_back(Consensus::MergeType::ByACV);
-    //mt.push_back(Consensus::MergeType::ByACVHeuristic);
+    mt.push_back(MergeType::ByACV);
+    mt.push_back(MergeType::ByACVHeuristic);
     mt.push_back(MergeType::Standard);
 
     for(MergeType imt : mt)

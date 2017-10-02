@@ -20,6 +20,37 @@ std::vector<int> DBTools::GetResultsIDs(int m)
     return retVal;
 }
 
+int DBTools::GetResultsCount(int idResult, int VmatrixID, int idMethod, int DbK)
+{
+    QString queryString = "SELECT COUNT(RESULT.id_result) as ilosc FROM RESULT";
+
+    idMethod++;
+
+    if (idResult > 0)
+        queryString += " WHERE RESULT.id_result = " + QString::number(idResult);
+    else if (VmatrixID > 0 && idMethod > 0)
+        queryString += " WHERE RESULT.id_matrix = " + QString::number(VmatrixID) + " and RESULT.id_method = " + QString::number(idMethod);
+    else if (VmatrixID > 0)
+        queryString += " WHERE RESULT.id_matrix = " + QString::number(VmatrixID);
+    else if (idMethod > 0)
+        queryString += " WHERE RESULT.id_method = " + QString::number(idMethod);
+
+    if (DbK > 0)
+        queryString += " AND RESULT.k = " + QString::number(DbK);
+
+    queryString += " ORDER BY RESULT.id_result";
+
+    //qDebug() << queryString;
+
+    QSqlQuery query(db);
+
+    query.exec(queryString);
+
+    query.next();
+
+    return query.value("ilosc").toInt();
+}
+
 std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResult, int VmatrixID, int idMethod, int DbK)
 {
     std::vector<std::shared_ptr<BiclusteringObject>> retVal;
