@@ -259,12 +259,14 @@ void Experimental::StartCustom(QString mode)
 
     //std::vector<int> resultIDs;
 
-    //for(int m = 1931; m <= 3610; ++m)
-    //{
+    for(int m = 1; m <= 8; ++m)
+    {
         //resultIDs.push_back(m);
-        //std::vector<int> resultIDs = engine->db->GetResultsIDs(4);
+        std::vector<int> resultIDs = engine->db->GetResultsIDs(m);
+        qDebug() << "Size: " << resultIDs.size();
+        InputForBingo("Bingo" + QString::number(m) + "_Final", resultIDs, m);
     //int m=8;
-    //}
+    }
 
     //InputForBingo("Bingo1_Final", resultIDs, 1);
     //InputForBingo("Bingo8_Final", resultIDs, 8);
@@ -274,7 +276,7 @@ void Experimental::StartCustom(QString mode)
     //CheckSimiliarity();
 
 
-    //return;
+    return;
     QStringList params = mode.split(';');
 
     int start = params[0].toInt();
@@ -340,7 +342,7 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
         qDebug() << *single[0]->dataMatrix->idMatrix;
 
-        if (    *single[0]->dataMatrix->idMatrix == matID )
+        //if (    *single[0]->dataMatrix->idMatrix == matID )
 //             && (   single[0]->idMethod == Enums::Methods::CONSENSUS
 //                 || single[0]->idMethod == Enums::Methods::TRICLUSTERING
 //                 || single[0]->idMethod == Enums::Methods::PLSA
@@ -380,9 +382,9 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
             //qDebug() << oldName << " -> " << newName << " = " << resultRename;
 
-            //out << "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index++) << "\n";
+            out << "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index++) << "_" << QString::number(*bic->ACV) << "\n";
 
-            out << QString::number(result->idResult) + ";" + QString::number(result->idMethod) + ";" + QString::number(*result->dataMatrix->idMatrix) + ";" + QString::number(foundedBiClusterSize) + ";" + QString::number(index++) << ";" << QString::number(*bic->ACV) << "\n";
+            //out << QString::number(result->idResult) + ";" + QString::number(result->idMethod) + ";" + QString::number(*result->dataMatrix->idMatrix) + ";" + QString::number(foundedBiClusterSize) + ";" + QString::number(index++) << ";" << QString::number(*bic->ACV) << "\n";
 
             for(int c1 : bic->cluster1)
             {
@@ -390,7 +392,7 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
                 //out << c1 << "\n";
             }
 
-            //out << "batch\n";
+            out << "batch\n";
         }
     }
 
