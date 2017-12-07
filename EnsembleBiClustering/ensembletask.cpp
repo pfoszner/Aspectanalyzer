@@ -50,6 +50,8 @@ void EnsembleTask::ParseParameters(std::vector<std::tuple<Enums::MethodsParamete
             }
         }
     }
+
+    BiclusteringObject::ParseParameters(params);
 }
 
 std::vector<std::vector<std::shared_ptr<Bicluster>>> EnsembleTask::GetBiclustersListGruppedByTask()

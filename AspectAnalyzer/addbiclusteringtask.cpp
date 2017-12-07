@@ -28,7 +28,7 @@
     AddBiclusteringTask::AddBiclusteringTask(std::shared_ptr<ComputingEngine>& engine, QWidget *parent)
         : engine(engine), SimpleWizard(parent)
     {
-        setNumPages(5);
+        setNumPages(6);
         title = "Add Bi-clustering Task Wizard";
     }
 
@@ -50,6 +50,9 @@
         case 4:
             paramsPage = new ParamsPage(this);
             return paramsPage;
+        case 5:
+            resultsPage = new ResultsPage(this);
+            return resultsPage;
         }
         return 0;
     }
@@ -96,6 +99,9 @@
                 params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Average));
 
             params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(numOfBiclusters));
+
+            if (resultsPage->saveToFileBox->isChecked())
+                params.emplace_back(Enums::MethodsParameters::SaveToLocalFile, std::make_shared<QString>(resultsPage->saveFileLabel->text()));
 
             newObject->ParseParameters(params);
 
@@ -417,4 +423,43 @@
 
         //layout->setRowStretch(5, 1);
         setLayout(layout);
+    }
+
+    ResultsPage::ResultsPage(AddBiclusteringTask *wizard)
+        : QWidget(wizard)
+    {
+        QString intro = "<center><b>Choose where to save results</center><p>";
+
+        topLabel = new QLabel(intro);
+
+        saveToFileBox = new QCheckBox("Save results to file");
+        saveToDBBox = new QCheckBox("Save results to databse");
+
+        saveToFileBox->setChecked(false);
+        saveToDBBox->setChecked(true);
+        saveToDBBox->setEnabled(false);
+
+        chooseDirButton = new QPushButton("Choose Dir", this);
+
+        saveFileLabel = new QLabel(QDir::currentPath());
+
+        connect(this, SIGNAL(ChangeQLabelDir(QString)), saveFileLabel, SLOT(setText(QString)));
+
+        connect(chooseDirButton, SIGNAL (released()),this, SLOT (handleloadFileButton()));
+
+        QGridLayout *layout = new QGridLayout;
+        layout->addWidget(topLabel, 0, 0);
+        layout->addWidget(saveToFileBox, 1, 0);
+        layout->addWidget(chooseDirButton, 2, 0);
+        layout->addWidget(saveFileLabel, 2, 1);
+        layout->addWidget(saveToDBBox, 3, 0);
+
+        setLayout(layout);
+    }
+
+    void ResultsPage::handleloadFileButton()
+    {
+        QString dir = QFileDialog::getExistingDirectory(nullptr, "Choose directory", "", QFileDialog::ShowDirsOnly);
+
+        emit ChangeQLabelDir(dir);
     }

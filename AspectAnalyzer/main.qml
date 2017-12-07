@@ -235,8 +235,6 @@ ApplicationWindow {
                 }
 
             }
-
-
         }
 
         Tab {

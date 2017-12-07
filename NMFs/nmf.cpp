@@ -92,6 +92,8 @@ void NMF::ParseParameters(std::vector<std::tuple<Enums::MethodsParameters, std::
             }
         }
     }
+
+    BiclusteringObject::ParseParameters(params);
 }
 
 void NMF::InitializateFirstValues()

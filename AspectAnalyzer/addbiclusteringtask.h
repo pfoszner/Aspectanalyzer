@@ -51,6 +51,7 @@ class DataSourcePage;
 class InputDataPage;
 class MethodPage;
 class ParamsPage;
+class ResultsPage;
 
 class AddBiclusteringTask : public SimpleWizard
 {
@@ -72,13 +73,14 @@ private:
     InputDataPage *inputDataPage;
     MethodPage *methodPage;
     ParamsPage *paramsPage;
+    ResultsPage *resultsPage;
 
     friend class IntroductionPage;
     friend class InputDataPage;
     friend class InputDataSource;
     friend class MethodPage;
     friend class ParamsPage;
-
+    friend class ResultsPage;
 
 };
 
@@ -179,6 +181,30 @@ public:
     QComboBox *extrctionCB;
     QLabel *theta;
     QLineEdit *thetaLE;
+
+    friend class AddBiclusteringTask;
+};
+
+class ResultsPage : public QWidget
+{
+    Q_OBJECT
+
+public:
+    ResultsPage(AddBiclusteringTask *wizard);
+
+signals:
+    void ChangeQLabelDir(QString text);
+
+public slots:
+    void handleloadFileButton();
+
+public:
+    QLabel *topLabel;
+    QLabel *saveFileLabel;
+    QCheckBox *saveToFileBox;
+    QCheckBox *saveToDBBox;
+    QPushButton *chooseDirButton;
+    QFileDialog *chooseDir;
 
     friend class AddBiclusteringTask;
 };

@@ -259,12 +259,12 @@ void Experimental::StartCustom(QString mode)
 
     //std::vector<int> resultIDs;
 
-    for(int m = 1; m <= 8; ++m)
+    for(int m = 2; m <= 5; ++m)
     {
         //resultIDs.push_back(m);
         std::vector<int> resultIDs = engine->db->GetResultsIDs(m);
         qDebug() << "Size: " << resultIDs.size();
-        InputForBingo("Bingo" + QString::number(m) + "_Final", resultIDs, m);
+        InputForBingo("Bingo" + QString::number(m) + "_Kumal", resultIDs, m);
     //int m=8;
     }
 
@@ -362,7 +362,7 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
     QTextStream out(&retVal);
 
-    //QString path = "D:\\AppData\\KumalData\\10\\7\\";
+    //QString path = "D:\\AppData\\KumalData\\Kumal137\\";
 
     for(std::shared_ptr<BiclusteringObject> result : test)
     {
@@ -374,7 +374,7 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
         for(std::shared_ptr<Bicluster> bic : result->foundedBiclusters)
         {
-            //QString oldName = path + "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index) + ".bgo";
+            //QString oldName = path + "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index) + "_0.bgo";
 
             //QString newName = path + "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index) + "_" + QString::number(*bic->ACV) + ".bgo";
 

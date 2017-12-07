@@ -43,7 +43,7 @@ enum ComputingMode
     std::vector<std::shared_ptr<Bicluster>> foundedBiclusters;
     std::vector<FeatureResult> features;
     void GenerateARFFFile(QString path, int dim, std::vector<int> indexes = std::vector<int>());
-
+    QString saveToLocalFile = "";
 
 public:
     BiclusteringObject(QByteArray);
@@ -67,6 +67,8 @@ public:
 
 //protected:
     void PostProcessingTask();
+
+    void SaveToLocalFile(std::shared_ptr<double> AverageAVC, double Similarity);
 
 signals:
     void ReportProgress(int steps);

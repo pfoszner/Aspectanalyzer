@@ -57,7 +57,9 @@ public:
         ExMethod,
         Multithreading,
         Theta,
-        Supervised
+        Supervised,
+        SaveToLocalFile,
+        SaveToDatabase
     };
 
     enum FeatureType

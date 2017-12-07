@@ -293,6 +293,8 @@ void BiclusteringObject::PostProcessingTask()
         qDebug() << "Panic! Panic! Panic!";
     }
 
+    double Value = 0;
+
     if (dataMatrix->expectedBiClusters.size() > 0)
     {
         Array<double> CM = GetCostMatrixForBiclusters(dataMatrix->expectedBiClusters, foundedBiclusters, Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
@@ -303,7 +305,7 @@ void BiclusteringObject::PostProcessingTask()
 
         Classis.SetCostMatrix(CM, ClassicalHungarian::MunkresFunc::Max);
 
-        double Value = Classis.RunMunkres();
+        Value = Classis.RunMunkres();
 
         for (uint i = 0; i < dataMatrix->expectedBiClusters.size(); ++i)
         {
@@ -343,6 +345,28 @@ void BiclusteringObject::PostProcessingTask()
     {
         features.push_back(FeatureResult(Enums::FeatureType::AverageACV, *AverageAVC / foundedBiclusters.size(), 0));
     }
+
+    SaveToLocalFile(AverageAVC, Value);
+}
+
+void BiclusteringObject::SaveToLocalFile(std::shared_ptr<double> AverageAVC, double Similarity)
+{
+    if (saveToLocalFile.length() > 0)
+    {
+        QFile retVal(saveToLocalFile + QDir::separator() + "result.txt");
+
+        retVal.open(QFile::Append | QFile::Text);
+
+        QTextStream out(&retVal);
+
+        time_t     now = time(0);
+        struct tm  tstruct;
+        char       buf[80];
+        tstruct = *localtime(&now);
+        strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+        out << "Result computation finished: " << buf << std::endl;
+    }
 }
 
 std::shared_ptr<BiclusteringObject> BiclusteringObject::Compute(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params)
@@ -356,6 +380,21 @@ std::shared_ptr<BiclusteringObject> BiclusteringObject::Compute(std::vector<std:
 
 void BiclusteringObject::ParseParameters(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params)
 {
+    for (auto &param : params)
+    {
+        switch (std::get<0>(param))
+        {
+            case Enums::SaveToLocalFile:
+            {
+                QString* m = reinterpret_cast<QString*>(std::get<1>(param).get());
+                if (m != nullptr) {
+                    saveToLocalFile = *m;
+                }
+                break;
+            }
+        }
+    }
+
     params.clear();
 }
 
