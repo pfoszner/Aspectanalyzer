@@ -17,8 +17,8 @@ class EnsembleTask : public BiclusteringObject, public std::enable_shared_from_t
 
 public:
 
-    EnsembleTask(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult)
-        : BiclusteringObject(Vmatrix, Method, IdResult, -1.0)
+    EnsembleTask(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time, QString desc)
+        : BiclusteringObject(Vmatrix, Method, IdResult, time, desc)
     {
 
     }

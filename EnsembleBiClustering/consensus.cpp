@@ -5,6 +5,8 @@ std::shared_ptr<BiclusteringObject> Consensus::Compute(std::vector<std::tuple<En
     //TODO: params
     params.clear();
 
+    clock_t begin = clock();
+
     try
     {
         std::vector<std::shared_ptr<Bicluster>> consensusClusters = CreateGenericBiclusters(tasksToEnsemble, 100, 20, -1);
@@ -26,6 +28,10 @@ std::shared_ptr<BiclusteringObject> Consensus::Compute(std::vector<std::tuple<En
 
         return null;
     }
+
+    clock_t end = clock();
+
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 }
 
 
@@ -281,6 +287,8 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
 
                         Array<double> cmUpdate(orgResults[r].size(), orgResults[r].size());
 
+                        QThreadPool *localInstance = new QThreadPool();
+
                         for(int i = 0; i < CM.height; ++i)
                         {
                             for(int j = 0; j < CM.width; ++j)
@@ -302,7 +310,7 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
                                     //cmUpdate[iOut][jOut] = orgResults[r][iOut]->Compare(orgResults[r][jOut], Enums::SimilarityMethods::JaccardIndex);
                                     CostMatrixWorker *st = new CostMatrixWorker(&cmUpdate[iOut][jOut], orgResults[r][iOut], orgResults[r][jOut], Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
 
-                                    QThreadPool::globalInstance()->start(st);
+                                    localInstance->start(st);
                                 }
                                 else
                                 {
@@ -311,7 +319,9 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
                             }
                         }
 
-                        QThreadPool::globalInstance()->waitForDone();
+                        localInstance->waitForDone();
+
+                        free(localInstance);
 
                         CM.Initialize(cmUpdate);
 
@@ -383,18 +393,22 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
 
     std::vector<std::shared_ptr<Bicluster>> retVal(Connected.size());
 
+    QThreadPool *localInstance = new QThreadPool();
+
     for (uint i = 0; i < Connected.size(); ++i)
     {
         retVal[i] = std::make_shared<Bicluster>(0, 0, 0, 0);
 
         ConsensusWorker *st = new ConsensusWorker(retVal[i], dataMatrix, Connected[i], ExtractType, (double)orgResults.size(), minClusterSize, percentage);
 
-        QThreadPool::globalInstance()->start(st);
+        localInstance->start(st);
 
 
     }
 
-    QThreadPool::globalInstance()->waitForDone();
+    localInstance->waitForDone();
+
+    free(localInstance);
 
     if (maxBiclusterNum > 0 && retVal.size() > (uint)maxBiclusterNum)
     {

@@ -19,8 +19,8 @@ public:
     std::vector<int> trimB;
 
 
-    TriClustering(std::shared_ptr<Matrix>& Vmatrix, int IdResult)
-        : EnsembleTask(Vmatrix, Enums::Methods::TRICLUSTERING, IdResult)
+    TriClustering(std::shared_ptr<Matrix>& Vmatrix, int IdResult, double time, QString desc)
+        : EnsembleTask(Vmatrix, Enums::Methods::TRICLUSTERING, IdResult, time, desc)
     {
 
     }

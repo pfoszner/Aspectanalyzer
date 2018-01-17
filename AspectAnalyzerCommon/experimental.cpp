@@ -4,7 +4,7 @@ void Experimental::TestTriclustering()
 {
     std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, 1, Enums::Methods::PLSA, -1);
 
-    std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1);
+    std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1, -1, "");
 
     newObject->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
 
@@ -129,8 +129,6 @@ std::vector <QString> Experimental::GetSignature()
     {
         QTextStream in(&file);
 
-
-
         while(!in.atEnd()) {
             QString line = in.readLine().trimmed();
 
@@ -244,9 +242,876 @@ void Experimental::CompareGrandTruthMiRNA()
     }
 }
 
+void Experimental::ImportKumalResults(int repNum)
+{
+    for(int m = 0; m < repNum; ++m)
+    {
+        qDebug() << "Model rep " << m;
+
+        QString path = "D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\Dane\\model\\rep_" + QString::number(m);
+
+        std::vector<std::shared_ptr<BiclusteringObject>> importRes;
+
+        std::shared_ptr<Matrix> currMatrix;
+
+        QDirIterator it(path, QStringList() << "*.*", QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext())
+        {
+            QString file = it.next();
+            QStringList temp = file.split('_');
+
+            //for(auto part : temp)
+            //{
+                //qDebug() << part;
+            //}
+
+            //qDebug() << "File: " << file << " - " << temp.size() << "\n";
+
+            if (temp.size() == 6)
+            {
+                if (temp[5] != "found.biclusters")
+                    continue;
+
+                //qDebug() << "Model: " << temp[2] << ". Algorithm: " << temp[4] << ". Extension: " << temp[5] << "\n";
+
+                QFile filestream(file);
+
+                if(!filestream.open(QIODevice::ReadOnly))
+                {
+                    //QMessageBox::information(0, "error", file.errorString());
+                }
+                else
+                {
+                    QTextStream in(&filestream);
+
+                    Enums::Methods Method = Enums::Methods::CONSENSUS;
+
+                    if (temp[4] == "BBC")
+                            Method = Enums::Methods::BBC;
+                    else if (temp[4] == "BiMax")
+                        Method = Enums::Methods::BiMax;
+                    else if (temp[4] == "Cheng and Church")
+                        Method = Enums::Methods::ChengandChurch;
+                    else if (temp[4] == "COALESCE")
+                        Method = Enums::Methods::COALESCE;
+                    else if (temp[4] == "CPB")
+                        Method = Enums::Methods::CPB;
+                    else if (temp[4] == "FABIA")
+                        Method = Enums::Methods::FABIA;
+                    else if (temp[4] == "ISA")
+                        Method = Enums::Methods::ISA;
+                    else if (temp[4] == "OPSM")
+                        Method = Enums::Methods::OPSM;
+                    else if (temp[4] == "Plaid")
+                        Method = Enums::Methods::Plaid;
+                    else if (temp[4] == "QUBIC")
+                        Method = Enums::Methods::QUBIC;
+                    else if (temp[4] == "Spectral")
+                        Method = Enums::Methods::Spectral;
+                    else if (temp[4] == "xMOTIFs")
+                        Method = Enums::Methods::xMOTIFs;
+
+
+                    std::shared_ptr<BiclusteringObject> currBic = std::make_shared<BiclusteringObject>(currMatrix, Method, -1, 0, "Kumal Import");
+
+                    while(!in.atEnd()) {
+
+                        QString line = in.readLine().trimmed();
+
+                        if (line.size() > 0)
+                        {
+                            QStringList bictmp = line.split(' ');
+
+                            std::vector<int> cluster1;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster1.push_back(val.toInt());
+                            }
+
+                            line = in.readLine().trimmed();
+                            bictmp = line.split(' ');
+
+                            std::vector<int> cluster2;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster2.push_back(val.toInt());
+                            }
+
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+
+                            currBic->foundedBiclusters.push_back(newItem);
+                        }
+                    }
+
+                    importRes.push_back(currBic);
+                }
+            }
+            else if (temp.size() == 5)
+            {
+                //qDebug() << "Expected biclusters \n";
+                QFile filestream(file);
+
+                if(!filestream.open(QIODevice::ReadOnly))
+                {
+                    //QMessageBox::information(0, "error", file.errorString());
+                }
+                else
+                {
+                    QTextStream in(&filestream);
+
+                    while(!in.atEnd()) {
+
+                        QString line = in.readLine().trimmed();
+
+                        if (line.size() > 0)
+                        {
+                            QStringList bictmp = line.split(' ');
+
+                            std::vector<int> cluster1;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster1.push_back(val.toInt());
+                            }
+
+                            line = in.readLine().trimmed();
+                            bictmp = line.split(' ');
+
+                            std::vector<int> cluster2;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster2.push_back(val.toInt());
+                            }
+
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+
+                            currMatrix->expectedBiClusters.push_back(newItem);
+                        }
+                    }
+
+                    currMatrix->expectedBiClusterCount = currMatrix->expectedBiClusters.size();
+
+                    currMatrix->idMatrix = std::make_shared<int>(engine->db->SaveMatrix(currMatrix->data, currMatrix->name, currMatrix->group, Enums::MatrixType::V, -1));
+                    engine->db->SaveBiclusters(currMatrix->expectedBiClusters, *currMatrix->idMatrix, -1);
+                    engine->db->SaveLabels(currMatrix->rowLabels, *currMatrix->idMatrix);
+                    engine->db->SaveLabels(currMatrix->columnLabels, *currMatrix->idMatrix);
+                }
+            }
+            else if (temp.size() > 2)
+            {
+                if (currMatrix != nullptr)
+                {
+                    for(auto bic : importRes)
+                    {
+                        std::shared_ptr<BiclusteringObject> newBic = std::make_shared<BiclusteringObject>(currMatrix, (Enums::Methods)bic->idMethod, -1, 0, "Kumal Import");
+                        for(auto fb : bic->foundedBiclusters)
+                        {
+                            newBic->foundedBiclusters.push_back(fb);
+                        }
+                        newBic->idMatrix = *currMatrix->idMatrix;
+                        engine->db->SaveResult(newBic);
+                    }
+                }
+
+                importRes.clear();
+
+                //qDebug() << "Dataset model: " << temp[2] << "\n";
+
+                currMatrix = std::make_shared<Matrix>(file);
+                currMatrix->name = temp[2];
+                currMatrix->group = "rep" + QString::number(m);
+            }
+        }
+
+        if (currMatrix != nullptr)
+        {
+            for(auto bic : importRes)
+            {
+                std::shared_ptr<BiclusteringObject> newBic = std::make_shared<BiclusteringObject>(currMatrix, (Enums::Methods)bic->idMethod, -1, 0, "Kumal Import");
+                for(auto fb : bic->foundedBiclusters)
+                {
+                    newBic->foundedBiclusters.push_back(fb);
+                }
+                newBic->idMatrix = *currMatrix->idMatrix;
+                engine->db->SaveResult(newBic);
+            }
+        }
+    }
+
+    qDebug() << "Done";
+}
+
+void Experimental::ImportKumalResultsNoise(int repNum)
+{
+    for(int m = 0; m < repNum; ++m)
+    {
+        qDebug() << "Noise rep " << m;
+
+        QString path = "D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\Dane\\noise\\rep_" + QString::number(m);
+
+        std::vector<std::shared_ptr<BiclusteringObject>> importRes;
+
+        std::shared_ptr<Matrix> currMatrix;
+
+        QDirIterator it(path, QStringList() << "*.*", QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext())
+        {
+            QString file = it.next();
+            QStringList temp = file.split('_');
+
+//            int i = 0;
+//            for(auto part : temp)
+//            {
+//                qDebug() << i++ << ": " << part;
+//            }
+
+//            continue;
+
+            //qDebug() << "File: " << file << " - " << temp.size() << "\n";
+
+            if (temp.size() == 7)
+            {
+                if (temp[6] != "found.biclusters")
+                    continue;
+
+                //qDebug() << "Model: " << temp[2] << ". Algorithm: " << temp[5] << ". Extension: " << temp[6] << "\n";
+
+                QFile filestream(file);
+
+                if(!filestream.open(QIODevice::ReadOnly))
+                {
+                    //QMessageBox::information(0, "error", file.errorString());
+                }
+                else
+                {
+                    QTextStream in(&filestream);
+
+                    Enums::Methods Method = Enums::Methods::CONSENSUS;
+
+                    if (temp[5] == "BBC")
+                            Method = Enums::Methods::BBC;
+                    else if (temp[5] == "BiMax")
+                        Method = Enums::Methods::BiMax;
+                    else if (temp[5] == "Cheng and Church")
+                        Method = Enums::Methods::ChengandChurch;
+                    else if (temp[5] == "COALESCE")
+                        Method = Enums::Methods::COALESCE;
+                    else if (temp[5] == "CPB")
+                        Method = Enums::Methods::CPB;
+                    else if (temp[5] == "FABIA")
+                        Method = Enums::Methods::FABIA;
+                    else if (temp[5] == "ISA")
+                        Method = Enums::Methods::ISA;
+                    else if (temp[5] == "OPSM")
+                        Method = Enums::Methods::OPSM;
+                    else if (temp[5] == "Plaid")
+                        Method = Enums::Methods::Plaid;
+                    else if (temp[5] == "QUBIC")
+                        Method = Enums::Methods::QUBIC;
+                    else if (temp[5] == "Spectral")
+                        Method = Enums::Methods::Spectral;
+                    else if (temp[5] == "xMOTIFs")
+                        Method = Enums::Methods::xMOTIFs;
+
+
+                    std::shared_ptr<BiclusteringObject> currBic = std::make_shared<BiclusteringObject>(currMatrix, Method, -1, 0, "Kumal Import");
+
+                    while(!in.atEnd()) {
+
+                        QString line = in.readLine().trimmed();
+
+                        if (line.size() > 0)
+                        {
+                            QStringList bictmp = line.split(' ');
+
+                            std::vector<int> cluster1;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster1.push_back(val.toInt());
+                            }
+
+                            line = in.readLine().trimmed();
+                            bictmp = line.split(' ');
+
+                            std::vector<int> cluster2;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster2.push_back(val.toInt());
+                            }
+
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+
+                            currBic->foundedBiclusters.push_back(newItem);
+                        }
+                    }
+
+                    importRes.push_back(currBic);
+                }
+            }
+            else if (temp.size() == 6)
+            {
+                //qDebug() << "Expected biclusters \n";
+                QFile filestream(file);
+
+                if(!filestream.open(QIODevice::ReadOnly))
+                {
+                    //QMessageBox::information(0, "error", file.errorString());
+                }
+                else
+                {
+                    QTextStream in(&filestream);
+
+                    while(!in.atEnd()) {
+
+                        QString line = in.readLine().trimmed();
+
+                        if (line.size() > 0)
+                        {
+                            QStringList bictmp = line.split(' ');
+
+                            std::vector<int> cluster1;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster1.push_back(val.toInt());
+                            }
+
+                            line = in.readLine().trimmed();
+                            bictmp = line.split(' ');
+
+                            std::vector<int> cluster2;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster2.push_back(val.toInt());
+                            }
+
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+
+                            currMatrix->expectedBiClusters.push_back(newItem);
+                        }
+                    }
+
+                    currMatrix->expectedBiClusterCount = currMatrix->expectedBiClusters.size();
+
+                    currMatrix->idMatrix = std::make_shared<int>(engine->db->SaveMatrix(currMatrix->data, currMatrix->name, currMatrix->group, Enums::MatrixType::V, -1));
+                    engine->db->SaveBiclusters(currMatrix->expectedBiClusters, *currMatrix->idMatrix, -1);
+                    engine->db->SaveLabels(currMatrix->rowLabels, *currMatrix->idMatrix);
+                    engine->db->SaveLabels(currMatrix->columnLabels, *currMatrix->idMatrix);
+                }
+            }
+            else if (temp.size() > 2)
+            {
+                if (currMatrix != nullptr)
+                {
+                    for(auto bic : importRes)
+                    {
+                        std::shared_ptr<BiclusteringObject> newBic = std::make_shared<BiclusteringObject>(currMatrix, (Enums::Methods)bic->idMethod, -1, 0, "Kumal Import");
+                        for(auto fb : bic->foundedBiclusters)
+                        {
+                            newBic->foundedBiclusters.push_back(fb);
+                        }
+                        newBic->idMatrix = *currMatrix->idMatrix;
+                        engine->db->SaveResult(newBic);
+                    }
+                }
+
+                importRes.clear();
+
+                //qDebug() << "Dataset model: " << temp[2] << "\n";
+
+                currMatrix = std::make_shared<Matrix>(file);
+                temp[4].resize(temp[4].size() - 8);
+                currMatrix->name = temp[2] + "_" + temp[4];
+                currMatrix->group = "rep" + QString::number(m);
+            }
+        }
+
+        if (currMatrix != nullptr)
+        {
+            for(auto bic : importRes)
+            {
+                std::shared_ptr<BiclusteringObject> newBic = std::make_shared<BiclusteringObject>(currMatrix, (Enums::Methods)bic->idMethod, -1, 0, "Kumal Import");
+                for(auto fb : bic->foundedBiclusters)
+                {
+                    newBic->foundedBiclusters.push_back(fb);
+                }
+                newBic->idMatrix = *currMatrix->idMatrix;
+                engine->db->SaveResult(newBic);
+            }
+        }
+    }
+
+    qDebug() << "Done";
+}
+
+void Experimental::ImportKumalResultsNumber(int repNum)
+{
+    for(int m = 0; m < repNum; ++m)
+    {
+        qDebug() << "Number rep " << m;
+
+        QString path = "D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\Dane\\number\\rep_" + QString::number(m);
+
+        std::vector<std::shared_ptr<BiclusteringObject>> importRes;
+
+        std::shared_ptr<Matrix> currMatrix;
+
+        QDirIterator it(path, QStringList() << "*.*", QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext())
+        {
+            QString file = it.next();
+            QStringList temp = file.split('_');
+
+//            int i = 0;
+//            for(auto part : temp)
+//            {
+//                qDebug() << i++ << ": " << part;
+//            }
+//            continue;
+
+            //qDebug() << "File: " << file << " - " << temp.size() << "\n";
+
+            if (temp.size() == 8)
+            {
+                if (temp[7] != "found.biclusters")
+                    continue;
+
+                //qDebug() << "Model: " << temp[2] << ". Algorithm: " << temp[6] << ". Extension: " << temp[7] << "\n";
+
+                QFile filestream(file);
+
+                if(!filestream.open(QIODevice::ReadOnly))
+                {
+                    //QMessageBox::information(0, "error", file.errorString());
+                }
+                else
+                {
+                    QTextStream in(&filestream);
+
+                    Enums::Methods Method = Enums::Methods::CONSENSUS;
+
+                    if (temp[6] == "BBC")
+                            Method = Enums::Methods::BBC;
+                    else if (temp[6] == "BiMax")
+                        Method = Enums::Methods::BiMax;
+                    else if (temp[6] == "Cheng and Church")
+                        Method = Enums::Methods::ChengandChurch;
+                    else if (temp[6] == "COALESCE")
+                        Method = Enums::Methods::COALESCE;
+                    else if (temp[6] == "CPB")
+                        Method = Enums::Methods::CPB;
+                    else if (temp[6] == "FABIA")
+                        Method = Enums::Methods::FABIA;
+                    else if (temp[6] == "ISA")
+                        Method = Enums::Methods::ISA;
+                    else if (temp[6] == "OPSM")
+                        Method = Enums::Methods::OPSM;
+                    else if (temp[6] == "Plaid")
+                        Method = Enums::Methods::Plaid;
+                    else if (temp[6] == "QUBIC")
+                        Method = Enums::Methods::QUBIC;
+                    else if (temp[6] == "Spectral")
+                        Method = Enums::Methods::Spectral;
+                    else if (temp[6] == "xMOTIFs")
+                        Method = Enums::Methods::xMOTIFs;
+
+
+                    std::shared_ptr<BiclusteringObject> currBic = std::make_shared<BiclusteringObject>(currMatrix, Method, -1, 0, "Kumal Import");
+
+                    while(!in.atEnd()) {
+
+                        QString line = in.readLine().trimmed();
+
+                        if (line.size() > 0)
+                        {
+                            QStringList bictmp = line.split(' ');
+
+                            std::vector<int> cluster1;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster1.push_back(val.toInt());
+                            }
+
+                            line = in.readLine().trimmed();
+                            bictmp = line.split(' ');
+
+                            std::vector<int> cluster2;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster2.push_back(val.toInt());
+                            }
+
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+
+                            currBic->foundedBiclusters.push_back(newItem);
+                        }
+                    }
+
+                    importRes.push_back(currBic);
+                }
+            }
+            else if (temp.size() == 7)
+            {
+                //qDebug() << "Expected biclusters \n";
+                QFile filestream(file);
+
+                if(!filestream.open(QIODevice::ReadOnly))
+                {
+                    //QMessageBox::information(0, "error", file.errorString());
+                }
+                else
+                {
+                    QTextStream in(&filestream);
+
+                    while(!in.atEnd()) {
+
+                        QString line = in.readLine().trimmed();
+
+                        if (line.size() > 0)
+                        {
+                            QStringList bictmp = line.split(' ');
+
+                            std::vector<int> cluster1;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster1.push_back(val.toInt());
+                            }
+
+                            line = in.readLine().trimmed();
+                            bictmp = line.split(' ');
+
+                            std::vector<int> cluster2;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster2.push_back(val.toInt());
+                            }
+
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+
+                            currMatrix->expectedBiClusters.push_back(newItem);
+                        }
+                    }
+
+                    currMatrix->expectedBiClusterCount = currMatrix->expectedBiClusters.size();
+
+                    currMatrix->idMatrix = std::make_shared<int>(engine->db->SaveMatrix(currMatrix->data, currMatrix->name, currMatrix->group, Enums::MatrixType::V, -1));
+                    engine->db->SaveBiclusters(currMatrix->expectedBiClusters, *currMatrix->idMatrix, -1);
+                    engine->db->SaveLabels(currMatrix->rowLabels, *currMatrix->idMatrix);
+                    engine->db->SaveLabels(currMatrix->columnLabels, *currMatrix->idMatrix);
+                }
+            }
+            else if (temp.size() > 2)
+            {
+                if (currMatrix != nullptr)
+                {
+                    for(auto bic : importRes)
+                    {
+                        std::shared_ptr<BiclusteringObject> newBic = std::make_shared<BiclusteringObject>(currMatrix, (Enums::Methods)bic->idMethod, -1, 0, "Kumal Import");
+                        for(auto fb : bic->foundedBiclusters)
+                        {
+                            newBic->foundedBiclusters.push_back(fb);
+                        }
+                        newBic->idMatrix = *currMatrix->idMatrix;
+                        engine->db->SaveResult(newBic);
+                    }
+                }
+
+                importRes.clear();
+
+                //qDebug() << "Dataset model: " << temp[2] << "\n";
+
+                currMatrix = std::make_shared<Matrix>(file);
+                temp[5].resize(temp[5].size() - 8);
+                currMatrix->name = temp[2] + "_" + temp[4] + "_" + temp[5];
+                currMatrix->group = "rep" + QString::number(m);
+            }
+        }
+
+        if (currMatrix != nullptr)
+        {
+            for(auto bic : importRes)
+            {
+                std::shared_ptr<BiclusteringObject> newBic = std::make_shared<BiclusteringObject>(currMatrix, (Enums::Methods)bic->idMethod, -1, 0, "Kumal Import");
+                for(auto fb : bic->foundedBiclusters)
+                {
+                    newBic->foundedBiclusters.push_back(fb);
+                }
+                newBic->idMatrix = *currMatrix->idMatrix;
+                engine->db->SaveResult(newBic);
+            }
+        }
+    }
+
+    qDebug() << "Done";
+}
+
+void Experimental::ImportKumalResultsOverlap(int repNum)
+{
+    for(int m = 0; m < repNum; ++m)
+    {
+        qDebug() << "Overlap rep " << m;
+
+        QString path = "D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\Dane\\overlap\\rep_" + QString::number(m);
+
+        std::vector<std::shared_ptr<BiclusteringObject>> importRes;
+
+        std::shared_ptr<Matrix> currMatrix;
+
+        QDirIterator it(path, QStringList() << "*.*", QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext())
+        {
+            QString file = it.next();
+            QStringList temp = file.split('_');
+
+//            int i = 0;
+//            for(auto part : temp)
+//            {
+//                qDebug() << i++ << ": " << part;
+//            }
+//            continue;
+
+            //qDebug() << "File: " << file << " - " << temp.size() << "\n";
+
+            if (temp.size() == 11)
+            {
+                if (temp[10] != "found.biclusters")
+                    continue;
+
+                //qDebug() << "Model: " << temp[2] << ". Algorithm: " << temp[9] << ". Extension: " << temp[10] << "\n";
+
+                QFile filestream(file);
+
+                if(!filestream.open(QIODevice::ReadOnly))
+                {
+                    //QMessageBox::information(0, "error", file.errorString());
+                }
+                else
+                {
+                    QTextStream in(&filestream);
+
+                    Enums::Methods Method = Enums::Methods::CONSENSUS;
+
+                    if (temp[9] == "BBC")
+                            Method = Enums::Methods::BBC;
+                    else if (temp[9] == "BiMax")
+                        Method = Enums::Methods::BiMax;
+                    else if (temp[9] == "Cheng and Church")
+                        Method = Enums::Methods::ChengandChurch;
+                    else if (temp[9] == "COALESCE")
+                        Method = Enums::Methods::COALESCE;
+                    else if (temp[9] == "CPB")
+                        Method = Enums::Methods::CPB;
+                    else if (temp[9] == "FABIA")
+                        Method = Enums::Methods::FABIA;
+                    else if (temp[9] == "ISA")
+                        Method = Enums::Methods::ISA;
+                    else if (temp[9] == "OPSM")
+                        Method = Enums::Methods::OPSM;
+                    else if (temp[9] == "Plaid")
+                        Method = Enums::Methods::Plaid;
+                    else if (temp[9] == "QUBIC")
+                        Method = Enums::Methods::QUBIC;
+                    else if (temp[9] == "Spectral")
+                        Method = Enums::Methods::Spectral;
+                    else if (temp[9] == "xMOTIFs")
+                        Method = Enums::Methods::xMOTIFs;
+
+
+                    std::shared_ptr<BiclusteringObject> currBic = std::make_shared<BiclusteringObject>(currMatrix, Method, -1, 0, "Kumal Import");
+
+                    while(!in.atEnd()) {
+
+                        QString line = in.readLine().trimmed();
+
+                        if (line.size() > 0)
+                        {
+                            QStringList bictmp = line.split(' ');
+
+                            std::vector<int> cluster1;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster1.push_back(val.toInt());
+                            }
+
+                            line = in.readLine().trimmed();
+                            bictmp = line.split(' ');
+
+                            std::vector<int> cluster2;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster2.push_back(val.toInt());
+                            }
+
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+
+                            currBic->foundedBiclusters.push_back(newItem);
+                        }
+                    }
+
+                    importRes.push_back(currBic);
+                }
+            }
+            else if (temp.size() == 10)
+            {
+                //qDebug() << "Expected biclusters \n";
+                QFile filestream(file);
+
+                if(!filestream.open(QIODevice::ReadOnly))
+                {
+                    //QMessageBox::information(0, "error", file.errorString());
+                }
+                else
+                {
+                    QTextStream in(&filestream);
+
+                    while(!in.atEnd()) {
+
+                        QString line = in.readLine().trimmed();
+
+                        if (line.size() > 0)
+                        {
+                            QStringList bictmp = line.split(' ');
+
+                            std::vector<int> cluster1;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster1.push_back(val.toInt());
+                            }
+
+                            line = in.readLine().trimmed();
+                            bictmp = line.split(' ');
+
+                            std::vector<int> cluster2;
+
+                            for(QString val : bictmp)
+                            {
+                                cluster2.push_back(val.toInt());
+                            }
+
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+
+                            currMatrix->expectedBiClusters.push_back(newItem);
+                        }
+                    }
+
+                    currMatrix->expectedBiClusterCount = currMatrix->expectedBiClusters.size();
+
+                    currMatrix->idMatrix = std::make_shared<int>(engine->db->SaveMatrix(currMatrix->data, currMatrix->name, currMatrix->group, Enums::MatrixType::V, -1));
+                    engine->db->SaveBiclusters(currMatrix->expectedBiClusters, *currMatrix->idMatrix, -1);
+                    engine->db->SaveLabels(currMatrix->rowLabels, *currMatrix->idMatrix);
+                    engine->db->SaveLabels(currMatrix->columnLabels, *currMatrix->idMatrix);
+                }
+            }
+            else if (temp.size() > 2)
+            {
+                if (currMatrix != nullptr)
+                {
+                    for(auto bic : importRes)
+                    {
+                        std::shared_ptr<BiclusteringObject> newBic = std::make_shared<BiclusteringObject>(currMatrix, (Enums::Methods)bic->idMethod, -1, 0, "Kumal Import");
+                        for(auto fb : bic->foundedBiclusters)
+                        {
+                            newBic->foundedBiclusters.push_back(fb);
+                        }
+                        newBic->idMatrix = *currMatrix->idMatrix;
+                        engine->db->SaveResult(newBic);
+                    }
+                }
+
+                importRes.clear();
+
+                //qDebug() << "Dataset model: " << temp[2] << "\n";
+                temp[8].resize(temp[8].size() - 8);
+                currMatrix = std::make_shared<Matrix>(file);
+                currMatrix->name = temp[2] + "_" + temp[4] + "_" + temp[5] + "_" + temp[6] + "_" + temp[7] + "_" + temp[8];
+                currMatrix->group = "rep" + QString::number(m);
+            }
+        }
+
+        if (currMatrix != nullptr)
+        {
+            for(auto bic : importRes)
+            {
+                std::shared_ptr<BiclusteringObject> newBic = std::make_shared<BiclusteringObject>(currMatrix, (Enums::Methods)bic->idMethod, -1, 0, "Kumal Import");
+                for(auto fb : bic->foundedBiclusters)
+                {
+                    newBic->foundedBiclusters.push_back(fb);
+                }
+                newBic->idMatrix = *currMatrix->idMatrix;
+                engine->db->SaveResult(newBic);
+            }
+        }
+    }
+
+    qDebug() << "Done";
+}
+
+
 void Experimental::StartCustom(QString mode)
 {
 
+    //qDebug() << engine->db->GetResults(-1,-1,-1,-1).size();
+
+    //ImportKumalResults(20);
+    //ImportKumalResultsNoise(20);
+    //ImportKumalResultsNumber(20);
+    //ImportKumalResultsOverlap(20);
+
+
+//    for(int i = 1; i <= 72; ++i)
+//    {
+//        std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(i,-1,-1,-1);
+
+//        test[0]->PostProcessingTask();
+
+//        if (test[0]->foundedBiclusters.size() > 0)
+//            qDebug() << test[0]->idResult << ";" << *test[0]->dataMatrix->idMatrix << ";" << test[0]->idMethod << ";" << *test[0]->foundedBiclusters[0]->ACV << ";" << *test[0]->foundedBiclusters[0]->similarity  << ";" << test[0]->Recovery()  << ";" << test[0]->Relevance();
+//        else
+//            qDebug() << test[0]->idResult << ";" << *test[0]->dataMatrix->idMatrix << ";" << test[0]->idMethod << ";0;0;0;0";
+
+//    }
+//qDebug() << "Mission accomplished!";
+    //return;
+
+    std::vector<int> ids = engine->db->getGroupOfMatrices("rep0");
+
+    //ids.push_back(1);
+    //ids.push_back(2);
+
+    for(int id : ids)
+    {
+        try
+        {
+            RunConsensus(id);
+        }
+        catch(...){}
+    }
+
+    for(int id : ids)
+    {
+        try
+        {
+            RunTriclustering(id);
+        }
+        catch(...){}
+    }
+
+    engine->ServeQueue();
+
+    qDebug() << "Mission accomplished!";
     //ExportResults("", 1, 360);
 
     //DividePowerlogs();
@@ -259,14 +1124,14 @@ void Experimental::StartCustom(QString mode)
 
     //std::vector<int> resultIDs;
 
-    for(int m = 2; m <= 5; ++m)
-    {
+    //for(int m = 2; m <= 5; ++m)
+    //{
         //resultIDs.push_back(m);
-        std::vector<int> resultIDs = engine->db->GetResultsIDs(m);
-        qDebug() << "Size: " << resultIDs.size();
-        InputForBingo("Bingo" + QString::number(m) + "_Kumal", resultIDs, m);
+        //std::vector<int> resultIDs = engine->db->GetResultsIDs(m);
+        //qDebug() << "Size: " << resultIDs.size();
+        //InputForBingo("Bingo" + QString::number(m) + "_Kumal", resultIDs, m);
     //int m=8;
-    }
+    //}
 
     //InputForBingo("Bingo1_Final", resultIDs, 1);
     //InputForBingo("Bingo8_Final", resultIDs, 8);
@@ -481,8 +1346,9 @@ void Experimental::CompareGrandTruth()
     qDebug() << "Single Average: " << (singleAvg / 40);
 }
 
-void Experimental::RunTriclustering()
+void Experimental::RunTriclustering(int method)
 {
+    /*
     std::vector<Enums::Methods> methods;
 
     methods.push_back(Enums::Methods::PLSA);
@@ -494,8 +1360,14 @@ void Experimental::RunTriclustering()
 
     for(Enums::Methods method : methods)
     {
-        std::vector<std::shared_ptr<BiclusteringObject>> single  = engine->db->GetResults(-1, 1, method, -1);
+    */
+        std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, method, -1, -1);
+        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r) { return r->idMethod == Enums::Methods::CONSENSUS; });
+        test.erase(riter, test.end());
 
+        if (test.size() == 0)
+            return;
+        /*
         double bestValue = -1;
         int best = 0;
 
@@ -526,8 +1398,8 @@ void Experimental::RunTriclustering()
 
         test.push_back(single[best]);
     }
-
-    std::vector<MergeType> mt;
+*/
+    //std::vector<MergeType> mt;
 
     //mt.push_back(Consensus::MergeType::ByACV);
     //mt.push_back(Consensus::MergeType::ByACVHeuristic);
@@ -535,11 +1407,11 @@ void Experimental::RunTriclustering()
 
     //for(Consensus::MergeType imt : mt)
     //{
-        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(engine->CurrentVmatrix, -1);
+        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1, 0, "");
 
-        newObject->expectedBiClusterCount = 3;
+        newObject->expectedBiClusterCount = 1;
 
-        newObject->dataMatrix->expectedBiClusterCount = 3;
+        newObject->dataMatrix->expectedBiClusterCount = 1;
 
         newObject->SetEnsemble(test);
 
@@ -549,11 +1421,11 @@ void Experimental::RunTriclustering()
 
         params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
 
-        auto res = newObject->Compute(params);
+        //auto res = newObject->Compute(params);
 
-        engine->db->SaveResult(res);
+        //engine->db->SaveResult(res);
 
-        //engine->AddBiClusteringTask(newObject);
+        engine->AddBiClusteringTask(newObject);
     //}
        //engine->ServeQueue();
 }
@@ -576,7 +1448,7 @@ void Experimental::RunAllTriclustering()
 
         qDebug() << "Matrix: " << test[0]->dataMatrix->name << " Max: " << maxBic;
 
-        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1);
+        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1, 0, "");
 
         //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
 
@@ -644,7 +1516,7 @@ void Experimental::RunAllConsensus()
 
         for(MergeType imt : mt)
         {
-            std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1);
+            std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1, -1, "");
 
             //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
 
@@ -753,7 +1625,7 @@ void Experimental::RunAllConsensus2(int idMatrix)
 
             for(MergeType imt : mt)
             {
-                std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1);
+                std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1, -1, "");
 
                 //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
 
@@ -785,7 +1657,7 @@ void Experimental::RunStepConsensus(int matrix, int start, int stop, int step)
 
     for(uint s = start; s <= stop; s = s + step)
     {
-        std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(vMatrix, -1);;
+        std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(vMatrix, -1, 0, "");
 
         std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, matrix, -1, s);
 
@@ -829,7 +1701,7 @@ void Experimental::RunStepTricluster(int matrix, int start)
 
     for(uint s = start; s <= 100; s = s + 5)
     {
-        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(vMatrix, -1);;
+        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(vMatrix, -1, 0, "");
 
         std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, matrix, -1, s);
 
@@ -873,21 +1745,26 @@ void Experimental::RunStepTricluster(int matrix, int start)
     //engine->ServeQueue();
 }
 
-void Experimental::RunConsensus()
+void Experimental::RunConsensus(int method)
 {
-    std::vector<Enums::Methods> methods;
+    //std::vector<Enums::Methods> methods;
 
-    methods.push_back(Enums::Methods::PLSA);
-    methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
-    methods.push_back(Enums::Methods::KULLBACK_LIEBER);
-    methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
+    //methods.push_back(Enums::Methods::PLSA);
+    //methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
+    //methods.push_back(Enums::Methods::KULLBACK_LIEBER);
+    //methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
 
+    /*
     std::vector<std::shared_ptr<BiclusteringObject>> test;
 
     for(Enums::Methods method : methods)
     {
-        std::vector<std::shared_ptr<BiclusteringObject>> single  = engine->db->GetResults(-1, 7, method, -1);
+    */
+        std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, method, -1, -1);
 
+        if (test.size() == 0)
+            return;
+/*
         double bestValue = -1;
         int best = 0;
 
@@ -912,22 +1789,32 @@ void Experimental::RunConsensus()
 
         test.push_back(single[best]);
     }
-
+*/
     std::vector<MergeType> mt;
 
     mt.push_back(MergeType::ByACV);
     mt.push_back(MergeType::ByACVHeuristic);
     mt.push_back(MergeType::Standard);
+    mt.push_back(MergeType::None);
+
+    std::vector<QString> descs;
+
+    descs.push_back("ByACV");
+    descs.push_back("ByACVHeuristic");
+    descs.push_back("Standard");
+    descs.push_back("None");
+
+    int d = 0;
 
     for(MergeType imt : mt)
     {
-        //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1);
+        std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1, 0, descs[d++]);
 
-        std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
+        //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
 
-        newObject->expectedBiClusterCount = 3;
+        newObject->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
 
-        newObject->dataMatrix->expectedBiClusterCount = 3;
+        newObject->dataMatrix->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
 
         newObject->SetEnsemble(test);
 
@@ -937,11 +1824,11 @@ void Experimental::RunConsensus()
 
         params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
 
-        auto res = newObject->Compute(params);
+        //auto res = newObject->Compute(params);
 
-        engine->db->SaveResult(res);
+        //engine->db->SaveResult(res);
 
-        //engine->AddBiClusteringTask(newObject);
+        engine->AddBiClusteringTask(newObject);
     }
 
     //engine->ServeQueue();
@@ -986,7 +1873,7 @@ void Experimental::Squro(QString mode)
             engine->ServeQueue();
         }
 
-        RunConsensus();
+        RunConsensus(1);
     }
     else if (mode == "2")
     {
@@ -1021,7 +1908,7 @@ void Experimental::Squro(QString mode)
             engine->ServeQueue();
         }
 
-        RunConsensus();
+        RunConsensus(1);
     }
     else if (mode == "3")
     {
@@ -1153,7 +2040,7 @@ void Experimental::LoadKumalBiclusters()
                         methodID = Enums::Methods::xMOTIFs;
 
 
-                    bicObject = std::make_shared<BiclusteringObject>(dataMatrix, methodID, -1, -1);
+                    bicObject = std::make_shared<BiclusteringObject>(dataMatrix, methodID, -1, -1, "Kumal Import");
                 }
 
                 QString rows = in.readLine().trimmed();

@@ -44,16 +44,18 @@ enum ComputingMode
     std::vector<FeatureResult> features;
     void GenerateARFFFile(QString path, int dim, std::vector<int> indexes = std::vector<int>());
     QString saveToLocalFile = "";
+    QString desc = "";
 
 public:
     BiclusteringObject(QByteArray);
     BiclusteringObject(std::shared_ptr<Matrix>&);
-    BiclusteringObject(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time)
+    BiclusteringObject(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time, QString desc)
         : BiclusteringObject(Vmatrix)
     {
         idMethod = Method;
         idResult = IdResult;
         time_spent = time;
+        this->desc = desc;
     }
 
     QByteArray Serialize(bool withData);
@@ -69,6 +71,13 @@ public:
     void PostProcessingTask();
 
     void SaveToLocalFile(std::shared_ptr<double> AverageAVC, double Similarity);
+
+    double Recovery();
+
+    double Relevance();
+
+private:
+    double RecoveryRelevance(const std::vector<std::shared_ptr<Bicluster>>& first, const std::vector<std::shared_ptr<Bicluster>>& second);
 
 signals:
     void ReportProgress(int steps);

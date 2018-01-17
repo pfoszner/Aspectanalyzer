@@ -36,11 +36,83 @@ Matrix::Matrix(QString filepath)
     else if (extension == "soft"){
             LoadSoftFile(filepath);
     }
+    else if (extension == "dataset"){
+            LoadDatasetFile(filepath);
+    }
 }
+
+
 
 Matrix::Matrix(std::vector <QString>& sdata)
 {
     LoadFromDataList(sdata);
+}
+
+void Matrix::LoadDatasetFile(QString& filepath)
+{
+    idMatrix = std::make_shared<int>(-1);
+
+    QFile file(filepath);
+
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        //QMessageBox::information(0, "error", file.errorString());
+    }
+    else
+    {
+        QTextStream in(&file);
+
+        bool header = true;
+
+        int rowIndex = 0;
+
+        while(!in.atEnd()) {
+
+            QString line = in.readLine().trimmed();
+
+            if (header){
+
+                QStringList tmp = line.split('\t');
+
+                for(int i = 1; i < tmp.size(); ++i)
+                {
+                    Label newItem(-1, -1, (int)Enums::LabelType::ColumnLabel, i-1, tmp[i]);
+                    columnLabels.push_back(newItem);
+                }
+
+                header = false;
+            }
+            else{
+                QStringList tmp = line.split('\t');
+
+                rowLabels.emplace_back(-1, -1, Enums::LabelType::RowLabel, rowIndex++, tmp[0]);
+
+                arma::vec row = arma::zeros<arma::vec>(tmp.size()-1);
+
+                for(int i = 1; i < tmp.size(); ++i)
+                {
+                        bool ok;
+
+                        double value = tmp[i].trimmed().toDouble(&ok);
+
+                        if (!ok)
+                        {
+                            value = tmp[i].replace(",",".").toDouble(&ok);
+
+                            if (!ok)
+                            {
+                                qDebug() << "Conversion gone wrong. Value: \"" << tmp[i] << "\"";
+                            }
+                        }
+
+                        row(i - 1) = value;
+                }
+
+                data = arma::join_cols(data, row.t());
+
+            }
+        }
+    }
 }
 
 void Matrix::LoadSoftFile(QString& filepath)

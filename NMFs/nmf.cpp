@@ -5,8 +5,8 @@ NMF::NMF(std::shared_ptr<Matrix>& data) : BiclusteringObject(data), n(data->data
 
 }
 
-NMF::NMF(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time)
- : BiclusteringObject(Vmatrix, Method, IdResult, time), n(Vmatrix->data.n_cols), p(Vmatrix->data.n_rows)
+NMF::NMF(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time, QString desc)
+ : BiclusteringObject(Vmatrix, Method, IdResult, time, desc), n(Vmatrix->data.n_cols), p(Vmatrix->data.n_rows)
 {
 
 }

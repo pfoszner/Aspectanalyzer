@@ -237,6 +237,8 @@ Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<s
 
     Array<double> CostMatrix(size, size);
 
+    QThreadPool *localInstance = new QThreadPool();
+
     for(uint i = 0; i < size; ++i)
     {
         for(uint j = 0; j < size; ++j)
@@ -255,7 +257,7 @@ Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<s
                 {
                     CostMatrixWorker *st = new CostMatrixWorker(&CostMatrix[i][j], original[i], computed[j], mode, simMethod);
 
-                    QThreadPool::globalInstance()->start(st);
+                    localInstance->start(st);
 
                     /*
                     switch (mode)
@@ -281,7 +283,9 @@ Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<s
         }
     }
 
-    QThreadPool::globalInstance()->waitForDone();
+    localInstance->waitForDone();
+
+    free(localInstance);
 
     return CostMatrix;
 }
@@ -290,7 +294,7 @@ void BiclusteringObject::PostProcessingTask()
 {
     if (foundedBiclusters.size() == 0)
     {
-        qDebug() << "Panic! Panic! Panic!";
+        //qDebug() << "Panic! Panic! Panic!";
     }
 
     double Value = 0;
@@ -365,7 +369,7 @@ void BiclusteringObject::SaveToLocalFile(std::shared_ptr<double> AverageAVC, dou
         tstruct = *localtime(&now);
         strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
 
-        out << "Result computation finished: " << buf << std::endl;
+        //out << "Result computation finished: " << buf << std::endl;
     }
 }
 
@@ -489,6 +493,40 @@ void BiclusteringObject::GenerateARFFFile(QString path, int dim, std::vector<int
     }
 
     retVal.close();
+}
+
+// S(E,F) - Recovery
+// S(F,E) - Relevance
+double BiclusteringObject::RecoveryRelevance(const std::vector<std::shared_ptr<Bicluster>>& first, const std::vector<std::shared_ptr<Bicluster>>& second)
+{
+    double retVal;
+
+    for(std::shared_ptr<Bicluster> b1 : first)
+    {
+        double maximum = 0;
+
+        for(std::shared_ptr<Bicluster> b2 : second)
+        {
+            double candidate = b1->Compare(b2, Enums::SimilarityMethods::JaccardIndex);
+
+            if (candidate > maximum)
+                maximum = candidate;
+        }
+
+        retVal += maximum;
+    }
+
+    return retVal / first.size();
+}
+
+double BiclusteringObject::Recovery()
+{
+    return RecoveryRelevance(dataMatrix->expectedBiClusters, foundedBiclusters);
+}
+
+double BiclusteringObject::Relevance()
+{
+    return RecoveryRelevance(foundedBiclusters, dataMatrix->expectedBiClusters);
 }
 
 QByteArray IntToArray(qint32 source) //Use qint32 to ensure that the number have 4 bytes

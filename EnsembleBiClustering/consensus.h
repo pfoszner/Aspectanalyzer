@@ -13,8 +13,8 @@ public:
 
     MergeType ExtractType = MergeType::Standard;
 
-    Consensus(std::shared_ptr<Matrix>& Vmatrix, int IdResult)
-        : EnsembleTask(Vmatrix, Enums::Methods::CONSENSUS, IdResult)
+    Consensus(std::shared_ptr<Matrix>& Vmatrix, int IdResult, double time, QString desc)
+        : EnsembleTask(Vmatrix, Enums::Methods::CONSENSUS, IdResult, time, desc)
     {
 
     }

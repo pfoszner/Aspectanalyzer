@@ -57,7 +57,7 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
 {
     std::vector<std::shared_ptr<BiclusteringObject>> retVal;
 
-    QString queryString = "SELECT RESULT.id_result as id_result, RESULT.id_method as id_method, RESULT.time as time, RESULT.id_matrix as id_matrix, FEATURE.id_feature as id_feature, FEATURE.value as value, FEATURE.id_feature_type as id_type, FEATURE.[index] as [index] FROM (RESULT LEFT OUTER JOIN FEATURE ON RESULT.id_result = FEATURE.id_result)";
+    QString queryString = "SELECT RESULT.id_result as id_result, RESULT.id_method as id_method, RESULT.time as time, RESULT.id_matrix as id_matrix, RESULT.desc as desc, FEATURE.id_feature as id_feature, FEATURE.value as value, FEATURE.id_feature_type as id_type, FEATURE.[index] as [index] FROM (RESULT LEFT OUTER JOIN FEATURE ON RESULT.id_result = FEATURE.id_result)";
 
     idMethod++;
 
@@ -89,6 +89,7 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
         int method = query.value("id_method").toInt() - 1;
         double time = query.value("time").toDouble();
         int Vmatrix = query.value("id_matrix").toInt();
+        QString desc = query.value("desc").toString();
 
         if (Result != nullptr && Result->idResult != ID)
         {
@@ -115,9 +116,9 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
                 || Enums::Methods(method) == Enums::Methods::KULLBACK_LIEBER
                 || Enums::Methods(method) == Enums::Methods::NonSmooth_KULLBACK_LIEBER
             )
-                Result = std::make_shared<NMF>(dataMatrix, Enums::Methods(method), ID, time);
+                Result = std::make_shared<NMF>(dataMatrix, Enums::Methods(method), ID, time, desc);
             else
-                Result = std::make_shared<BiclusteringObject>(dataMatrix, Enums::Methods(method), ID, time);
+                Result = std::make_shared<BiclusteringObject>(dataMatrix, Enums::Methods(method), ID, time, desc);
 
             std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
 
@@ -149,11 +150,11 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
             GetMatrixData(tmpPtr->idResult, Enums::MatrixType::W, tmpPtr);
             GetMatrixData(tmpPtr->idResult, Enums::MatrixType::H, tmpPtr);
 
-            qDebug() << tmpPtr->WMatrix.n_cols;
-            qDebug() << tmpPtr->WMatrix.n_rows;
+            //qDebug() << tmpPtr->WMatrix.n_cols;
+            //qDebug() << tmpPtr->WMatrix.n_rows;
 
-            qDebug() << tmpPtr->HMatrix.n_cols;
-            qDebug() << tmpPtr->HMatrix.n_rows;
+            //qDebug() << tmpPtr->HMatrix.n_cols;
+            //qDebug() << tmpPtr->HMatrix.n_rows;
         }
 
         retVal.push_back(Result);
@@ -184,13 +185,14 @@ int DBTools::SaveResult(std::shared_ptr<BiclusteringObject> taskToSave)
     //save result row
     QSqlQuery query(db);
 
-    QString queryText = "INSERT INTO RESULT ([id_method],[desc],[id_matrix],[k],[time]) VALUES (:method,'',:matrix,:bicNum,:time);";
+    QString queryText = "INSERT INTO RESULT ([id_method],[id_matrix],[k],[time],[desc]) VALUES (:method,:matrix,:bicNum,:time,:desc);";
 
     query.prepare(queryText);
     query.bindValue(":method", taskToSave->idMethod + 1);
     query.bindValue(":matrix", *taskToSave->dataMatrix->idMatrix);
-    query.bindValue(":bicNum", taskToSave->expectedBiClusterCount);
+    query.bindValue(":bicNum", taskToSave->foundedBiclusters.size());
     query.bindValue(":time", taskToSave->time_spent);
+    query.bindValue(":desc", taskToSave->desc);
 
     bool test = query.exec();
 

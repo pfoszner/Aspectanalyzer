@@ -48,6 +48,7 @@ public:
 private:
     void LoadFromDataList(std::vector <QString>& sdata);
     void LoadSoftFile(QString& filepath);
-};
+    void LoadDatasetFile(QString& filepath);
 
+};
 #endif // MATRIX_H

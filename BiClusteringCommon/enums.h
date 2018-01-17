@@ -47,7 +47,8 @@ public:
             ISA,
             ChengandChurch,
             BiMax,
-            xMOTIFs
+            xMOTIFs,
+            COALESCE
         };
 
     enum MethodsParameters

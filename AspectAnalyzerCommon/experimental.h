@@ -25,8 +25,8 @@ public:
 
     void StartCustom(QString mode);
     void TestTriclustering();
-    void RunConsensus();
-    void RunTriclustering();
+    void RunConsensus(int method);
+    void RunTriclustering(int method);
     void CompareGrandTruth();
     void CompareGrandTruthMiRNA();
     void ARFFPlay();
@@ -45,6 +45,10 @@ public:
     void InputForBingo(QString file, std::vector<int> startID, int endID);
     void CheckSimiliarity();
     void DividePowerlogs();
+    void ImportKumalResults(int repNum);
+    void ImportKumalResultsNoise(int repNum);
+    void ImportKumalResultsNumber(int repNum);
+    void ImportKumalResultsOverlap(int repNum);
 };
 
 #endif // EXPERIMENTAL_H

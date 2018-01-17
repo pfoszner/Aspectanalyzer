@@ -14,7 +14,7 @@ class NMF : public BiclusteringObject, public std::enable_shared_from_this<NMF>
 
 public:
     NMF(std::shared_ptr<Matrix>&);
-    NMF(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time);
+    NMF(std::shared_ptr<Matrix>& Vmatrix, Enums::Methods Method, int IdResult, double time, QString desc);
     NMF(QByteArray deserialize);// : BiclusteringObject(deserialize) { }
     arma::mat HMatrix;
     arma::mat WMatrix;

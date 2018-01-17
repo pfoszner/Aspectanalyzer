@@ -1,5 +1,25 @@
 #include "dbtools.h"
 
+std::vector<int> DBTools::getGroupOfMatrices(QString group)
+{
+    QString queryString = "SELECT id_matrix FROM matrix WHERE [group] = '" + group + "'";
+
+    std::vector<int> retVal;
+
+    QSqlQuery query(db);
+
+    query.exec(queryString);
+
+    while (query.next())
+    {
+        int ID = query.value("id_matrix").toInt();
+
+        retVal.push_back(ID);
+    }
+
+    return retVal;
+}
+
 void DBTools::GetMatrixTableList(QTableWidget *table)
 {
     QSqlQuery query(db);
@@ -176,7 +196,7 @@ int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int
 
     //file.open(QIODevice::ReadOnly);
 
-    qDebug() << rawData.size();
+    //qDebug() << rawData.size();
 
     //std::vector<char> rawData(fileSize);// = file.readAll();
 
@@ -204,7 +224,7 @@ int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int
     if (test)
     {
         retVal = query.lastInsertId().toInt();
-        qDebug() << query.lastInsertId();
+        //qDebug() << query.lastInsertId();
 
 
 //       double test1 = matrixToSave(40,40);

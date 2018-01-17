@@ -5,6 +5,8 @@ std::shared_ptr<BiclusteringObject> TriClustering::Compute(std::vector<std::tupl
     //TODO: params
     params.clear();
 
+    clock_t begin = clock();
+
     try
     {
         std::vector<std::shared_ptr<Bicluster>> TriClusters;
@@ -30,6 +32,10 @@ std::shared_ptr<BiclusteringObject> TriClustering::Compute(std::vector<std::tupl
 
         return null;
     }
+
+    clock_t end = clock();
+
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 }
 
 std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::vector<std::shared_ptr<Bicluster>> Biclusters)

@@ -33,6 +33,7 @@ public:
     void GetMatrixData(int, int, std::shared_ptr<NMF>);
     void GetMatrixTableList(QTableWidget *table);
     std::vector<int> GetResultsIDs(int m);
+    std::vector<int> getGroupOfMatrices(QString group);
 
 private:
     QString path;
