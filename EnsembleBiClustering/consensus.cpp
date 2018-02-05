@@ -218,7 +218,7 @@ std::vector<std::vector<std::shared_ptr<Bicluster>>> Consensus::SortResults(cons
 
 std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::vector<std::vector<std::shared_ptr<Bicluster>>> orgResults, double percentage, uint minClusterSize, int maxBiclusterNum)
 {
-    uint bicSize = orgResults[0].size();
+    size_t bicSize = orgResults[0].size();
 
     //Are there any results at all?
     if (orgResults.size() == 0)
@@ -234,7 +234,7 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
             {
                 if (orgResults[r].size() < expectedBiClusterCount)
                 {
-                    std::shared_ptr<Bicluster> emptyBic = std::make_shared<Bicluster>(-1, std::vector<int>(), std::vector<int>(), nullptr, nullptr);
+                    std::shared_ptr<Bicluster> emptyBic = std::make_shared<Bicluster>(-1, std::vector<int>(), std::vector<int>());
 
                     while (orgResults[r].size() < expectedBiClusterCount)
                     {
@@ -420,8 +420,7 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
             {
                 if (retVal[i]->cluster1.size() > 0 && retVal[i]->cluster2.size() > 0)
                 {
-                    std::shared_ptr<double> tmp = dataMatrix->AverageCorrelationValue(retVal[i]->cluster1, retVal[i]->cluster2);
-                    SimValuesList[i] = *tmp;
+                    SimValuesList[i] = dataMatrix->AverageCorrelationValue(retVal[i]->cluster1, retVal[i]->cluster2);
                 }
                 else
                     SimValuesList[i] = 0;

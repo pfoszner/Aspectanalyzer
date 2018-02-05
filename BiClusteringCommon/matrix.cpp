@@ -1,5 +1,7 @@
 #include "matrix.h"
 
+using namespace arma;
+
 Matrix::Matrix(QString filepath)
 {
     QFileInfo fi(filepath);
@@ -294,7 +296,7 @@ void Matrix::LoadFromDataList(std::vector <QString>& sdata)
                 itemsToLoad = -1;
         }
 
-        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, cluster1, cluster2);
         expectedBiClusters.push_back(NewBic);
     }
 
@@ -326,7 +328,7 @@ void Matrix::LoadFromDataList(std::vector <QString>& sdata)
 
         if (i == startMainLoop + expectedBiClusterCount)
         {
-            data = arma::zeros<arma::mat>(sdata.size() - startMainLoop - expectedBiClusterCount, 1000 - startInnerLoop);
+            data = arma::zeros<arma::mat>((uint)sdata.size() - startMainLoop - expectedBiClusterCount, 1000 - startInnerLoop);
         }
 
         for(int j = startInnerLoop; j < 1000; ++j)
@@ -352,7 +354,7 @@ void Matrix::LoadFromDataList(std::vector <QString>& sdata)
 
     for(auto bic : expectedBiClusters)
     {
-        bic->ACV = AverageCorrelationValue(bic->cluster1, bic->cluster2);
+        bic->SetFeature(Enums::FeatureType::ACV, AverageCorrelationValue(bic->cluster1, bic->cluster2));
     }
 
     double Min = data.min();
@@ -380,11 +382,11 @@ void Matrix::AddValue(double value)
     data = data + value;
 }
 
-std::shared_ptr<double> Matrix::AverageCorrelationValue(const std::vector<int>& clusterW, const std::vector<int>& clusterH)
+double Matrix::AverageSpearmansRank(const std::vector<int>& clusterW, const std::vector<int>& clusterH)
 {
-    std::shared_ptr<double> retVal;
+    double retVal;
 
-    arma::mat Amatrix = arma::zeros<arma::mat>(clusterW.size(), clusterH.size());
+    arma::mat Amatrix = arma::zeros<arma::mat>((uint)clusterW.size(), (uint)clusterH.size());
 
     for (uint i = 0; i < clusterH.size(); ++i)
     {
@@ -401,13 +403,355 @@ std::shared_ptr<double> Matrix::AverageCorrelationValue(const std::vector<int>& 
         }
     }
 
+    retVal = AverageSpearmansRank(Amatrix);
+
+    return retVal;
+}
+
+rowvec getSpearmanRanks(const rowvec X)
+{
+    rowvec retVal = zeros<rowvec>(X.n_elem);
+
+    for(uint i = 0; i < X.n_elem; ++i)
+    {
+        double val = X(i);
+        int count = 0;
+
+        for(uint j = 0; j < X.n_elem; ++j)
+        {
+            if (X(j) <= val)
+               count++;
+        }
+
+        retVal(i) = count;
+    }
+
+    return retVal;
+}
+
+double Matrix::Variance(const std::vector<int>& clusterW, const std::vector<int>& clusterH)
+{
+    double retVal;
+
+    arma::mat Amatrix = arma::zeros<arma::mat>((uint)clusterW.size(), (uint)clusterH.size());
+
+    for (uint i = 0; i < clusterH.size(); ++i)
+    {
+        for (uint j = 0; j < clusterW.size(); ++j)
+        {
+            try
+            {
+                Amatrix(j, i) = data(clusterW[j], clusterH[i]);
+            }
+            catch(...)
+            {
+                qDebug() << "Panic. ACV part errror: " << clusterW[j] << "," << clusterH[i];
+            }
+        }
+    }
+
+    retVal = Variance(Amatrix);
+
+    return retVal;
+}
+
+double Matrix::Variance(const arma::mat& Amatrix)
+{
+    double retVal = 0;
+
+    int dim1 = Amatrix.n_rows;
+    int dim2 = Amatrix.n_cols;
+
+    double AIJ = 0;
+
+    for (int i = 0; i < dim1; ++i)
+    {
+        for (int j = 0; j < dim2; ++j)
+        {
+            AIJ += Amatrix[i, j];
+        }
+    }
+
+    AIJ /= dim1 * dim2;
+
+    for (int i = 0; i < dim1; ++i)
+    {
+        for (int j = 0; j < dim2; ++j)
+        {
+            retVal += (Amatrix[i, j] - AIJ) * (Amatrix[i, j] - AIJ);
+        }
+    }
+
+    return retVal;
+}
+
+double Matrix::AverageSpearmansRank(const arma::mat& Amatrix)
+{
+    int dim1 = Amatrix.n_rows;
+    int dim2 = Amatrix.n_cols;
+
+    double RowValue = 0;
+
+    int div = 0;
+
+    for (int i = 0; i < dim1 - 1; ++i)
+    {
+        rowvec iRow = Amatrix.row(i);
+
+        rowvec iRank = getSpearmanRanks(iRow);
+
+        double iStd = stddev(iRank);
+
+        double iMean = mean(iRank);
+
+        rowvec iRankMinusMean = iRank - iMean;
+
+        for (int j = i + 1; j < dim1; ++j)
+        {
+            rowvec jRow = Amatrix.row(j);
+
+            rowvec jRank = getSpearmanRanks(jRow);
+
+            double jStd = stddev(jRank);
+
+            double jMean = mean(jRank);
+
+            rowvec jRankMinusMean = jRank - jMean;
+
+            double covariance = accu(iRankMinusMean % jRankMinusMean) / (iRow.n_elem - 1);
+
+            double denominator = iStd * jStd;
+
+            if (denominator != 0)
+                RowValue += covariance / denominator;
+            else
+                RowValue += 0;
+
+            div++;
+        }
+    }
+
+    RowValue /= div;
+
+    div= 0;
+
+    double ColumnValue = 0;
+
+    for (int i = 0; i < dim2 - 1; ++i)
+    {
+        colvec iCol = Amatrix.col(i);
+
+        colvec iRank = getSpearmanRanks(iCol.t()).t();
+
+        double iStd = stddev(iRank);
+
+        double iMean = mean(iRank);
+
+        colvec iRankMinusMean = iRank - iMean;
+
+        for (int j = i + 1; j < dim2; ++j)
+        {
+            colvec jCol = Amatrix.col(j);
+
+            colvec jRank = getSpearmanRanks(jCol.t()).t();
+
+            double jStd = stddev(jRank);
+
+            double jMean = mean(jRank);
+
+            colvec jRankMinusMean = jRank - jMean;
+
+            double covariance = accu(iRankMinusMean % jRankMinusMean) / (iCol.n_elem - 1);
+
+            double denominator = iStd * jStd;
+
+            if (denominator != 0)
+                ColumnValue += covariance / denominator;
+            else
+                ColumnValue += 1;
+
+            div++;
+        }
+    }
+
+    ColumnValue /= div;
+
+    if (abs(RowValue) > abs(ColumnValue))
+        return abs(RowValue);
+    else
+        return abs(ColumnValue);
+}
+
+double Matrix::ScalingMeanSquaredResidue(const std::vector<int>& clusterW, const std::vector<int>& clusterH)
+{
+    double retVal;
+
+    arma::mat Amatrix = arma::zeros<arma::mat>((uint)clusterW.size(), (uint)clusterH.size());
+
+    for (uint i = 0; i < clusterH.size(); ++i)
+    {
+        for (uint j = 0; j < clusterW.size(); ++j)
+        {
+            try
+            {
+                Amatrix(j, i) = data(clusterW[j], clusterH[i]);
+            }
+            catch(...)
+            {
+                qDebug() << "Panic. ACV part errror: " << clusterW[j] << "," << clusterH[i];
+            }
+        }
+    }
+
+    retVal = ScalingMeanSquaredResidue(Amatrix);
+
+    return retVal;
+}
+
+double Matrix::MeanSquaredResidue(const std::vector<int>& clusterW, const std::vector<int>& clusterH)
+{
+    double retVal;
+
+    arma::mat Amatrix = arma::zeros<arma::mat>((uint)clusterW.size(), (uint)clusterH.size());
+
+    for (uint i = 0; i < clusterH.size(); ++i)
+    {
+        for (uint j = 0; j < clusterW.size(); ++j)
+        {
+            try
+            {
+                Amatrix(j, i) = data(clusterW[j], clusterH[i]);
+            }
+            catch(...)
+            {
+                qDebug() << "Panic. ACV part errror: " << clusterW[j] << "," << clusterH[i];
+            }
+        }
+    }
+
+    retVal = MeanSquaredResidue(Amatrix);
+
+    return retVal;
+}
+
+double Matrix::ScalingMeanSquaredResidue(const arma::mat& Amatrix)
+{
+    double retVal = 0;
+
+    int dim1 = Amatrix.n_rows;
+    int dim2 = Amatrix.n_cols;
+
+    std::vector<double> AiJ(dim1, 0.0);
+    std::vector<double> AIj(dim2, 0.0);
+    double AIJ = 0;
+
+    for (int i = 0; i < dim1; ++i)
+    {
+        AiJ[i] = 0;
+
+        for (int j = 0; j < dim2; ++j)
+        {
+            AiJ[i] += Amatrix[i, j];
+            AIj[j] += Amatrix[i, j];
+            AIJ += Amatrix[i, j];
+        }
+
+        AiJ[i] /= dim2;
+    }
+
+    AIJ /= dim1 * dim2;
+
+    for (int j = 0; j < dim2; ++j)
+    {
+        AIj[j] /= dim1;
+    }
+
+    for (int i = 0; i < dim1; ++i)
+    {
+        for (int j = 0; j < dim2; ++j)
+        {
+            retVal += ((AiJ[i] * AIj[j] - Amatrix[i, j] * AIJ) * (AiJ[i] * AIj[j] - Amatrix[i, j] * AIJ)) / (AiJ[i] * AIj[j] * AiJ[i] * AIj[j]);
+        }
+    }
+
+    return retVal / (dim1 * dim2);
+}
+
+double Matrix::MeanSquaredResidue(const arma::mat& Amatrix)
+{
+    double retVal = 0;
+
+    int dim1 = Amatrix.n_rows;
+    int dim2 = Amatrix.n_cols;
+
+    std::vector<double> AiJ(dim1, 0.0);
+    std::vector<double> AIj(dim2, 0.0);
+    double AIJ = 0;
+
+    for (int i = 0; i < dim1; ++i)
+    {
+        AiJ[i] = 0;
+
+        for (int j = 0; j < dim2; ++j)
+        {
+            AiJ[i] += Amatrix[i, j];
+            AIj[j] += Amatrix[i, j];
+            AIJ += Amatrix[i, j];
+        }
+
+        AiJ[i] /= dim2;
+    }
+
+    AIJ /= dim1 * dim2;
+
+    for (int j = 0; j < dim2; ++j)
+    {
+        AIj[j] /= dim1;
+    }
+
+    for (int i = 0; i < dim1; ++i)
+    {
+        for (int j = 0; j < dim2; ++j)
+        {
+            retVal += (Amatrix[i, j] - AiJ[i] - AIj[j] + AIJ) * (Amatrix[i, j] - AiJ[i] - AIj[j] + AIJ);
+        }
+    }
+
+    return retVal / (dim1 * dim2);
+}
+
+double Matrix::AverageCorrelationValue(const std::vector<int>& clusterW, const std::vector<int>& clusterH)
+{
+    double retVal = 0;
+
+    arma::mat Amatrix = arma::zeros<arma::mat>((uint)clusterW.size(), (uint)clusterH.size());
+
+    for (uint i = 0; i < clusterH.size(); ++i)
+    {
+        for (uint j = 0; j < clusterW.size(); ++j)
+        {
+            try
+            {
+                Amatrix(j, i) = data(clusterW[j], clusterH[i]);
+            }
+            catch(...)
+            {
+                qDebug() << "Panic. ACV part errror: " << clusterW[j] << "," << clusterH[i];
+            }
+        }
+    }
+
+    //return std::make_shared<double>(AverageSpearmansRank(Amatrix));
+
     retVal = AverageCorrelationValue(Amatrix);
 
     return retVal;
 }
 
-std::shared_ptr<double> Matrix::AverageCorrelationValue(const arma::mat& Amatrix)
+double Matrix::AverageCorrelationValue(const arma::mat& Amatrix)
 {
+    //return std::make_shared<double>(AverageSpearmansRank(Amatrix));
+
     int dim1 = Amatrix.n_rows;
     int dim2 = Amatrix.n_cols;
 
@@ -440,7 +784,7 @@ std::shared_ptr<double> Matrix::AverageCorrelationValue(const arma::mat& Amatrix
             if (denominator != 0)
                 RowValue += std::abs(nominator / denominator);
             else
-                RowValue += 1;
+                RowValue += 0;
 
             div++;
         }
@@ -482,7 +826,7 @@ std::shared_ptr<double> Matrix::AverageCorrelationValue(const arma::mat& Amatrix
     ColumnValue /= div;
 
     if (RowValue > ColumnValue)
-        return std::make_shared<double>(RowValue);
+        return RowValue;
     else
-        return std::make_shared<double>(ColumnValue);
+        return ColumnValue;
 }

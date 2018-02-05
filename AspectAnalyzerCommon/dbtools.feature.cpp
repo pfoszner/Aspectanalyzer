@@ -1,6 +1,6 @@
 #include "dbtools.h"
 
-bool DBTools::SaveFeatures(std::vector<FeatureResult>& features, int idResult)
+bool DBTools::SaveFeatures(std::vector<FeatureResult>& features, int idResult, int idBicluster, int idMatrix)
 {
     bool retVal = true;
 
@@ -14,10 +14,12 @@ bool DBTools::SaveFeatures(std::vector<FeatureResult>& features, int idResult)
 
     QVariantList types;
     QVariantList results;
+    QVariantList mats;
+    QVariantList bics;
     QVariantList indexes;
     QVariantList values;
 
-    QString queryText = "INSERT INTO FEATURE ([id_feature_type],[id_result],[index],[value]) VALUES (:type,:result,:index,:value);";
+    QString queryText = "INSERT INTO FEATURE ([id_feature_type],[id_result],[id_matrix],[id_bicluster],[index],[value]) VALUES (:type,:result,:matrix,:bicluster,:index,:value);";
 
     query.prepare(queryText);
 
@@ -28,7 +30,21 @@ bool DBTools::SaveFeatures(std::vector<FeatureResult>& features, int idResult)
             continue;
 
         types.push_back(item.type);
-        results.push_back(idResult);
+        if (idResult > 0)
+            results.push_back(idResult);
+        else
+            results.push_back("");
+
+        if (idMatrix > 0)
+            mats.push_back(idMatrix);
+        else
+            mats.push_back("");
+
+        if (idBicluster > 0)
+            bics.push_back(idBicluster);
+        else
+            bics.push_back("");
+
         indexes.push_back(item.indexNbr);
         values.push_back(item.value);
     }

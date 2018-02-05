@@ -23,7 +23,7 @@ public:
     int SaveResult(std::shared_ptr<BiclusteringObject> taskToSave);
     int SaveMatrix(arma::mat matrixToSave, QString name, QString group, int type, int result);
     bool SaveBiclusters(std::vector<std::shared_ptr<Bicluster>>&, int idMatrix, int idResult);
-    bool SaveFeatures(std::vector<FeatureResult>& features, int idResult);
+    bool SaveFeatures(std::vector<FeatureResult>& features, int idResult, int idBicluster, int idMatrix);
     std::vector<std::shared_ptr<BiclusteringObject>> GetResults(int idResult, int VmatrixID, int idMethod, int DbK);
     int GetResultsCount(int idResult, int VmatrixID, int idMethod, int DbK);
     std::shared_ptr<Matrix> GetMatrix(int);

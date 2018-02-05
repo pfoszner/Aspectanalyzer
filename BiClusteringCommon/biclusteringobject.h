@@ -70,7 +70,7 @@ public:
 //protected:
     void PostProcessingTask();
 
-    void SaveToLocalFile(std::shared_ptr<double> AverageAVC, double Similarity);
+    void SaveToLocalFile(double AverageAVC, double Similarity);
 
     double Recovery();
 

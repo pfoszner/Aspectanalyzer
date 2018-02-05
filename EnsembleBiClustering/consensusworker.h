@@ -20,6 +20,7 @@ private:
     double orgResultsSize;
     int minClusterSize;
     double percentage;
+    Enums::FeatureType choosenMeasure = Enums::FeatureType::ACV;
 
 public:
     ConsensusWorker(std::shared_ptr<Bicluster>& bic, std::shared_ptr<Matrix> dataMatrix, const std::vector<std::shared_ptr<Bicluster>>& connected, MergeType extractType, double orgResultsSize, int minClusterSize, double percentage)

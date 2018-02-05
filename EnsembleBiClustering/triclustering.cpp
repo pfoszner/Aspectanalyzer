@@ -182,7 +182,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                 {
                     for(uint e = 0; e < E.size(); ++e)
                     {
-                        arma::ucube colE = cube.tube(0,e,F.size()-1,e);
+                        arma::ucube colE = cube.tube(0,e,(arma::uword)F.size()-1,e);
 
                         double onesOut = arma::accu(colE);
                         double zerosOut = colE.n_elem - onesOut;
@@ -235,7 +235,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
                     if (lossSub == LossF)
                     {
-                        arma::ucube rowF = cube.tube(Fstar,0,Fstar,E.size()-1);
+                        arma::ucube rowF = cube.tube(Fstar,0,Fstar,(uint)E.size()-1);
 
                         F.erase(F.begin() + Fstar);
 
@@ -249,7 +249,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                     }
                     if (lossSub == LossE)
                     {
-                        arma::ucube colE = cube.tube(0,Estar,F.size()-1,Estar);
+                        arma::ucube colE = cube.tube(0,Estar,(uint)F.size()-1,Estar);
 
                         E.erase(E.begin() + Estar);
 
@@ -296,12 +296,12 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
             if (F.size() > 1 && E.size() > 1 && B.size() > 0)
             {
-                std::shared_ptr<Bicluster> New = std::make_shared<Bicluster>(-1, F, E, dataMatrix->AverageCorrelationValue(F, E), nullptr);
+                std::shared_ptr<Bicluster> New = std::make_shared<Bicluster>(-1, F, E);
 
                 RetVal.push_back(New);
             }
 
-            for(int b = B.size()-1; b >= 0; --b)
+            for(size_t b = B.size()-1; b >= 0; --b)
             {
                 Biclusters.erase(Biclusters.begin()+B[b]);
             }
@@ -319,7 +319,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
 
 void TriClustering::RemoveCubeColumn(std::vector<int> colIndex)
 {
-    arma::ucube newCube = arma::ucube(cube.n_rows, cube.n_cols - colIndex.size(), cube.n_slices);
+    arma::ucube newCube = arma::ucube(cube.n_rows, cube.n_cols - (uint)colIndex.size(), cube.n_slices);
 
     //newCube.zeros(cube.n_rows - 1, cube.n_cols, cube.n_slices);
 
@@ -379,7 +379,7 @@ void TriClustering::RemoveCubeColumn(int colIndex)
 
 void TriClustering::RemoveCubeRow(std::vector<int> rowIndex)
 {
-    arma::ucube newCube = arma::ucube(cube.n_rows - rowIndex.size(), cube.n_cols, cube.n_slices);
+    arma::ucube newCube = arma::ucube(cube.n_rows - (uint)rowIndex.size(), cube.n_cols, cube.n_slices);
 
     //newCube.zeros(cube.n_rows - 1, cube.n_cols, cube.n_slices);
 
@@ -441,7 +441,7 @@ void TriClustering::BuildBinaryCube(const std::vector<std::shared_ptr<Bicluster>
 {
     //cube = arma::Cube<short>(dim1, dim2, Biclusters.size());
 
-    cube.zeros(dim1, dim2, Biclusters.size());
+    cube.zeros(dim1, dim2, (uint)Biclusters.size());
 
     //double Surface = dim1 * dim2 * Biclusters.size();
 

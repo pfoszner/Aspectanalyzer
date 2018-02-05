@@ -28,7 +28,7 @@ public:
 
 
 public slots:
-    void btnAddTaskSlot(int);
+    void btnAddTaskSlot();
     //void btnLoadFromFileSlot();
     //void btnLoadFromDatabaseSlot();
     //void btnTuneSlot();

@@ -12,14 +12,10 @@ Bicluster::Bicluster(const Bicluster& Copy)
 
     std::copy(Copy.cluster2.begin(), Copy.cluster2.end(), cluster2.begin());
 
-    if (Copy.ACV != nullptr)
-        ACV = std::make_shared<double>(*Copy.ACV);
-
-    if (Copy.similarity != nullptr)
-        similarity = std::make_shared<double>(*Copy.similarity);
+    std::copy(Copy.mesures.begin(), Copy.mesures.end(), mesures.begin());
 }
 
-Bicluster::Bicluster(int IdBicluster, const std::vector<int>& cluster1, const std::vector<int>& cluster2, std::shared_ptr<double> AVC, std::shared_ptr<double> Similarity)
+Bicluster::Bicluster(int IdBicluster, const std::vector<int>& cluster1, const std::vector<int>& cluster2)
 {
     this->idBicluster = IdBicluster;
 
@@ -34,14 +30,15 @@ Bicluster::Bicluster(int IdBicluster, const std::vector<int>& cluster1, const st
     else
     {
         if (cluster1.size() == 0 || cluster2.size() == 0)
-            throw "Invalid clusters.";
+        {
 
-        this->cluster1.insert(this->cluster1.end(), cluster1.begin(), cluster1.end());
-        this->cluster2.insert(this->cluster2.end(), cluster2.begin(), cluster2.end());
+        }
+        else
+        {
+            this->cluster1.insert(this->cluster1.end(), cluster1.begin(), cluster1.end());
+            this->cluster2.insert(this->cluster2.end(), cluster2.begin(), cluster2.end());
+        }
     }
-
-    this->similarity = Similarity;
-    this->ACV = AVC;
 }
 
 Bicluster::Bicluster(int X, int Y, int len1, int len2)
@@ -63,6 +60,28 @@ Bicluster::Bicluster(int X, int Y, int len1, int len2)
             }
         }
     }
+}
+
+std::shared_ptr<double> Bicluster::GetFeature(Enums::FeatureType type)
+{
+    auto iter = std::find_if(mesures.begin(), mesures.end(), [type](FeatureResult q) { return q.type == type; } );
+
+    if (iter == mesures.end())
+        return nullptr;
+    else
+        return std::make_shared<double>(iter->value);
+}
+
+void Bicluster::SetFeature(Enums::FeatureType type, double value)
+{
+    FeatureResult newFeature(type, value, 0);
+
+    mesures.push_back(newFeature);
+}
+
+void Bicluster::SetFeature(FeatureResult newFeature)
+{
+    mesures.push_back(newFeature);
 }
 
 double Bicluster::Compare(std::shared_ptr<Bicluster> CompareTo, Enums::SimilarityMethods type)
@@ -242,11 +261,11 @@ double Bicluster::JaccardIndex(const std::vector<int>& s, const std::vector<int>
     return RetVal;
 }
 
-int Bicluster::LevenshteinDistance(const std::vector<int>& s, const std::vector<int>& t)
+uint Bicluster::LevenshteinDistance(const std::vector<int>& s, const std::vector<int>& t)
 {
-    int n = s.size();
-    int m = t.size();
-    Array<int> d(n + 1, m + 1);
+    uint n = (uint)s.size();
+    uint m = (uint)t.size();
+    Array<uint> d(n + 1, m + 1);
 
     // Step 1
     if (n == 0) { return m; }
@@ -254,15 +273,15 @@ int Bicluster::LevenshteinDistance(const std::vector<int>& s, const std::vector<
     if (m == 0) { return n; }
 
     // Step 2
-    for (int i = 0; i <= n; i++) { d[i][0] = i; }
+    for (uint i = 0; i <= n; i++) { d[i][0] = i; }
 
-    for (int j = 0; j <= m; j++) { d[0][j] = j; }
+    for (uint j = 0; j <= m; j++) { d[0][j] = j; }
 
     // Step 3
-    for (int i = 1; i <= n; i++)
+    for (uint i = 1; i <= n; i++)
     {
         //Step 4
-        for (int j = 1; j <= m; j++)
+        for (uint j = 1; j <= m; j++)
         {
             // Step 5
             int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;

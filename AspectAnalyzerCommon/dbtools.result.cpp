@@ -4,9 +4,9 @@ std::vector<int> DBTools::GetResultsIDs(int m)
 {
     std::vector<int> retVal;
 
-    QString queryString = "SELECT id_result FROM result where id_matrix = " + QString::number(m) + " and id_result > 100";
+    QString queryString = "SELECT id_result FROM result where id_matrix = " + QString::number(m) + " and id_method <> 8";
 
-    qDebug() << queryString;
+    //qDebug() << queryString;
 
     QSqlQuery query(db);
 
@@ -134,7 +134,7 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
             int index = query.value("index").toInt();
             int IdFeature = query.value("id_feature").toInt();
 
-            Result->features.emplace_back(Enums::FeatureType(type), Fvalue, index, IdFeature, ID);
+            Result->features.emplace_back(Enums::FeatureType(type), Fvalue, index, IdFeature, ID, -1, -1);
         }
     }
 
@@ -220,7 +220,7 @@ int DBTools::SaveResult(std::shared_ptr<BiclusteringObject> taskToSave)
     SaveBiclusters(taskToSave->foundedBiclusters, *taskToSave->dataMatrix->idMatrix, taskToSave->idResult);
 
     //save features
-    SaveFeatures(taskToSave->features, taskToSave->idResult);
+    SaveFeatures(taskToSave->features, taskToSave->idResult, -1, -1);
 
     return retVal;
 }

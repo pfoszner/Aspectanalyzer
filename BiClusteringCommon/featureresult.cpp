@@ -5,8 +5,10 @@ FeatureResult::FeatureResult(Enums::FeatureType type, double value, int indexNbr
 
 }
 
-FeatureResult::FeatureResult(Enums::FeatureType type, double value, int indexNbr, int idFeature, int idResult) : FeatureResult(type, value, indexNbr)
+FeatureResult::FeatureResult(Enums::FeatureType type, double value, int indexNbr, int idFeature, int idResult, int idBicluster, int idMatrix) : FeatureResult(type, value, indexNbr)
 {
     this->idFeature = idFeature;
     this->idResult = idResult;
+    this->idBicluster = idBicluster;
+    this->idMatrix = idMatrix;
 }

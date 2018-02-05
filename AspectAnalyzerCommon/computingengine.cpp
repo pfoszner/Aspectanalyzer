@@ -112,7 +112,7 @@ void ComputingEngine::AddBiClusteringTask(ResultPointer task)
 void ComputingEngine::CheckResultsToWrite()
 {
     lock.lock();
-    uint queueSize = resultsToWrite.size();
+    size_t queueSize = resultsToWrite.size();
     lock.unlock();
 
     if (queueSize > 0)
@@ -200,7 +200,7 @@ void ComputingEngine::CheckWriteResult(ResultPointer jobDone)
     if (jobDone->mode == BiclusteringObject::ComputingMode::Local)
     {
         resultsToWrite.push(jobDone);
-        int count = resultsToWrite.size();
+        size_t count = resultsToWrite.size();
         lock.unlock();
 
         if (count >= 1)
@@ -314,7 +314,7 @@ void ComputingEngine::ServeQueue()
 }
 
 
-int ComputingEngine::GetInQueue()
+size_t ComputingEngine::GetInQueue()
 {
     if (taskToComputute > 0)
         return taskToComputute;
@@ -322,7 +322,7 @@ int ComputingEngine::GetInQueue()
         return queue.size();
 }
 
-int ComputingEngine::GetRunning()
+size_t ComputingEngine::GetRunning()
 {
     return runningTasks;
 }

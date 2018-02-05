@@ -17,14 +17,16 @@ SOURCES += \
     plsa.cpp \
     lse.cpp \
     kullbackleibler.cpp \
-    nskullbackleibler.cpp
+    nskullbackleibler.cpp \
+    pgm.cpp
 
 HEADERS += \
     nmf.h \
     plsa.h \
     lse.h \
     kullbackleibler.h \
-    nskullbackleibler.h
+    nskullbackleibler.h \
+    pgm.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

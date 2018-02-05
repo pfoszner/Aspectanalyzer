@@ -39,12 +39,12 @@ public:
     int maxThreadAllowd = 8;
 
 private:
-    int runningTasks = 0;
-    int taskToComputute = 0;
+    size_t runningTasks = 0;
+    size_t taskToComputute = 0;
     std::queue<ResultPointer> queue;
     std::vector<SingleThreadWorker> threadArray;
     std::queue<ResultPointer> resultsToWrite;
-    int progressSteps = 0;
+    size_t progressSteps = 0;
     int currentProgressSteps = 0;
     time_t queueStart;
     QMutex lock;
@@ -56,8 +56,8 @@ public:
     void LoadDataMatrix(QString filename);
     void AddBiClusteringTask(ResultPointer);
     void ServeQueue();
-    int GetInQueue();
-    int GetRunning();
+    size_t GetInQueue();
+    size_t GetRunning();
     void CheckResultsToWrite();
 
 private:

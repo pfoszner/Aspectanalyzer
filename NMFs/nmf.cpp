@@ -538,7 +538,9 @@ void NMF::TrimCluster1(std::shared_ptr<Bicluster>& bic, int bicNumber)
 
         clust1 = GetWBicluster(bicNumber, exMethod, 0, (uint)clust1.size() - 1);
 
-        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2, dataMatrix->AverageCorrelationValue(clust1, clust2), nullptr);
+        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2);
+
+        NewBic->SetFeature(Enums::FeatureType::ACV, dataMatrix->AverageCorrelationValue(clust1, clust2));
 
         //clock_t end = clock();
 
@@ -546,7 +548,7 @@ void NMF::TrimCluster1(std::shared_ptr<Bicluster>& bic, int bicNumber)
 
         //qDebug() << "Get cluster1 of " << bicNumber << " New ACV: " << *NewBic->ACV << " Size: (" << clust1.size() << ", " << clust2.size() << ") Time Spent: " << time_spent;
 
-        if (*NewBic->ACV > *bic->ACV)
+        if (*NewBic->GetFeature(Enums::FeatureType::ACV) > *bic->GetFeature(Enums::FeatureType::ACV))
         {
             bic = NewBic;
         }
@@ -570,7 +572,9 @@ void NMF::TrimCluster2(std::shared_ptr<Bicluster>& bic, int bicNumber)
 
         clust2 = GetHBicluster(bicNumber, exMethod, 0, (uint)clust2.size() - 1);
 
-        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2, dataMatrix->AverageCorrelationValue(clust1, clust2), nullptr);
+        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2);
+
+        NewBic->SetFeature(Enums::FeatureType::ACV, dataMatrix->AverageCorrelationValue(clust1, clust2));
 
         //clock_t end = clock();
 
@@ -578,7 +582,7 @@ void NMF::TrimCluster2(std::shared_ptr<Bicluster>& bic, int bicNumber)
 
         //qDebug() << "Get cluster2 of " << bicNumber << " New ACV: " << *NewBic->ACV << " Size: (" << clust1.size() << ", " << clust2.size() << ") Time Spent: " << time_spent;
 
-        if (*NewBic->ACV > *bic->ACV)
+        if (*NewBic->GetFeature(Enums::FeatureType::ACV) > *bic->GetFeature(Enums::FeatureType::ACV))
         {
             bic = NewBic;
         }
@@ -602,11 +606,13 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
         if (clust1.size() == 0 || clust2.size() == 0)
             return std::vector<std::shared_ptr<Bicluster>>();
 
-        std::shared_ptr<Bicluster> bic = std::make_shared<Bicluster>(-1, clust1, clust2, dataMatrix->AverageCorrelationValue(clust1, clust2), nullptr);
+        std::shared_ptr<Bicluster> bic = std::make_shared<Bicluster>(-1, clust1, clust2);
+
+        bic->SetFeature(Enums::FeatureType::ACV, dataMatrix->AverageCorrelationValue(clust1, clust2));
 
         //qDebug() << "Get bicluster " << i << " Initial ACV: " << *bic->ACV << " Size: (" << clust1.size() << ", " << clust2.size() << ")";
 
-        if (*bic->ACV < 1.0 && trimByACV)
+        if (*bic->GetFeature(Enums::FeatureType::ACV) < 1.0 && trimByACV)
         {
             if (clust1.size() > clust2.size())
             {
@@ -622,7 +628,7 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
             }
         }
 
-        qDebug() << "Done bicluster " << i << ". Size <" << clust1.size() << ", " << clust2.size() << ">. ACV: " << *bic->ACV;
+        qDebug() << "Done bicluster " << i << ". Size <" << clust1.size() << ", " << clust2.size() << ">.";
 
         retVal.push_back(bic);
     }

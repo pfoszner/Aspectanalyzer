@@ -103,27 +103,21 @@ void DBTools::CreateNewDatabase()
                "    `name`	TEXT NOT NULL,"
                "    PRIMARY KEY(`id_feature_type`)"
                ");");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (1,'SimilarityJaccard_Average'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (2,'SimilarityJaccard_1STD'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (3,'SimilarityJaccard_2STD'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (4,'SimilarityJaccard_0'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (5,'SimilarityJaccard_plus_1_STD'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (6,'SimilarityJaccard_plus_2_STD'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (7,'SimilarityJaccard_plus_3_STD'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (8,'SimilarityJaccard_Quadrille'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (9,'SimilarityLevenstine'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (10,'MSR'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (11,'ACV'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (12,'ASR'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (13,'SimilarityJaccard_Custom'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (14,'Divergence'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (15,'BiclusterCount'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (16,'AverageACV'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (17,'AverageSimilarity'); ");
-               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (18,'Consensus Extraction Type'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (1,'SimilarityJaccard'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (2,'SimilarityLevenstine'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (3,'MSR'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (4,'ACV'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (5,'ASR'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (6,'Divergence'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (7,'BiclusterCount'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (8,'AverageACV'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (9,'AverageSimilarity'); ");
+               test = query.exec("INSERT INTO `feature_type` (id_feature_type,name) VALUES (10,'Consensus Extraction Type'); ");
                test = query.exec("CREATE TABLE \"feature\" ("
                "    `id_feature`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
-               "    `id_result`	INTEGER NOT NULL,"
+               "    `id_result`	INTEGER,"
+               "    `id_matrix`	INTEGER,"
+               "    `id_bicluster`	INTEGER,"
                "    `id_feature_type`	INTEGER NOT NULL,"
                "    `index`	INTEGER NOT NULL DEFAULT 0,"
                "    `value`	REAL NOT NULL"
@@ -133,8 +127,6 @@ void DBTools::CreateNewDatabase()
                "    `id_matrix`	INTEGER NOT NULL,"
                "    `id_result`	INTEGER,"
                "    `index_nbr`	INTEGER NOT NULL,"
-               "    `similarity`	REAL,"
-               "    `ACV`	REAL,"
                "    `data`	TEXT NOT NULL"
                ");");
                test = query.exec("PRAGMA journal_mode = OFF");

@@ -20,8 +20,6 @@ std::vector<std::shared_ptr<Bicluster>> DBTools::GetBiclusters(int idMatrix, int
     while(query.next())
     {
         QString rawData = query.value("data").toString();
-        std::shared_ptr<double> ACV = std::make_shared<double>(query.value("ACV").toDouble());
-        std::shared_ptr<double> similarity = std::make_shared<double>(query.value("similarity").toDouble());
 
         QStringList bicRow = rawData.split("\t");
 
@@ -54,9 +52,12 @@ std::vector<std::shared_ptr<Bicluster>> DBTools::GetBiclusters(int idMatrix, int
                 itemsToLoad = -1;
         }
 
-        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(idResult, cluster1, cluster2, ACV, similarity);
-        retVal.push_back(NewBic);
+        if (cluster1.size() > 0 && cluster2.size() > 0)
+        {
+            std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(idResult, cluster1, cluster2);
 
+            retVal.push_back(NewBic);
+        }
     }
 
     return retVal;
@@ -75,7 +76,7 @@ bool DBTools::SaveBiclusters(std::vector<std::shared_ptr<Bicluster>>& biclusters
         if (bic->idBicluster > 0)
             continue;
 
-        QString queryText = "INSERT INTO BICLUSTER ([id_matrix],[id_result],[index_nbr],[similarity],[ACV],[data]) VALUES (:matrix,:result,:index,:simi,:acv,:data);";
+        QString queryText = "INSERT INTO BICLUSTER ([id_matrix],[id_result],[index_nbr],[data]) VALUES (:matrix,:result,:index,:data);";
 
         query.prepare(queryText);
 
@@ -87,16 +88,6 @@ bool DBTools::SaveBiclusters(std::vector<std::shared_ptr<Bicluster>>& biclusters
             query.bindValue(":result", QVariant(QVariant::Int));
 
         query.bindValue(":index", index++);
-
-        if (bic->similarity != nullptr)
-            query.bindValue(":simi", *bic->similarity);
-        else
-            query.bindValue(":simi", QVariant(QVariant::Double));
-
-        if (bic->ACV != nullptr)
-            query.bindValue(":acv", *bic->ACV);
-        else
-            query.bindValue(":acv", QVariant(QVariant::Double));
 
         QString data = QString::number(bic->cluster1.size());
 
@@ -119,6 +110,8 @@ bool DBTools::SaveBiclusters(std::vector<std::shared_ptr<Bicluster>>& biclusters
         if (test)
         {
             bic->idBicluster = query.lastInsertId().toInt();
+
+            SaveFeatures(bic->mesures, idResult, bic->idBicluster, -1);
         }
         else
         {
@@ -126,6 +119,8 @@ bool DBTools::SaveBiclusters(std::vector<std::shared_ptr<Bicluster>>& biclusters
             qDebug() << query.lastError();
             qDebug() << query.executedQuery();
         }
+
+
     }
 
     return retVal;

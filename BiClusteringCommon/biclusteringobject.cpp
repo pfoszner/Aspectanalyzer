@@ -78,7 +78,7 @@ void BiclusteringObject::Deserialize(QByteArray deserialize)
                 deserialize.remove(0, 4);
             }
 
-            std::shared_ptr<Bicluster> bic = std::make_shared<Bicluster>(-1, clust1, clust2, nullptr, nullptr);
+            std::shared_ptr<Bicluster> bic = std::make_shared<Bicluster>(-1, clust1, clust2);
             foundedBiclusters.push_back(bic);
         }
 
@@ -161,13 +161,13 @@ QByteArray BiclusteringObject::Serialize(bool withData)
 //    std::shared_ptr<Matrix> dataMatrix; not nedeed becouse of idMethod
 //    std::vector<std::shared_ptr<Bicluster>> foundedBiclusters;
 
-    qint32 temp = this->foundedBiclusters.size();
+    qint32 temp = (qint32)this->foundedBiclusters.size();
 
     buffer.append(IntToArray(temp));
 
     for(std::shared_ptr<Bicluster> bic : this->foundedBiclusters)
     {
-        temp = bic->cluster1.size();
+        temp = (qint32)bic->cluster1.size();
 
         buffer.append(IntToArray(temp));
 
@@ -176,7 +176,7 @@ QByteArray BiclusteringObject::Serialize(bool withData)
             buffer.append(IntToArray(c1));
         }
 
-        temp = bic->cluster2.size();
+        temp = (qint32)bic->cluster2.size();
 
         buffer.append(IntToArray(temp));
 
@@ -188,7 +188,7 @@ QByteArray BiclusteringObject::Serialize(bool withData)
 
 //    std::vector<FeatureResult> features;
 
-    temp = this->features.size();
+    temp = (qint32)this->features.size();
 
     buffer.append(IntToArray(temp));
 
@@ -230,7 +230,7 @@ QByteArray BiclusteringObject::Serialize(bool withData)
 
 Array<double> BiclusteringObject::GetCostMatrixForBiclusters(const std::vector<std::shared_ptr<Bicluster>>& original, const std::vector<std::shared_ptr<Bicluster>>& computed, Enums::BiclusterCompareMode mode, Enums::SimilarityMethods simMethod)
 {
-    uint size = original.size();
+    size_t size = original.size();
 
     if (computed.size() > size)
         size = computed.size();
@@ -318,7 +318,7 @@ void BiclusteringObject::PostProcessingTask()
                 if (Classis.M[i][j] == 1)
                 {
                     double simi = Classis.C_orig[i][j];
-                    foundedBiclusters[j]->similarity = std::make_shared<double>(simi);
+                    foundedBiclusters[j]->SetFeature(Enums::FeatureType::SimilarityJaccard, simi);
                     break;
                 }
             }
@@ -329,7 +329,7 @@ void BiclusteringObject::PostProcessingTask()
         //delete Classis;
     }
 
-    std::shared_ptr<double> AverageAVC = std::make_shared<double>(0);
+    double AverageAVC = -1.0;
 
     if (foundedBiclusters.size() > 0)
     {
@@ -337,23 +337,22 @@ void BiclusteringObject::PostProcessingTask()
         {
             if (foundedBiclusters[i]->cluster1.size() > 0 && foundedBiclusters[i]->cluster2.size() > 0)
             {
-                foundedBiclusters[i]->ACV = dataMatrix->AverageCorrelationValue(foundedBiclusters[i]->cluster1, foundedBiclusters[i]->cluster2);
-                *AverageAVC += *foundedBiclusters[i]->ACV;
+                double ACV = dataMatrix->AverageCorrelationValue(foundedBiclusters[i]->cluster1, foundedBiclusters[i]->cluster2);
+                foundedBiclusters[i]->SetFeature(Enums::FeatureType::ACV, ACV);
+                AverageAVC += ACV;
             }
-            else
-                foundedBiclusters[i]->ACV = nullptr;
         }
     }
 
-    if (AverageAVC != nullptr)
+    if (AverageAVC >= 0.0)
     {
-        features.push_back(FeatureResult(Enums::FeatureType::AverageACV, *AverageAVC / foundedBiclusters.size(), 0));
+        features.push_back(FeatureResult(Enums::FeatureType::AverageACV, AverageAVC / foundedBiclusters.size(), 0));
     }
 
     SaveToLocalFile(AverageAVC, Value);
 }
 
-void BiclusteringObject::SaveToLocalFile(std::shared_ptr<double> AverageAVC, double Similarity)
+void BiclusteringObject::SaveToLocalFile(double AverageAVC, double Similarity)
 {
     if (saveToLocalFile.length() > 0)
     {
@@ -499,7 +498,7 @@ void BiclusteringObject::GenerateARFFFile(QString path, int dim, std::vector<int
 // S(F,E) - Relevance
 double BiclusteringObject::RecoveryRelevance(const std::vector<std::shared_ptr<Bicluster>>& first, const std::vector<std::shared_ptr<Bicluster>>& second)
 {
-    double retVal;
+    double retVal = 0;
 
     for(std::shared_ptr<Bicluster> b1 : first)
     {

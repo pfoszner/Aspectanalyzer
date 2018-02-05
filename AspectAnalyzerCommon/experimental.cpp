@@ -219,7 +219,7 @@ void Experimental::CompareGrandTruthMiRNA()
             {
                 std::shared_ptr<double> ACV;
                 std::shared_ptr<double> Similarity;
-                std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(res->idResult, cluster1, single, ACV, Similarity);
+                std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(res->idResult, cluster1, single);
                 expected.push_back(NewBic);
             }
             header = false;
@@ -339,7 +339,7 @@ void Experimental::ImportKumalResults(int repNum)
                                 cluster2.push_back(val.toInt());
                             }
 
-                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                             currBic->foundedBiclusters.push_back(newItem);
                         }
@@ -386,7 +386,7 @@ void Experimental::ImportKumalResults(int repNum)
                                 cluster2.push_back(val.toInt());
                             }
 
-                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                             currMatrix->expectedBiClusters.push_back(newItem);
                         }
@@ -544,7 +544,7 @@ void Experimental::ImportKumalResultsNoise(int repNum)
                                 cluster2.push_back(val.toInt());
                             }
 
-                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                             currBic->foundedBiclusters.push_back(newItem);
                         }
@@ -591,7 +591,7 @@ void Experimental::ImportKumalResultsNoise(int repNum)
                                 cluster2.push_back(val.toInt());
                             }
 
-                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                             currMatrix->expectedBiClusters.push_back(newItem);
                         }
@@ -749,7 +749,7 @@ void Experimental::ImportKumalResultsNumber(int repNum)
                                 cluster2.push_back(val.toInt());
                             }
 
-                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                             currBic->foundedBiclusters.push_back(newItem);
                         }
@@ -796,7 +796,7 @@ void Experimental::ImportKumalResultsNumber(int repNum)
                                 cluster2.push_back(val.toInt());
                             }
 
-                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                             currMatrix->expectedBiClusters.push_back(newItem);
                         }
@@ -954,7 +954,7 @@ void Experimental::ImportKumalResultsOverlap(int repNum)
                                 cluster2.push_back(val.toInt());
                             }
 
-                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                             currBic->foundedBiclusters.push_back(newItem);
                         }
@@ -1001,7 +1001,7 @@ void Experimental::ImportKumalResultsOverlap(int repNum)
                                 cluster2.push_back(val.toInt());
                             }
 
-                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                            std::shared_ptr<Bicluster> newItem = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                             currMatrix->expectedBiClusters.push_back(newItem);
                         }
@@ -1059,9 +1059,171 @@ void Experimental::ImportKumalResultsOverlap(int repNum)
     qDebug() << "Done";
 }
 
+void Experimental::PringInfo(int taskID, QString filename)
+{
+    std::vector<std::shared_ptr<BiclusteringObject>> TmpTask = engine->db->GetResults(taskID,-1,-1,-1);
+
+    std::shared_ptr<BiclusteringObject> task = TmpTask[0];
+
+    QFile retVal(filename);
+
+    retVal.open(QIODevice::Append | QIODevice::Text);
+
+    QTextStream out(&retVal);
+
+    if (task->foundedBiclusters.size() > 0)
+    {
+        task->PostProcessingTask();
+
+        double ASR = 0;
+        double MSR = 0;
+        double ACV = 0;
+        double Similarity = 0;
+
+        if (task->foundedBiclusters.size() > 0)
+        {
+            for(uint i = 0; i < task->foundedBiclusters.size(); ++i)
+            {
+                if (task->foundedBiclusters[i]->cluster1.size() > 0 && task->foundedBiclusters[i]->cluster2.size() > 0)
+                {
+                    ASR += task->dataMatrix->AverageSpearmansRank(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
+                    MSR += task->dataMatrix->MeanSquaredResidue(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
+                    ACV += task->dataMatrix->AverageCorrelationValue(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
+                }
+            }
+
+            ASR /= task->foundedBiclusters.size();
+            MSR /= task->foundedBiclusters.size();
+        }
+
+
+        //qDebug() << task->idResult << ";" << *task->dataMatrix->idMatrix << ";" << task->dataMatrix->name << ";" << task->idMethod << ";" << ACV << ";" << Similarity  << ";" << task->Recovery()  << ";" << task->Relevance() << ";" << ASR << ";" << MSR << ";" << task->desc;
+        //out << task->idResult << ";" << *task->dataMatrix->idMatrix << ";" << task->dataMatrix->name << ";" << task->idMethod << ";" << ACV << ";" << Similarity  << ";" << task->Recovery()  << ";" << task->Relevance() << ";" << ASR << ";" << MSR << ";" << task->desc << "\n";
+    }
+    else
+    {
+        out << task->idResult << ";" << *task->dataMatrix->idMatrix << ";" << task->dataMatrix->name << ";" << task->idMethod << ";0;0;0;0;0;0;" << task->desc << "\n";
+    }
+}
 
 void Experimental::StartCustom(QString mode)
 {
+    for(int i = 14037; i <= 15164; ++i)
+    {
+        //if (i > 14248)
+            PringInfo(i, "Final.csv");
+    }
+
+    return;
+    std::vector<int> mats = engine->db->getGroupOfMatrices("rep0");
+
+    for(int mat : mats)
+    {
+        if (mat == 1)
+            continue;
+
+        std::vector<Enums::Methods> methods;
+
+        methods.push_back(Enums::Methods::PLSA);
+        methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
+        methods.push_back(Enums::Methods::KULLBACK_LIEBER);
+        methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
+
+        RunConsensus(mat, methods, "_FinalNMF");
+
+        std::vector<Enums::Methods> methods2;
+
+        methods2.push_back(Enums::Methods::FABIA);
+        methods2.push_back(Enums::Methods::QUBIC);
+        methods2.push_back(Enums::Methods::Spectral);
+        methods2.push_back(Enums::Methods::Plaid);
+        methods2.push_back(Enums::Methods::OPSM);
+        methods2.push_back(Enums::Methods::BBC);
+        methods2.push_back(Enums::Methods::CPB);
+        methods2.push_back(Enums::Methods::ISA);
+        methods2.push_back(Enums::Methods::ChengandChurch);
+        methods2.push_back(Enums::Methods::BiMax);
+        methods2.push_back(Enums::Methods::xMOTIFs);
+        methods2.push_back(Enums::Methods::COALESCE);
+
+        RunConsensus(mat, methods, "_Final");
+    }
+
+    engine->ServeQueue();
+
+    /*
+    PringInfo(10313, "dupa.csv");
+    PringInfo(10314, "dupa.csv");
+    PringInfo(10316, "dupa.csv");
+    PringInfo(10317, "dupa.csv");
+    PringInfo(10318, "dupa.csv");
+    PringInfo(10311, "dupa.csv");
+    PringInfo(10312, "dupa.csv");
+    PringInfo(10315, "dupa.csv");
+    PringInfo(10319, "dupa.csv");
+    PringInfo(10320, "dupa.csv");
+    PringInfo(10321, "dupa.csv");
+    PringInfo(10322, "dupa.csv");
+    PringInfo(10323, "dupa.csv");
+    PringInfo(10324, "dupa.csv");
+    PringInfo(10325, "dupa.csv");
+    PringInfo(10326, "dupa.csv");
+    PringInfo(10327, "dupa.csv");
+    PringInfo(10328, "dupa.csv");
+    PringInfo(10330, "dupa.csv");
+    PringInfo(10332, "dupa.csv");
+*/
+
+    //RunConsensus(1);
+
+
+    //return;
+    //PringInfo(14033, "dupa.csv");
+    //PringInfo(14034, "dupa.csv");
+    //PringInfo(14035, "dupa.csv");
+    //PringInfo(14036, "dupa.csv");
+
+    return;
+
+    std::shared_ptr<Matrix> dupa = engine->db->GetMatrix(1);
+
+    arma::mat Amatrix = arma::zeros<arma::mat>((uint)dupa->expectedBiClusters[0]->cluster1.size(), (uint)dupa->expectedBiClusters[0]->cluster2.size());
+
+    for (uint i = 0; i < dupa->expectedBiClusters[0]->cluster1.size(); ++i)
+    {
+        for (uint j = 0; j < dupa->expectedBiClusters[0]->cluster2.size(); ++j)
+        {
+            try
+            {
+                Amatrix(j, i) = dupa->data(dupa->expectedBiClusters[0]->cluster1[j], dupa->expectedBiClusters[0]->cluster2[i]);
+            }
+            catch(...)
+            {
+                qDebug() << "Panic. ACV part errror: " << dupa->expectedBiClusters[0]->cluster1[j] << "," << dupa->expectedBiClusters[0]->cluster2[i];
+            }
+        }
+    }
+
+    QDir dir = QDir::current();
+
+    if (!dir.cd("tmp"))
+    {
+        dir.mkdir("tmp");
+    }
+
+    QString filename = "tmp/test.mat";
+
+    Amatrix.save(filename.toStdString(), arma::arma_ascii);
+
+    qDebug() << dupa->AverageSpearmansRank(Amatrix);
+
+    qDebug() << dupa->AverageCorrelationValue(Amatrix);
+
+    qDebug() << dupa->ScalingMeanSquaredResidue(Amatrix);
+
+    qDebug() << dupa->MeanSquaredResidue(Amatrix);
+
+    qDebug() << dupa->Variance(Amatrix);
 
     //qDebug() << engine->db->GetResults(-1,-1,-1,-1).size();
 
@@ -1071,20 +1233,68 @@ void Experimental::StartCustom(QString mode)
     //ImportKumalResultsOverlap(20);
 
 
-//    for(int i = 1; i <= 72; ++i)
+    //std::vector<int> mats = engine->db->getGroupOfMatrices("rep0");
+
+//    int i = 1;
+
+//    for(int mat : mats)
 //    {
-//        std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(i,-1,-1,-1);
+//        if (i > 50 && i <= 150)
+//        {
+//            //std::shared_ptr<Matrix> matData = engine->db->GetMatrix(mat);
 
-//        test[0]->PostProcessingTask();
+//            //RunNMF(mat, matData->expectedBiClusterCount, matData->expectedBiClusterCount, 1, 5);
 
-//        if (test[0]->foundedBiclusters.size() > 0)
-//            qDebug() << test[0]->idResult << ";" << *test[0]->dataMatrix->idMatrix << ";" << test[0]->idMethod << ";" << *test[0]->foundedBiclusters[0]->ACV << ";" << *test[0]->foundedBiclusters[0]->similarity  << ";" << test[0]->Recovery()  << ";" << test[0]->Relevance();
-//        else
-//            qDebug() << test[0]->idResult << ";" << *test[0]->dataMatrix->idMatrix << ";" << test[0]->idMethod << ";0;0;0;0";
+//            RunConsensus(mat);
 
+//            RunTriclustering(mat);
+
+//            qDebug() << "Done " << i << " from " << mats.size();
+//        }
+
+//        i++;
 //    }
-//qDebug() << "Mission accomplished!";
+
     //return;
+
+//    std::vector<QString> types;
+//    types.push_back("Standard");
+//    types.push_back("ByACV");
+//    types.push_back("None");
+//    types.push_back("ByACVHeuristic");
+
+//    std::vector<std::shared_ptr<BiclusteringObject>> consensus = engine->db->GetResults(-1,-1,(int)Enums::Methods::CONSENSUS,-1);
+
+//    for(QString type : types)
+//    {
+//        for(std::shared_ptr<BiclusteringObject> single : consensus)
+//        {
+//            if (single->desc.left(type.size()) == type)
+//            {
+//                PringInfo(single, type + ".csv");
+
+//                std::vector<int> test = engine->db->GetResultsIDs(*single->dataMatrix->idMatrix);
+
+//                for(int singleTest : test)
+//                {
+//                    std::vector<std::shared_ptr<BiclusteringObject>> sig = engine->db->GetResults(singleTest,-1,-1,-1);
+
+//                    PringInfo(sig[0], type + ".csv");
+//                }
+//            }
+//        }
+//    }
+    //return;
+//qDebug() << "Mission accomplished!";
+//    for(int r=10311; r<=14024; ++r)
+
+//    for(int r=12001; r<=15000; ++r)
+//    {
+//        std::vector<std::shared_ptr<BiclusteringObject>> sig = engine->db->GetResults(r,-1,-1,-1);
+
+//        PringInfo(sig[0]);
+//    }
+    return;
 
     std::vector<int> ids = engine->db->getGroupOfMatrices("rep0");
 
@@ -1095,7 +1305,7 @@ void Experimental::StartCustom(QString mode)
     {
         try
         {
-            RunConsensus(id);
+            //RunConsensus(id);
         }
         catch(...){}
     }
@@ -1141,24 +1351,24 @@ void Experimental::StartCustom(QString mode)
     //CheckSimiliarity();
 
 
-    return;
-    QStringList params = mode.split(';');
+    //return;
+    //QStringList params = mode.split(';');
 
-    int start = params[0].toInt();
-    int stop = params[1].toInt();
-    int matrixS = params[2].toInt();
-    int matrixE = params[3].toInt();
+    //int start = params[0].toInt();
+    //int stop = params[1].toInt();
+    //int matrixS = params[2].toInt();
+    //int matrixE = params[3].toInt();
 
-    for(int m = matrixS; m <= matrixE; ++m)
-    {
-        RunNMF(m, start, stop, 5, 10);
+    //for(int m = matrixS; m <= matrixE; ++m)
+    //{
+        //RunNMF(m, start, stop, 5, 10);
 
         //QThreadPool::globalInstance()->waitForDone();
 
         //RunStepConsensus(m, 2, 5, 1);
 
         //RunStepTricluster(m, 5);
-    }
+    //}
     //std::vector<std::shared_ptr<BiclusteringObject>> single1 = engine->db->GetResults(1931, -1, -1, -1);
 
     //std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(single1[0]);
@@ -1247,7 +1457,7 @@ void Experimental::InputForBingo(QString file, std::vector<int> resIDs, int matI
 
             //qDebug() << oldName << " -> " << newName << " = " << resultRename;
 
-            out << "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index++) << "_" << QString::number(*bic->ACV) << "\n";
+            out << "cluster_" + QString::number(result->idResult) + "_" + QString::number(result->idMethod) + "_" + QString::number(*result->dataMatrix->idMatrix) + "_" + QString::number(foundedBiClusterSize) + "_" + QString::number(index++) << "_" << QString::number(*bic->GetFeature(Enums::FeatureType::ACV)) << "\n";
 
             //out << QString::number(result->idResult) + ";" + QString::number(result->idMethod) + ";" + QString::number(*result->dataMatrix->idMatrix) + ";" + QString::number(foundedBiClusterSize) + ";" + QString::number(index++) << ";" << QString::number(*bic->ACV) << "\n";
 
@@ -1304,7 +1514,7 @@ void Experimental::CompareGrandTruth()
                     {
                         std::shared_ptr<double> ACV;
                         std::shared_ptr<double> Similarity;
-                        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(res->idResult, cluster1, currentBic, ACV, Similarity);
+                        std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(res->idResult, cluster1, currentBic);
                         expected.push_back(NewBic);
                         currentBic.clear();
                     }
@@ -1321,7 +1531,7 @@ void Experimental::CompareGrandTruth()
             {
                 std::shared_ptr<double> ACV;
                 std::shared_ptr<double> Similarity;
-                std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(res->idResult, cluster1, currentBic, ACV, Similarity);
+                std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(res->idResult, cluster1, currentBic);
                 expected.push_back(NewBic);
                 currentBic.clear();
             }
@@ -1346,9 +1556,9 @@ void Experimental::CompareGrandTruth()
     qDebug() << "Single Average: " << (singleAvg / 40);
 }
 
-void Experimental::RunTriclustering(int method)
+void Experimental::RunTriclustering(int matrix)
 {
-    /*
+
     std::vector<Enums::Methods> methods;
 
     methods.push_back(Enums::Methods::PLSA);
@@ -1360,12 +1570,12 @@ void Experimental::RunTriclustering(int method)
 
     for(Enums::Methods method : methods)
     {
-    */
-        std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, method, -1, -1);
-        auto riter = std::remove_if(test.begin(), test.end(), [](std::shared_ptr<BiclusteringObject> r) { return r->idMethod == Enums::Methods::CONSENSUS; });
-        test.erase(riter, test.end());
 
-        if (test.size() == 0)
+        std::vector<std::shared_ptr<BiclusteringObject>> testSingle  = engine->db->GetResults(-1, matrix, method, -1);
+        auto riter = std::remove_if(testSingle.begin(), testSingle.end(), [](std::shared_ptr<BiclusteringObject> r) { return r->idMethod == Enums::Methods::CONSENSUS; });
+        testSingle.erase(riter, testSingle.end());
+
+        if (testSingle.size() == 0)
             return;
         /*
         double bestValue = -1;
@@ -1395,10 +1605,11 @@ void Experimental::RunTriclustering(int method)
         //tmpPtr->RebuildBiclusters();
 
         //single[best]->PostProcessingTask();
-
-        test.push_back(single[best]);
-    }
 */
+        for(std::shared_ptr<BiclusteringObject> single : testSingle)
+            test.push_back(single);
+    }
+
     //std::vector<MergeType> mt;
 
     //mt.push_back(Consensus::MergeType::ByACV);
@@ -1407,11 +1618,11 @@ void Experimental::RunTriclustering(int method)
 
     //for(Consensus::MergeType imt : mt)
     //{
-        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1, 0, "");
+        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1, 0, "NMF");
 
-        newObject->expectedBiClusterCount = 1;
+        newObject->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
 
-        newObject->dataMatrix->expectedBiClusterCount = 1;
+        newObject->dataMatrix->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
 
         newObject->SetEnsemble(test);
 
@@ -1745,22 +1956,27 @@ void Experimental::RunStepTricluster(int matrix, int start)
     //engine->ServeQueue();
 }
 
-void Experimental::RunConsensus(int method)
+void Experimental::RunConsensus(int matrix, std::vector<Enums::Methods> methods, QString desc)
 {
-    //std::vector<Enums::Methods> methods;
+
 
     //methods.push_back(Enums::Methods::PLSA);
-    //methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
-    //methods.push_back(Enums::Methods::KULLBACK_LIEBER);
-    //methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
+    methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
+    methods.push_back(Enums::Methods::KULLBACK_LIEBER);
+    methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
 
-    /*
+
     std::vector<std::shared_ptr<BiclusteringObject>> test;
 
     for(Enums::Methods method : methods)
     {
-    */
-        std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, method, -1, -1);
+
+        std::vector<std::shared_ptr<BiclusteringObject>> testSingle  = engine->db->GetResults(-1, matrix, method, -1);
+
+        for(std::shared_ptr<BiclusteringObject> single : testSingle)
+        {
+            test.push_back(single);
+        }
 
         if (test.size() == 0)
             return;
@@ -1790,6 +2006,7 @@ void Experimental::RunConsensus(int method)
         test.push_back(single[best]);
     }
 */
+    }
     std::vector<MergeType> mt;
 
     mt.push_back(MergeType::ByACV);
@@ -1808,7 +2025,7 @@ void Experimental::RunConsensus(int method)
 
     for(MergeType imt : mt)
     {
-        std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1, 0, descs[d++]);
+        std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1, 0, descs[d++] + desc);
 
         //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
 
@@ -1873,7 +2090,7 @@ void Experimental::Squro(QString mode)
             engine->ServeQueue();
         }
 
-        RunConsensus(1);
+        //RunConsensus(1);
     }
     else if (mode == "2")
     {
@@ -1908,7 +2125,7 @@ void Experimental::Squro(QString mode)
             engine->ServeQueue();
         }
 
-        RunConsensus(1);
+        //RunConsensus(1);
     }
     else if (mode == "3")
     {
@@ -2067,7 +2284,7 @@ void Experimental::LoadKumalBiclusters()
                 {
                     bicNum++;
 
-                    std::shared_ptr<Bicluster> fb = std::make_shared<Bicluster>(-1, cluster1, cluster2, nullptr, nullptr);
+                    std::shared_ptr<Bicluster> fb = std::make_shared<Bicluster>(-1, cluster1, cluster2);
 
                     bicObject->foundedBiclusters.push_back(fb);
                 }
@@ -2269,9 +2486,9 @@ void Experimental::ExportResults(QString folder, int startId, int stopID)
 
                 //out << "Bicluster " << ++index << ". Average corelation value: " << *bic->ACV << "\n";
 
-                qDebug() << *result->dataMatrix->idMatrix << ";" << result->idResult << ";" << result->idMethod << ";Bicluster " << index << ";" << *bic->ACV << "\n";
+                qDebug() << *result->dataMatrix->idMatrix << ";" << result->idResult << ";" << result->idMethod << ";Bicluster " << index << ";" << *bic->GetFeature(Enums::FeatureType::ACV) << "\n";
 
-                out << *result->dataMatrix->idMatrix << ";" << result->idResult << ";" << result->idMethod << ";Bicluster " << ++index << ";" << *bic->ACV << "\n";
+                out << *result->dataMatrix->idMatrix << ";" << result->idResult << ";" << result->idMethod << ";Bicluster " << ++index << ";" << *bic->GetFeature(Enums::FeatureType::ACV) << "\n";
 
                 //out << "Cluster1:\n";
 

@@ -7,9 +7,9 @@ void ConsensusWorker::run()
         for( std::shared_ptr<Bicluster>& item : connected)
         {
             if (item->cluster1.size() > 0 && item->cluster2.size() > 0)
-                item->ACV = dataMatrix->AverageCorrelationValue(item->cluster1, item->cluster2);
+                item->SetFeature(choosenMeasure, dataMatrix->AverageCorrelationValue(item->cluster1, item->cluster2));
             else
-                item->ACV = 0;
+                item->SetFeature(choosenMeasure, 0.0);
         }
     }
 
@@ -23,9 +23,9 @@ void ConsensusWorker::run()
             auto it = std::find_if(Cluster1.begin(), Cluster1.end(), [c1](ClusterItem iter) { return iter.Index == c1; } );
 
             if (it != Cluster1.end())
-                it->IncreaseWeight(*item->ACV);
+                it->IncreaseWeight(*item->GetFeature(choosenMeasure));
             else
-                Cluster1.emplace_back(c1, *item->ACV);
+                Cluster1.emplace_back(c1, *item->GetFeature(choosenMeasure));
         }
 
         for (int c2 : item->cluster2)
@@ -33,9 +33,9 @@ void ConsensusWorker::run()
             auto it = std::find_if(Cluster2.begin(), Cluster2.end(), [c2](ClusterItem iter) { return iter.Index == c2; } );
 
             if (it != Cluster2.end())
-                it->IncreaseWeight(*item->ACV);
+                it->IncreaseWeight(*item->GetFeature(choosenMeasure));
             else
-                Cluster2.emplace_back(c2, *item->ACV);
+                Cluster2.emplace_back(c2, *item->GetFeature(choosenMeasure));
         }
     }
 
@@ -88,7 +88,7 @@ void ConsensusWorker::run()
                 MinWeight *= 0.9;
         }
 
-        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2), nullptr);
+        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2);
 
 
 
@@ -105,10 +105,12 @@ void ConsensusWorker::run()
 
         bool done = false;
 
-        Bicluster Final(-1, FinalCluster1, FinalCluster2, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2), nullptr);
+        Bicluster Final(-1, FinalCluster1, FinalCluster2);
 
-        double currentValue = *Final.ACV;
-        std::shared_ptr<double> candidateValue = 0;
+        Final.SetFeature(choosenMeasure, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2));
+
+        double currentValue = *Final.GetFeature(choosenMeasure);
+        double candidateValue = 0.0;
 
         while (!done)
         {
@@ -137,13 +139,13 @@ void ConsensusWorker::run()
 
                 qDebug() << "ByACV: Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size();
 
-                if (*candidateValue <= currentValue)
+                if (candidateValue <= currentValue)
                 {
                     FinalCluster1.push_back(Index);
                 }
                 else
                 {
-                    currentValue = *candidateValue;
+                    currentValue = candidateValue;
                 }
             }
 
@@ -160,15 +162,15 @@ void ConsensusWorker::run()
 
                 candidateValue = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
 
-                qDebug() << "ByACV: (" << *candidateValue << ") Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size() << "Final Size 1: " << FinalCluster1.size() << " Final Size 2: " << FinalCluster2.size();
+                qDebug() << "ByACV: (" << candidateValue << ") Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size() << "Final Size 1: " << FinalCluster1.size() << " Final Size 2: " << FinalCluster2.size();
 
-                if (*candidateValue <= currentValue)
+                if (candidateValue <= currentValue)
                 {
                     FinalCluster2.push_back(Index);
                 }
                 else
                 {
-                    currentValue = *candidateValue;
+                    currentValue = candidateValue;
                 }
             }
 
@@ -176,7 +178,7 @@ void ConsensusWorker::run()
                 done = true;
         }
 
-        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2), nullptr);
+        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2);
 
     }
     else if (extractType == MergeType::ByACVHeuristic)
@@ -209,7 +211,7 @@ void ConsensusWorker::run()
                 Cluster2.clear();
             }
 
-            std::shared_ptr<double> currentValue = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
+            double currentValue = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
 
             if (Cluster1.size() > 0)
             {
@@ -220,9 +222,9 @@ void ConsensusWorker::run()
                 auto riter = std::remove_if(FinalCluster1.begin(), FinalCluster1.end(), [index1](const int r) { return r == index1; });
                 FinalCluster1.erase(riter, FinalCluster1.end());
 
-                std::shared_ptr<double> Candidate =  dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
+                double Candidate = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
 
-                min1 = *Candidate - *currentValue;
+                min1 = Candidate - currentValue;
 
                 FinalCluster1.push_back(index1);
             }
@@ -236,9 +238,9 @@ void ConsensusWorker::run()
                 auto riter = std::remove_if(FinalCluster2.begin(), FinalCluster2.end(), [index2](int r) { return r == index2; });
                 FinalCluster2.erase(riter, FinalCluster2.end());
 
-                std::shared_ptr<double> Candidate = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
+                double Candidate = dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2);
 
-                min2 = *Candidate - *currentValue;
+                min2 = Candidate - currentValue;
 
                 FinalCluster2.push_back(index2);
             }
@@ -271,13 +273,13 @@ void ConsensusWorker::run()
                 Cluster2.erase(riter, Cluster2.end());
             }
 
-            qDebug() << "ByACVHeuristic (" << *currentValue <<  "): Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size() << "Final Size 1: " << FinalCluster1.size() << " Final Size 2: " << FinalCluster2.size();
+            qDebug() << "ByACVHeuristic (" << currentValue <<  "): Size 1: " << Cluster1.size() << " Size 2: " << Cluster2.size() << "Final Size 1: " << FinalCluster1.size() << " Final Size 2: " << FinalCluster2.size();
 
             if (Cluster1.size() == 0 && Cluster2.size() == 0)
                 done = true;
         }
 
-        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2), nullptr);
+        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2);
 
     }
     else if (extractType == MergeType::None)
@@ -288,6 +290,6 @@ void ConsensusWorker::run()
         std::transform(Cluster1.begin(), Cluster1.end(), FinalCluster1.begin(), [](const ClusterItem& c){ return c.Index; });
         std::transform(Cluster2.begin(), Cluster2.end(), FinalCluster2.begin(), [](const ClusterItem& c){ return c.Index; });
 
-        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2, dataMatrix->AverageCorrelationValue(FinalCluster1, FinalCluster2), nullptr);
+        bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2);
     }
 }

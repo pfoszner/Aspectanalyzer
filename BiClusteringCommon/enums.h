@@ -48,7 +48,8 @@ public:
             ChengandChurch,
             BiMax,
             xMOTIFs,
-            COALESCE
+            COALESCE,
+            PROJECT_GRADIENT_METHOD
         };
 
     enum MethodsParameters
@@ -65,23 +66,16 @@ public:
 
     enum FeatureType
     {
-        SimilarityJaccard_Average = 1,
-        SimilarityJaccard_1STD,
-        SimilarityJaccard_2STD,
-        SimilarityJaccard_0,
-        SimilarityJaccard_plus_1_STD,
-        SimilarityJaccard_plus_2_STD,
-        SimilarityJaccard_plus_3_STD,
-        SimilarityJaccard_Quadrille,
+        SimilarityJaccard = 1,
         SimilarityLevenstine,
         MSR,
         ACV,
         ASR,
-        SimilarityJaccard_Custom,
         Divergence,
         BiclusterCount,
         AverageACV,
-        AverageSimilarity
+        AverageSimilarity,
+        ConsensusExtractionType
     };
 
     enum SimilarityMethods

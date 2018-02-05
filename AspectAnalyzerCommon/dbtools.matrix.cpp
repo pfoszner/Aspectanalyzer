@@ -2,7 +2,7 @@
 
 std::vector<int> DBTools::getGroupOfMatrices(QString group)
 {
-    QString queryString = "SELECT id_matrix FROM matrix WHERE [group] = '" + group + "'";
+    QString queryString = "SELECT id_matrix FROM matrix WHERE [group] like '%" + group + "%'";
 
     std::vector<int> retVal;
 
@@ -147,7 +147,7 @@ void DBTools::GetMatrixData(int idResult, int idType, std::shared_ptr<NMF> resul
 
     tmpFile.open(QIODevice::WriteOnly);
 
-    auto writeResult = tmpFile.write(rawData);
+    tmpFile.write(rawData);
 
     tmpFile.close();
 

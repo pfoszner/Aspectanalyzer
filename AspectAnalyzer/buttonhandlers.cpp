@@ -16,7 +16,7 @@ ButtonHandlers::~ButtonHandlers()
 }
 
 //Add new bi-clustering task to worker
-void ButtonHandlers::btnAddTaskSlot(int methodID)
+void ButtonHandlers::btnAddTaskSlot()
 {
     AddBiclusteringTask wizard(engine);
 

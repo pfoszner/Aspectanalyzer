@@ -25,8 +25,8 @@ public:
 
     void StartCustom(QString mode);
     void TestTriclustering();
-    void RunConsensus(int method);
-    void RunTriclustering(int method);
+    void RunConsensus(int method, std::vector<Enums::Methods> methods, QString desc);
+    void RunTriclustering(int matrix);
     void CompareGrandTruth();
     void CompareGrandTruthMiRNA();
     void ARFFPlay();
@@ -49,6 +49,7 @@ public:
     void ImportKumalResultsNoise(int repNum);
     void ImportKumalResultsNumber(int repNum);
     void ImportKumalResultsOverlap(int repNum);
+    void PringInfo(int taskID, QString filename);
 };
 
 #endif // EXPERIMENTAL_H
