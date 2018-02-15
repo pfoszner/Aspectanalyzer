@@ -8,9 +8,14 @@
 #include <QString>
 #include "common.h"
 #include "featureresult.h"
+#include <QMutex>
 
 class Bicluster
 {
+
+private:
+    QMutex lock;
+
 public:
     int idBicluster = -1;
     std::vector<int> cluster1;

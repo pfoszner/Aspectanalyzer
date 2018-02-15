@@ -26,7 +26,7 @@ public:
     void StartCustom(QString mode);
     void TestTriclustering();
     void RunConsensus(int method, std::vector<Enums::Methods> methods, QString desc);
-    void RunTriclustering(int matrix);
+    void RunTriclustering(int matrix, std::vector<Enums::Methods> methods, QString desc);
     void CompareGrandTruth();
     void CompareGrandTruthMiRNA();
     void ARFFPlay();

@@ -53,6 +53,8 @@ bool DBTools::SaveFeatures(std::vector<FeatureResult>& features, int idResult, i
 
     query.bindValue(":type", types);
     query.bindValue(":result", results);
+    query.bindValue(":matrix", mats);
+    query.bindValue(":bicluster", bics);
     query.bindValue(":index", indexes);
     query.bindValue(":value", values);
 

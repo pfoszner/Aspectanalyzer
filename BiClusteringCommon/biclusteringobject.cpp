@@ -8,12 +8,23 @@ static inline double ArrayToDouble(QByteArray source);
 BiclusteringObject::BiclusteringObject(std::shared_ptr<Matrix>& dataMatrix)
 {
     this->dataMatrix = std::make_shared<Matrix>(*dataMatrix);
-    //this->dataMatrix = dataMatrix;
+
+    ft.push_back(Enums::FeatureType::ACV);
+    ft.push_back(Enums::FeatureType::ASR);
+    ft.push_back(Enums::FeatureType::MSR);
+    ft.push_back(Enums::FeatureType::SMSR);
+    ft.push_back(Enums::FeatureType::Variance);
 }
 
 BiclusteringObject::BiclusteringObject(QByteArray deserialize)
 {
     Deserialize(deserialize);
+
+    ft.push_back(Enums::FeatureType::ACV);
+    ft.push_back(Enums::FeatureType::ASR);
+    ft.push_back(Enums::FeatureType::MSR);
+    ft.push_back(Enums::FeatureType::SMSR);
+    ft.push_back(Enums::FeatureType::Variance);
 }
 
 void BiclusteringObject::Deserialize(QByteArray deserialize)
@@ -299,7 +310,7 @@ void BiclusteringObject::PostProcessingTask()
 
     double Value = 0;
 
-    if (dataMatrix->expectedBiClusters.size() > 0)
+    if (dataMatrix->expectedBiClusters.size() > 0 && foundedBiclusters.size() > 0)
     {
         Array<double> CM = GetCostMatrixForBiclusters(dataMatrix->expectedBiClusters, foundedBiclusters, Enums::BiclusterCompareMode::Both, Enums::SimilarityMethods::JaccardIndex);
 
@@ -329,27 +340,29 @@ void BiclusteringObject::PostProcessingTask()
         //delete Classis;
     }
 
-    double AverageAVC = -1.0;
-
-    if (foundedBiclusters.size() > 0)
+    for(Enums::FeatureType ift : ft)
     {
-        for(uint i = 0; i < foundedBiclusters.size(); ++i)
+        double AverageValue = -1.0;
+
+        if (foundedBiclusters.size() > 0)
         {
-            if (foundedBiclusters[i]->cluster1.size() > 0 && foundedBiclusters[i]->cluster2.size() > 0)
+            for(uint i = 0; i < foundedBiclusters.size(); ++i)
             {
-                double ACV = dataMatrix->AverageCorrelationValue(foundedBiclusters[i]->cluster1, foundedBiclusters[i]->cluster2);
-                foundedBiclusters[i]->SetFeature(Enums::FeatureType::ACV, ACV);
-                AverageAVC += ACV;
+                if (foundedBiclusters[i]->cluster1.size() > 0 && foundedBiclusters[i]->cluster2.size() > 0)
+                {
+                    double Value = dataMatrix->CalculateQualityMeasure(ift, foundedBiclusters[i]->cluster1, foundedBiclusters[i]->cluster2);
+                    foundedBiclusters[i]->SetFeature(ift, Value);
+                    AverageValue += Value;
+                }
             }
         }
-    }
 
-    if (AverageAVC >= 0.0)
-    {
-        features.push_back(FeatureResult(Enums::FeatureType::AverageACV, AverageAVC / foundedBiclusters.size(), 0));
+        if (AverageValue >= 0.0)
+        {
+            features.push_back(FeatureResult(ift, AverageValue / foundedBiclusters.size(), 0));
+        }
     }
-
-    SaveToLocalFile(AverageAVC, Value);
+    //SaveToLocalFile(AverageAVC, Value);
 }
 
 void BiclusteringObject::SaveToLocalFile(double AverageAVC, double Similarity)

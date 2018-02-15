@@ -1086,9 +1086,9 @@ void Experimental::PringInfo(int taskID, QString filename)
             {
                 if (task->foundedBiclusters[i]->cluster1.size() > 0 && task->foundedBiclusters[i]->cluster2.size() > 0)
                 {
-                    ASR += task->dataMatrix->AverageSpearmansRank(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
-                    MSR += task->dataMatrix->MeanSquaredResidue(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
-                    ACV += task->dataMatrix->AverageCorrelationValue(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
+                    //ASR += task->dataMatrix->AverageSpearmansRank(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
+                    //MSR += task->dataMatrix->MeanSquaredResidue(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
+                    //ACV += task->dataMatrix->AverageCorrelationValue(task->foundedBiclusters[i]->cluster1, task->foundedBiclusters[i]->cluster2);
                 }
             }
 
@@ -1108,18 +1108,53 @@ void Experimental::PringInfo(int taskID, QString filename)
 
 void Experimental::StartCustom(QString mode)
 {
+    ImportKumalResults(20);
+    ImportKumalResultsNoise(20);
+    ImportKumalResultsNumber(20);
+    ImportKumalResultsOverlap(20);
+
+//return;
+
+    std::vector<Enums::Methods> methods3;
+
+    methods3.push_back(Enums::Methods::FABIA);
+    methods3.push_back(Enums::Methods::QUBIC);
+    methods3.push_back(Enums::Methods::Spectral);
+    methods3.push_back(Enums::Methods::Plaid);
+    methods3.push_back(Enums::Methods::OPSM);
+    methods3.push_back(Enums::Methods::BBC);
+    methods3.push_back(Enums::Methods::CPB);
+    methods3.push_back(Enums::Methods::ISA);
+    methods3.push_back(Enums::Methods::ChengandChurch);
+    methods3.push_back(Enums::Methods::BiMax);
+    methods3.push_back(Enums::Methods::xMOTIFs);
+    methods3.push_back(Enums::Methods::COALESCE);
+
+    RunTriclustering(134, methods3, "Dupa");
+
+    return;
+
     for(int i = 14037; i <= 15164; ++i)
     {
         //if (i > 14248)
-            PringInfo(i, "Final.csv");
+            //PringInfo(i, "Final.csv");
     }
 
-    return;
+    QStringList params = mode.split(';');
+
+    int start = params[0].toInt();
+    int stop = params[1].toInt();
+
+    //return;
     std::vector<int> mats = engine->db->getGroupOfMatrices("rep0");
+
+    int count = 0;
 
     for(int mat : mats)
     {
-        if (mat == 1)
+        ++count;
+
+        if (count <= start || count > stop)
             continue;
 
         std::vector<Enums::Methods> methods;
@@ -1129,7 +1164,9 @@ void Experimental::StartCustom(QString mode)
         methods.push_back(Enums::Methods::KULLBACK_LIEBER);
         methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
 
-        RunConsensus(mat, methods, "_FinalNMF");
+        RunConsensus(mat, methods, "FinalMeasureTest_NMF");
+
+        //continue;
 
         std::vector<Enums::Methods> methods2;
 
@@ -1146,7 +1183,9 @@ void Experimental::StartCustom(QString mode)
         methods2.push_back(Enums::Methods::xMOTIFs);
         methods2.push_back(Enums::Methods::COALESCE);
 
-        RunConsensus(mat, methods, "_Final");
+        RunConsensus(mat, methods, "FinalMeasureTest");
+
+        qDebug() << count << " of " << mats.size() << " witch is " << (round((count * 1000.0) / mats.size()) / 10) << " %";
     }
 
     engine->ServeQueue();
@@ -1215,15 +1254,15 @@ void Experimental::StartCustom(QString mode)
 
     Amatrix.save(filename.toStdString(), arma::arma_ascii);
 
-    qDebug() << dupa->AverageSpearmansRank(Amatrix);
+    //qDebug() << dupa->AverageSpearmansRank(Amatrix);
 
-    qDebug() << dupa->AverageCorrelationValue(Amatrix);
+    //qDebug() << dupa->AverageCorrelationValue(Amatrix);
 
-    qDebug() << dupa->ScalingMeanSquaredResidue(Amatrix);
+    //qDebug() << dupa->ScalingMeanSquaredResidue(Amatrix);
 
-    qDebug() << dupa->MeanSquaredResidue(Amatrix);
+    //qDebug() << dupa->MeanSquaredResidue(Amatrix);
 
-    qDebug() << dupa->Variance(Amatrix);
+    //qDebug() << dupa->Variance(Amatrix);
 
     //qDebug() << engine->db->GetResults(-1,-1,-1,-1).size();
 
@@ -1314,7 +1353,7 @@ void Experimental::StartCustom(QString mode)
     {
         try
         {
-            RunTriclustering(id);
+            //RunTriclustering(id);
         }
         catch(...){}
     }
@@ -1556,15 +1595,8 @@ void Experimental::CompareGrandTruth()
     qDebug() << "Single Average: " << (singleAvg / 40);
 }
 
-void Experimental::RunTriclustering(int matrix)
+void Experimental::RunTriclustering(int matrix, std::vector<Enums::Methods> methods, QString desc)
 {
-
-    std::vector<Enums::Methods> methods;
-
-    methods.push_back(Enums::Methods::PLSA);
-    methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
-    methods.push_back(Enums::Methods::KULLBACK_LIEBER);
-    methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
 
     std::vector<std::shared_ptr<BiclusteringObject>> test;
 
@@ -1572,11 +1604,11 @@ void Experimental::RunTriclustering(int matrix)
     {
 
         std::vector<std::shared_ptr<BiclusteringObject>> testSingle  = engine->db->GetResults(-1, matrix, method, -1);
-        auto riter = std::remove_if(testSingle.begin(), testSingle.end(), [](std::shared_ptr<BiclusteringObject> r) { return r->idMethod == Enums::Methods::CONSENSUS; });
-        testSingle.erase(riter, testSingle.end());
+        //auto riter = std::remove_if(testSingle.begin(), testSingle.end(), [](std::shared_ptr<BiclusteringObject> r) { return r->idMethod == Enums::Methods::CONSENSUS; });
+        //testSingle.erase(riter, testSingle.end());
 
         if (testSingle.size() == 0)
-            return;
+            continue;
         /*
         double bestValue = -1;
         int best = 0;
@@ -1610,6 +1642,9 @@ void Experimental::RunTriclustering(int matrix)
             test.push_back(single);
     }
 
+    if (test.size() == 0)
+        return;
+
     //std::vector<MergeType> mt;
 
     //mt.push_back(Consensus::MergeType::ByACV);
@@ -1618,7 +1653,7 @@ void Experimental::RunTriclustering(int matrix)
 
     //for(Consensus::MergeType imt : mt)
     //{
-        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1, 0, "NMF");
+        std::shared_ptr<TriClustering> newObject = std::make_shared<TriClustering>(test[0]->dataMatrix, -1, 0, desc);
 
         newObject->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
 
@@ -1961,9 +1996,9 @@ void Experimental::RunConsensus(int matrix, std::vector<Enums::Methods> methods,
 
 
     //methods.push_back(Enums::Methods::PLSA);
-    methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
-    methods.push_back(Enums::Methods::KULLBACK_LIEBER);
-    methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
+    //methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
+    //methods.push_back(Enums::Methods::KULLBACK_LIEBER);
+    //methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
 
 
     std::vector<std::shared_ptr<BiclusteringObject>> test;
@@ -2013,6 +2048,7 @@ void Experimental::RunConsensus(int matrix, std::vector<Enums::Methods> methods,
     mt.push_back(MergeType::ByACVHeuristic);
     mt.push_back(MergeType::Standard);
     mt.push_back(MergeType::None);
+    mt.push_back(MergeType::GainFunction);
 
     std::vector<QString> descs;
 
@@ -2020,32 +2056,68 @@ void Experimental::RunConsensus(int matrix, std::vector<Enums::Methods> methods,
     descs.push_back("ByACVHeuristic");
     descs.push_back("Standard");
     descs.push_back("None");
+    descs.push_back("GainFunction");
 
-    int d = 0;
+    std::vector<Enums::FeatureType> ft;
 
-    for(MergeType imt : mt)
+    ft.push_back(Enums::FeatureType::ACV);
+    ft.push_back(Enums::FeatureType::ASR);
+    ft.push_back(Enums::FeatureType::MSR);
+    ft.push_back(Enums::FeatureType::SMSR);
+    ft.push_back(Enums::FeatureType::Variance);
+
+
+    std::vector<QString> descsFeat;
+
+    descsFeat.push_back("ACV");
+    descsFeat.push_back("ASR");
+    descsFeat.push_back("MSR");
+    descsFeat.push_back("SMSR");
+    descsFeat.push_back("Variance");
+
+    int f = 0;
+
+    for(Enums::FeatureType ift : ft)
     {
-        std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1, 0, descs[d++] + desc);
+        int d = 0;
 
-        //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
+        for(MergeType imt : mt)
+        {
+            std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1, 0, desc + "_" + descs[d++] + "_" + descsFeat[f]);
 
-        newObject->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
+            //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
 
-        newObject->dataMatrix->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
+            newObject->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
 
-        newObject->SetEnsemble(test);
+            newObject->dataMatrix->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
 
-        newObject->ExtractType = imt;
+            newObject->SetEnsemble(test);
 
-        std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
+            newObject->ExtractType = imt;
 
-        params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+            newObject->qualityMeasure = ift;
 
-        //auto res = newObject->Compute(params);
+            std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
 
-        //engine->db->SaveResult(res);
+            params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
 
-        engine->AddBiClusteringTask(newObject);
+            //auto res = newObject->Compute(params);
+
+            //engine->db->SaveResult(res);
+
+            if (imt == MergeType::GainFunction)
+            {
+
+                    newObject->penaltyForGainFunction = f + 1;
+                    newObject->desc += "_" + QString::number(f + 1);
+
+            }
+
+
+            engine->AddBiClusteringTask(newObject);
+        }
+
+        f++;
     }
 
     //engine->ServeQueue();

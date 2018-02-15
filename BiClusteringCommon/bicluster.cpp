@@ -64,24 +64,42 @@ Bicluster::Bicluster(int X, int Y, int len1, int len2)
 
 std::shared_ptr<double> Bicluster::GetFeature(Enums::FeatureType type)
 {
-    auto iter = std::find_if(mesures.begin(), mesures.end(), [type](FeatureResult q) { return q.type == type; } );
+    lock.lock();
+    std::vector<FeatureResult>::iterator iter = std::find_if(mesures.begin(), mesures.end(), [type](FeatureResult q) { return q.type == type; } );
 
     if (iter == mesures.end())
+    {
+        lock.unlock();
         return nullptr;
+    }
     else
-        return std::make_shared<double>(iter->value);
+    {
+        std::shared_ptr<double> retVal = std::make_shared<double>(iter->value);
+        lock.unlock();
+        return retVal;
+    }
+
 }
 
 void Bicluster::SetFeature(Enums::FeatureType type, double value)
 {
+    lock.lock();
+
+    auto riter = std::remove_if(mesures.begin(), mesures.end(), [type](FeatureResult r) { return r.type == type; });
+    mesures.erase(riter, mesures.end());
+
     FeatureResult newFeature(type, value, 0);
 
     mesures.push_back(newFeature);
+
+    lock.unlock();
 }
 
 void Bicluster::SetFeature(FeatureResult newFeature)
 {
+    lock.lock();
     mesures.push_back(newFeature);
+    lock.unlock();
 }
 
 double Bicluster::Compare(std::shared_ptr<Bicluster> CompareTo, Enums::SimilarityMethods type)

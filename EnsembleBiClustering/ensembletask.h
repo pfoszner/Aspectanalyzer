@@ -8,7 +8,8 @@ enum class MergeType
         Standard = 0,
         ByACV,
         ByACVHeuristic,
-        None
+        None,
+        GainFunction
     };
 
 class EnsembleTask : public BiclusteringObject, public std::enable_shared_from_this<EnsembleTask>

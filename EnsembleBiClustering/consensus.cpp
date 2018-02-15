@@ -399,7 +399,7 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
     {
         retVal[i] = std::make_shared<Bicluster>(0, 0, 0, 0);
 
-        ConsensusWorker *st = new ConsensusWorker(retVal[i], dataMatrix, Connected[i], ExtractType, (double)orgResults.size(), minClusterSize, percentage);
+        ConsensusWorker *st = new ConsensusWorker(retVal[i], dataMatrix, Connected[i], ExtractType, qualityMeasure, penaltyForGainFunction, (double)orgResults.size(), minClusterSize, percentage);
 
         localInstance->start(st);
 
@@ -420,7 +420,7 @@ std::vector<std::shared_ptr<Bicluster>> Consensus::CreateGenericBiclusters(std::
             {
                 if (retVal[i]->cluster1.size() > 0 && retVal[i]->cluster2.size() > 0)
                 {
-                    SimValuesList[i] = dataMatrix->AverageCorrelationValue(retVal[i]->cluster1, retVal[i]->cluster2);
+                    SimValuesList[i] = dataMatrix->CalculateQualityMeasure(qualityMeasure, retVal[i]->cluster1, retVal[i]->cluster2);
                 }
                 else
                     SimValuesList[i] = 0;

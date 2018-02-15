@@ -21,9 +21,9 @@ double PGM::DivernegceValue()
 {
     //double projnorm = norm([gradW(gradW<0 | W>0); gradH(gradH<0 | H>0)]);
     //if (projnorm < tol*initgrad)
-    //    return 0.0;
+        return 0.0;
     //else
-    //    return projnorm;
+        //return projnorm;
 }
 
 void PGM::PreProcessing()

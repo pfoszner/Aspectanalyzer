@@ -34,16 +34,8 @@ public:
     QString group;
     uint expectedBiClusterCount;
     std::vector<std::shared_ptr<Bicluster>> expectedBiClusters;
-    double AverageCorrelationValue(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
-    double AverageCorrelationValue(const arma::mat& Amatrix);
-    double MeanSquaredResidue(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
-    double MeanSquaredResidue(const arma::mat& Amatrix);
-    double ScalingMeanSquaredResidue(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
-    double ScalingMeanSquaredResidue(const arma::mat& Amatrix);
-    double AverageSpearmansRank(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
-    double AverageSpearmansRank(const arma::mat& Amatrix);
-    double Variance(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
-    double Variance(const arma::mat& Amatrix);
+
+    double CalculateQualityMeasure(Enums::FeatureType measure, const std::vector<int>& clusterW, const std::vector<int>& clusterH);
     std::vector<Label> rowLabels;
     std::vector<Label> columnLabels;
     std::vector<Label> classLabels;
@@ -55,6 +47,17 @@ private:
     void LoadFromDataList(std::vector <QString>& sdata);
     void LoadSoftFile(QString& filepath);
     void LoadDatasetFile(QString& filepath);
+
+    double AverageCorrelationValue(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
+    double AverageCorrelationValue(const arma::mat& Amatrix);
+    double MeanSquaredResidue(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
+    double MeanSquaredResidue(const arma::mat& Amatrix);
+    double ScalingMeanSquaredResidue(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
+    double ScalingMeanSquaredResidue(const arma::mat& Amatrix);
+    double AverageSpearmansRank(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
+    double AverageSpearmansRank(const arma::mat& Amatrix);
+    double Variance(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
+    double Variance(const arma::mat& Amatrix);
 
 };
 #endif // MATRIX_H

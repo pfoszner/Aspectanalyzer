@@ -201,6 +201,7 @@ void ComputingEngine::CheckWriteResult(ResultPointer jobDone)
     {
         resultsToWrite.push(jobDone);
         size_t count = resultsToWrite.size();
+        qDebug() << "Result done - " << jobDone->desc;
         lock.unlock();
 
         if (count >= 1)
@@ -218,7 +219,7 @@ void ComputingEngine::CheckWriteResult(ResultPointer jobDone)
         }
         lock.unlock();
     }
-    qDebug() << "Result done";
+
 }
 
 void ComputingEngine::ServeQueue()

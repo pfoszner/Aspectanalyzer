@@ -79,6 +79,8 @@ public:
 private:
     double RecoveryRelevance(const std::vector<std::shared_ptr<Bicluster>>& first, const std::vector<std::shared_ptr<Bicluster>>& second);
 
+    std::vector<Enums::FeatureType> ft;
+
 signals:
     void ReportProgress(int steps);
 };

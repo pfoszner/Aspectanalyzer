@@ -830,3 +830,40 @@ double Matrix::AverageCorrelationValue(const arma::mat& Amatrix)
     else
         return ColumnValue;
 }
+
+
+double Matrix::CalculateQualityMeasure(Enums::FeatureType measure, const std::vector<int>& clusterW, const std::vector<int>& clusterH)
+{
+    switch(measure)
+    {
+        case Enums::FeatureType::ACV:
+        {
+            return AverageCorrelationValue(clusterW, clusterH);
+        }
+
+        case Enums::FeatureType::ASR:
+        {
+            return AverageSpearmansRank(clusterW, clusterH);
+        }
+
+        case Enums::FeatureType::MSR:
+        {
+            return MeanSquaredResidue(clusterW, clusterH);
+        }
+
+        case Enums::FeatureType::SMSR:
+        {
+            return ScalingMeanSquaredResidue(clusterW, clusterH);
+        }
+
+        case Enums::FeatureType::Variance:
+        {
+            return Variance(clusterW, clusterH);
+        }
+
+        default:
+        {
+            return AverageCorrelationValue(clusterW, clusterH);
+        }
+    }
+}

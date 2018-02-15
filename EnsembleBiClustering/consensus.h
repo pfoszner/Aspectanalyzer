@@ -12,6 +12,8 @@ class Consensus : public EnsembleTask
 public:
 
     MergeType ExtractType = MergeType::Standard;
+    long penaltyForGainFunction = 1;
+    Enums::FeatureType qualityMeasure = Enums::FeatureType::ACV;
 
     Consensus(std::shared_ptr<Matrix>& Vmatrix, int IdResult, double time, QString desc)
         : EnsembleTask(Vmatrix, Enums::Methods::CONSENSUS, IdResult, time, desc)

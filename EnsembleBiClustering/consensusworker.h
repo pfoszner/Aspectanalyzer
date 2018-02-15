@@ -17,14 +17,15 @@ private:
     std::shared_ptr<Matrix> dataMatrix;
     std::vector<std::shared_ptr<Bicluster>> connected;
     MergeType extractType = MergeType::Standard;
+    Enums::FeatureType choosenMeasure;
     double orgResultsSize;
     int minClusterSize;
     double percentage;
-    Enums::FeatureType choosenMeasure = Enums::FeatureType::ACV;
+    long penaltyForGainFunction = 1;
 
 public:
-    ConsensusWorker(std::shared_ptr<Bicluster>& bic, std::shared_ptr<Matrix> dataMatrix, const std::vector<std::shared_ptr<Bicluster>>& connected, MergeType extractType, double orgResultsSize, int minClusterSize, double percentage)
-        : bic(bic), dataMatrix(dataMatrix), connected(connected), extractType(extractType), orgResultsSize(orgResultsSize), minClusterSize(minClusterSize), percentage(percentage)
+    ConsensusWorker(std::shared_ptr<Bicluster>& bic, std::shared_ptr<Matrix> dataMatrix, const std::vector<std::shared_ptr<Bicluster>>& connected, MergeType extractType, Enums::FeatureType qualityMeasure, long penaltyForGainFunction, double orgResultsSize, int minClusterSize, double percentage)
+        : bic(bic), dataMatrix(dataMatrix), connected(connected), extractType(extractType), choosenMeasure(qualityMeasure), orgResultsSize(orgResultsSize), minClusterSize(minClusterSize), percentage(percentage), penaltyForGainFunction(penaltyForGainFunction)
     {
 
     }

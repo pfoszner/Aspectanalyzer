@@ -75,7 +75,9 @@ public:
         BiclusterCount,
         AverageACV,
         AverageSimilarity,
-        ConsensusExtractionType
+        ConsensusExtractionType,
+        Variance,
+        SMSR
     };
 
     enum SimilarityMethods

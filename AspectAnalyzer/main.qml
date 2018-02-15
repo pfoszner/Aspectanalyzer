@@ -180,7 +180,7 @@ ApplicationWindow {
                     y: 280
                     width: 80
                     height: 20
-                    text: qsTr("1")
+                    text: qsTr("0;1")
                     font.pixelSize: 48
                 }
 
