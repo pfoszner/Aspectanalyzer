@@ -600,8 +600,8 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
 
     for (int i = 0; i < expectedBiClusterCount; ++i)
     {
-        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, 50);  //n
-        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, 50);  //p
+        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, 100);  //n
+        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, 100);  //p
 
         if (clust1.size() == 0 || clust2.size() == 0)
             return std::vector<std::shared_ptr<Bicluster>>();

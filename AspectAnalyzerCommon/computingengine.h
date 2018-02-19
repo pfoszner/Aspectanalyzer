@@ -36,7 +36,7 @@ enum CommandType
 public:
     std::shared_ptr<Matrix> CurrentVmatrix;
     Client aaclient;
-    int maxThreadAllowd = 8;
+    int maxThreadAllowd = -1;
 
 private:
     size_t runningTasks = 0;

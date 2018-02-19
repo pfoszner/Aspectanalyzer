@@ -50,6 +50,7 @@ public:
     void ImportKumalResultsNumber(int repNum);
     void ImportKumalResultsOverlap(int repNum);
     void PringInfo(int taskID, QString filename);
+    void RunSingleNMF(int matrix, Enums::Methods method);
 };
 
 #endif // EXPERIMENTAL_H

@@ -1108,31 +1108,14 @@ void Experimental::PringInfo(int taskID, QString filename)
 
 void Experimental::StartCustom(QString mode)
 {
-    ImportKumalResults(20);
-    ImportKumalResultsNoise(20);
-    ImportKumalResultsNumber(20);
-    ImportKumalResultsOverlap(20);
+    //ImportKumalResults(20);
+    //ImportKumalResultsNoise(20);
+    //ImportKumalResultsNumber(20);
+    //ImportKumalResultsOverlap(20);
 
 //return;
 
-    std::vector<Enums::Methods> methods3;
-
-    methods3.push_back(Enums::Methods::FABIA);
-    methods3.push_back(Enums::Methods::QUBIC);
-    methods3.push_back(Enums::Methods::Spectral);
-    methods3.push_back(Enums::Methods::Plaid);
-    methods3.push_back(Enums::Methods::OPSM);
-    methods3.push_back(Enums::Methods::BBC);
-    methods3.push_back(Enums::Methods::CPB);
-    methods3.push_back(Enums::Methods::ISA);
-    methods3.push_back(Enums::Methods::ChengandChurch);
-    methods3.push_back(Enums::Methods::BiMax);
-    methods3.push_back(Enums::Methods::xMOTIFs);
-    methods3.push_back(Enums::Methods::COALESCE);
-
-    RunTriclustering(134, methods3, "Dupa");
-
-    return;
+    //return;
 
     for(int i = 14037; i <= 15164; ++i)
     {
@@ -1154,8 +1137,22 @@ void Experimental::StartCustom(QString mode)
     {
         ++count;
 
-        if (count <= start || count > stop)
-            continue;
+
+/*
+        RunSingleNMF(mat, Enums::Methods::PLSA);
+        RunSingleNMF(mat, Enums::Methods::LEAST_SQUARE_ERROR);
+        RunSingleNMF(mat, Enums::Methods::KULLBACK_LIEBER);
+        RunSingleNMF(mat, Enums::Methods::NonSmooth_KULLBACK_LIEBER);
+        qDebug() << count << " of " << mats.size() << " witch is " << (round((count * 1000.0) / mats.size()) / 10) << " %";
+
+
+
+        continue;
+
+
+        //if (count <= start || count > stop)
+            //continue;
+*/
 
         std::vector<Enums::Methods> methods;
 
@@ -1163,25 +1160,18 @@ void Experimental::StartCustom(QString mode)
         methods.push_back(Enums::Methods::LEAST_SQUARE_ERROR);
         methods.push_back(Enums::Methods::KULLBACK_LIEBER);
         methods.push_back(Enums::Methods::NonSmooth_KULLBACK_LIEBER);
-
-        RunConsensus(mat, methods, "FinalMeasureTest_NMF");
-
-        //continue;
-
-        std::vector<Enums::Methods> methods2;
-
-        methods2.push_back(Enums::Methods::FABIA);
-        methods2.push_back(Enums::Methods::QUBIC);
-        methods2.push_back(Enums::Methods::Spectral);
-        methods2.push_back(Enums::Methods::Plaid);
-        methods2.push_back(Enums::Methods::OPSM);
-        methods2.push_back(Enums::Methods::BBC);
-        methods2.push_back(Enums::Methods::CPB);
-        methods2.push_back(Enums::Methods::ISA);
-        methods2.push_back(Enums::Methods::ChengandChurch);
-        methods2.push_back(Enums::Methods::BiMax);
-        methods2.push_back(Enums::Methods::xMOTIFs);
-        methods2.push_back(Enums::Methods::COALESCE);
+        methods.push_back(Enums::Methods::FABIA);
+        methods.push_back(Enums::Methods::QUBIC);
+        methods.push_back(Enums::Methods::Spectral);
+        methods.push_back(Enums::Methods::Plaid);
+        methods.push_back(Enums::Methods::OPSM);
+        methods.push_back(Enums::Methods::BBC);
+        methods.push_back(Enums::Methods::CPB);
+        methods.push_back(Enums::Methods::ISA);
+        methods.push_back(Enums::Methods::ChengandChurch);
+        methods.push_back(Enums::Methods::BiMax);
+        methods.push_back(Enums::Methods::xMOTIFs);
+        methods.push_back(Enums::Methods::COALESCE);
 
         RunConsensus(mat, methods, "FinalMeasureTest");
 
@@ -1786,6 +1776,39 @@ void Experimental::RunAllConsensus()
 
         qDebug() << "Done ;]";
     }
+}
+
+void Experimental::RunSingleNMF(int matrix, Enums::Methods method)
+{
+    std::shared_ptr<BiclusteringObject> newObject;
+
+    std::shared_ptr<Matrix> vMatrix = engine->db->GetMatrix(matrix);
+
+    switch(method)
+    {
+        case Enums::PLSA:
+            newObject = std::make_shared<PLSA>(vMatrix);
+            break;
+        case Enums::LEAST_SQUARE_ERROR:
+            newObject = std::make_shared<LSE>(vMatrix);
+            break;
+        case Enums::KULLBACK_LIEBER:
+            newObject = std::make_shared<KullbackLeibler>(vMatrix);
+            break;
+        case Enums::NonSmooth_KULLBACK_LIEBER:
+            newObject = std::make_shared<nsKullbackLeibler>(vMatrix, 0.5);
+            break;
+    }
+
+    newObject->expectedBiClusterCount = vMatrix->expectedBiClusterCount;
+
+    newObject->dataMatrix->expectedBiClusterCount = vMatrix->expectedBiClusterCount;
+
+    std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
+
+    params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+
+    engine->AddBiClusteringTask(newObject);
 }
 
 void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)

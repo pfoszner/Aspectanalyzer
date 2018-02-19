@@ -226,7 +226,8 @@ void ComputingEngine::ServeQueue()
 {
     setProgressChange(0, "-");
 
-    QThreadPool::globalInstance()->setMaxThreadCount(maxThreadAllowd);
+    if (maxThreadAllowd > 0)
+        QThreadPool::globalInstance()->setMaxThreadCount(maxThreadAllowd);
 
     qDebug() << "Thread Count" << QThreadPool::globalInstance()->maxThreadCount() << " Number of Tasks: " << queue.size();
 
