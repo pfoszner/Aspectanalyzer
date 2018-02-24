@@ -342,7 +342,7 @@ void BiclusteringObject::PostProcessingTask()
 
     for(Enums::FeatureType ift : ft)
     {
-        double AverageValue = -1.0;
+        double AverageValue = 0;
 
         if (foundedBiclusters.size() > 0)
         {
@@ -357,10 +357,8 @@ void BiclusteringObject::PostProcessingTask()
             }
         }
 
-        if (AverageValue >= 0.0)
-        {
-            features.push_back(FeatureResult(ift, AverageValue / foundedBiclusters.size(), 0));
-        }
+        features.push_back(FeatureResult(ift, AverageValue / foundedBiclusters.size(), 0));
+
     }
     //SaveToLocalFile(AverageAVC, Value);
 }

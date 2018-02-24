@@ -301,7 +301,7 @@ std::vector<std::shared_ptr<Bicluster>> TriClustering::DoTheTriClustering(std::v
                 RetVal.push_back(New);
             }
 
-            for(size_t b = B.size()-1; b >= 0; --b)
+            for(int b = B.size()-1; b >= 0; --b)
             {
                 Biclusters.erase(Biclusters.begin()+B[b]);
             }

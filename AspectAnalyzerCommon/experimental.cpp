@@ -1138,6 +1138,7 @@ void Experimental::StartCustom(QString mode)
         ++count;
 
 
+
 /*
         RunSingleNMF(mat, Enums::Methods::PLSA);
         RunSingleNMF(mat, Enums::Methods::LEAST_SQUARE_ERROR);
@@ -1149,10 +1150,10 @@ void Experimental::StartCustom(QString mode)
 
         continue;
 
-
-        //if (count <= start || count > stop)
-            //continue;
 */
+        if (count <= start || count > stop)
+            continue;
+
 
         std::vector<Enums::Methods> methods;
 
@@ -1173,7 +1174,8 @@ void Experimental::StartCustom(QString mode)
         methods.push_back(Enums::Methods::xMOTIFs);
         methods.push_back(Enums::Methods::COALESCE);
 
-        RunConsensus(mat, methods, "FinalMeasureTest");
+        RunTriclustering(mat, methods, "FinalMeasureTest");
+        //RunConsensus(mat, methods, "FinalMeasureTest");
 
         qDebug() << count << " of " << mats.size() << " witch is " << (round((count * 1000.0) / mats.size()) / 10) << " %";
     }
@@ -2068,26 +2070,26 @@ void Experimental::RunConsensus(int matrix, std::vector<Enums::Methods> methods,
     std::vector<MergeType> mt;
 
     mt.push_back(MergeType::ByACV);
-    mt.push_back(MergeType::ByACVHeuristic);
-    mt.push_back(MergeType::Standard);
-    mt.push_back(MergeType::None);
-    mt.push_back(MergeType::GainFunction);
+    //mt.push_back(MergeType::ByACVHeuristic);
+    //mt.push_back(MergeType::Standard);
+    //mt.push_back(MergeType::None);
+    //mt.push_back(MergeType::GainFunction);
 
     std::vector<QString> descs;
 
     descs.push_back("ByACV");
-    descs.push_back("ByACVHeuristic");
-    descs.push_back("Standard");
-    descs.push_back("None");
-    descs.push_back("GainFunction");
+    //descs.push_back("ByACVHeuristic");
+    //descs.push_back("Standard");
+    //descs.push_back("None");
+    //descs.push_back("GainFunction");
 
     std::vector<Enums::FeatureType> ft;
 
     ft.push_back(Enums::FeatureType::ACV);
-    ft.push_back(Enums::FeatureType::ASR);
-    ft.push_back(Enums::FeatureType::MSR);
-    ft.push_back(Enums::FeatureType::SMSR);
-    ft.push_back(Enums::FeatureType::Variance);
+    //ft.push_back(Enums::FeatureType::ASR);
+    //ft.push_back(Enums::FeatureType::MSR);
+    //ft.push_back(Enums::FeatureType::SMSR);
+    //ft.push_back(Enums::FeatureType::Variance);
 
 
     std::vector<QString> descsFeat;
