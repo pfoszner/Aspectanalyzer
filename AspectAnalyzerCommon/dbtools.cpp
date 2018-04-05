@@ -38,7 +38,8 @@ void DBTools::CreateNewDatabase()
                   " `id_matrix`	INTEGER NOT NULL,"
                   " `time`	REAL NOT NULL,"
                   " `k`	INTEGER NOT NULL,"
-                  " `desc`	TEXT NOT NULL"
+                  " `desc`	TEXT NOT NULL,"
+                  " FOREIGN KEY(id_matrix) REFERENCES matrix(id_matrix)"
                "); ");
                test = query.exec("CREATE TABLE \"property_type\" ("
                   " `id_property_type`	INTEGER NOT NULL UNIQUE,"
@@ -81,7 +82,8 @@ void DBTools::CreateNewDatabase()
                  "  `dim2`	INTEGER NOT NULL,"
                  "  `group`	TEXT NOT NULL,"
                  "  `id_result`  INTEGER,"
-                 "  `data`  LARGEBLOB"
+                 "  `data`  LARGEBLOB,"
+                 " FOREIGN KEY(id_result) REFERENCES result(id_result)"
                ");");
                test = query.exec("CREATE TABLE `label_type` ("
                "    `id_label_type`	INTEGER NOT NULL UNIQUE,"
@@ -120,7 +122,10 @@ void DBTools::CreateNewDatabase()
                "    `id_bicluster`	INTEGER,"
                "    `id_feature_type`	INTEGER NOT NULL,"
                "    `index`	INTEGER NOT NULL DEFAULT 0,"
-               "    `value`	REAL NOT NULL"
+               "    `value`	REAL NOT NULL,"
+               " FOREIGN KEY(id_matrix) REFERENCES matrix(id_matrix),"
+               " FOREIGN KEY(id_result) REFERENCES result(id_result),"
+               " FOREIGN KEY(id_bicluster) REFERENCES bicluster(id_bicluster)"
                ");");
                test = query.exec("CREATE TABLE \"bicluster\" ("
                "    `id_bicluster`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
@@ -128,6 +133,15 @@ void DBTools::CreateNewDatabase()
                "    `id_result`	INTEGER,"
                "    `index_nbr`	INTEGER NOT NULL,"
                "    `data`	TEXT NOT NULL"
+               ");");
+               test = query.exec("CREATE INDEX `result_id_matrix` ON `result` ("
+               "    `id_matrix`	ASC"
+               ");");
+               test = query.exec("CREATE INDEX `feature_id_result` ON `feature` ("
+               "    `id_result`	ASC"
+               ");");
+               test = query.exec("CREATE INDEX `bicluster_id_result` ON `bicluster` ("
+               "    `id_result`	ASC"
                ");");
                test = query.exec("PRAGMA journal_mode = OFF");
                test = query.exec("PRAGMA synchronous = OFF");

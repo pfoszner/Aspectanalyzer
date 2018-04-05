@@ -208,6 +208,8 @@ void Experimental::RunAllEnsemble(int idMatrix, QString desc)
     //engine->db->SaveResult(res);
 
     engine->AddBiClusteringTask(newObjectT);
+
+    qDebug() << idMatrix;
 }
 
 void Experimental::ARFFPlay()
@@ -1308,9 +1310,10 @@ void Experimental::StartCustom(QString mode)
 
 //return;
 
-    ImportMatlabResults();
+    //ImportMatlabResults();
 
-    //RunAllEnsemble(1, "NewBatch");
+
+    RunAllEnsemble(1, "NewBatch");
 
     return;
 

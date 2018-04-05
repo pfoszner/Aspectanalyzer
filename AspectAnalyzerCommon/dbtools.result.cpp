@@ -195,7 +195,7 @@ int DBTools::SaveResult(std::shared_ptr<BiclusteringObject> taskToSave)
     query.prepare(queryText);
     query.bindValue(":method", taskToSave->idMethod + 1);
     query.bindValue(":matrix", *taskToSave->dataMatrix->idMatrix);
-    query.bindValue(":bicNum", taskToSave->foundedBiclusters.size());
+    query.bindValue(":bicNum", (int)taskToSave->foundedBiclusters.size());
     query.bindValue(":time", taskToSave->time_spent);
     query.bindValue(":desc", taskToSave->desc);
 
