@@ -351,6 +351,10 @@ void BiclusteringObject::PostProcessingTask()
                 if (foundedBiclusters[i]->cluster1.size() > 0 && foundedBiclusters[i]->cluster2.size() > 0)
                 {
                     double Value = dataMatrix->CalculateQualityMeasure(ift, foundedBiclusters[i]->cluster1, foundedBiclusters[i]->cluster2);
+
+                    if (std::isnan(Value))
+                        Value = 0.0;
+
                     foundedBiclusters[i]->SetFeature(ift, Value);
                     AverageValue += Value;
                 }

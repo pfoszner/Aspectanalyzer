@@ -176,6 +176,9 @@ void ConsensusWorker::run()
 
             if (Cluster1.size() == 0 && Cluster2.size() == 0)
                 done = true;
+
+            if ((FinalCluster1.size() < 10) || (FinalCluster2.size() < 10))
+                done = true;
         }
 
         bic = std::make_shared<Bicluster>(-1, FinalCluster1, FinalCluster2);

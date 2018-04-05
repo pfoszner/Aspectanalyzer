@@ -49,7 +49,10 @@ public:
             BiMax,
             xMOTIFs,
             COALESCE,
-            PROJECT_GRADIENT_METHOD
+            PROJECT_GRADIENT_METHOD,
+            Floc,
+            ITL,
+            kSpectral
         };
 
     enum MethodsParameters

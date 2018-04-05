@@ -81,7 +81,12 @@ std::vector<std::shared_ptr<BiclusteringObject>> DBTools::GetResults(int idResul
 
     std::shared_ptr<BiclusteringObject> Result;
 
-    query.exec(queryString);
+    bool error = query.exec(queryString);
+
+    if (!error)
+    {
+        qDebug() << queryString;
+    }
 
     while (query.next())
     {

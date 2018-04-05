@@ -328,10 +328,10 @@ void Matrix::LoadFromDataList(std::vector <QString>& sdata)
 
         if (i == startMainLoop + expectedBiClusterCount)
         {
-            data = arma::zeros<arma::mat>((uint)sdata.size() - startMainLoop - expectedBiClusterCount, 1000 - startInnerLoop);
+            data = arma::zeros<arma::mat>((uint)sdata.size() - startMainLoop - expectedBiClusterCount, row.size() - startInnerLoop);
         }
 
-        for(int j = startInnerLoop; j < 1000; ++j)
+        for(int j = startInnerLoop; j < row.size(); ++j)
         {
             bool ok;
 

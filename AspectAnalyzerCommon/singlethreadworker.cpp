@@ -13,7 +13,7 @@ void SingleThreadWorker::run()
 
     //params.emplace_back(Enums::ExMethod, std::make_shared<Enums::ExtractingMethod>(Enums::ExtractingMethod::Average));
 
-    params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(task->dataMatrix->expectedBiClusterCount));
+    params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(task->expectedBiClusterCount));
 
     //params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(1));
 

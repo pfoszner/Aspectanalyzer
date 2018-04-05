@@ -51,6 +51,8 @@ public:
     void ImportKumalResultsOverlap(int repNum);
     void PringInfo(int taskID, QString filename);
     void RunSingleNMF(int matrix, Enums::Methods method);
+    void ImportMatlabResults();
+    void RunAllEnsemble(int idMatrix, QString desc);
 };
 
 #endif // EXPERIMENTAL_H

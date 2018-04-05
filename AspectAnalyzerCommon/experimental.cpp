@@ -17,6 +17,199 @@ void Experimental::TestTriclustering()
     newObject->Compute(params);
 }
 
+void Experimental::ImportMatlabResults()
+{
+    QFile filestream("D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\importALL.txt");
+
+    if(!filestream.open(QIODevice::ReadOnly))
+    {
+        //QMessageBox::information(0, "error", file.errorString());
+    }
+    else
+    {
+        QTextStream in(&filestream);
+
+        QMap<QString, std::shared_ptr<Matrix>> map;
+
+        while(!in.atEnd()) {
+
+            QString currentMatrix = in.readLine().trimmed();
+
+            if (!map.contains(currentMatrix))
+            {
+                std::shared_ptr<Matrix> newItem = std::make_shared<Matrix>("D:\\AppData\\share\\data\\" + currentMatrix);
+
+                newItem->idMatrix = std::make_shared<int>(engine->db->SaveMatrix(newItem->data, currentMatrix, "New Batch", Enums::MatrixType::V, -1));
+
+                engine->db->SaveBiclusters(newItem->expectedBiClusters, *newItem->idMatrix, -1);
+                engine->db->SaveLabels(newItem->rowLabels, *newItem->idMatrix);
+                engine->db->SaveLabels(newItem->columnLabels, *newItem->idMatrix);
+
+                map[currentMatrix] = newItem;
+
+                qDebug() << map.size();
+            }
+
+            Enums::Methods method;
+
+            QString lineMethod = in.readLine().trimmed();
+
+            if (lineMethod == "BiMax")
+                method = Enums::Methods::BiMax;
+            else if (lineMethod == "CC")
+                method = Enums::Methods::ChengandChurch;
+            else if (lineMethod == "Floc")
+                method = Enums::Methods::Floc;
+            else if (lineMethod == "ITL")
+                method = Enums::Methods::ITL;
+            else if (lineMethod == "FABIA")
+                method = Enums::Methods::FABIA;
+            else if (lineMethod == "kSpectral")
+                method = Enums::Methods::kSpectral;
+            else if (lineMethod == "Plaid")
+                method = Enums::Methods::Plaid;
+            else if (lineMethod == "QUBIC")
+                method = Enums::Methods::QUBIC;
+            else if (lineMethod == "XMotifs")
+                method = Enums::Methods::xMOTIFs;
+
+            int numOfBiClusters = in.readLine().trimmed().toInt();
+
+            std::shared_ptr<BiclusteringObject> currRes = std::make_shared<BiclusteringObject>(map[currentMatrix], method, -1, 0, "NewBatch Import");
+
+            for(int i = 0; i < numOfBiClusters; ++i)
+            {
+                QString cluster1Line = in.readLine().trimmed();
+                QStringList cluster1Items = cluster1Line.split(' ');
+                std::vector<int> cluster1;
+
+                for(QString item : cluster1Items)
+                {
+                    cluster1.push_back(item.toInt() - 1);
+                }
+
+                QString cluster2Line = in.readLine().trimmed();
+                QStringList cluster2Items = cluster2Line.split(' ');
+                std::vector<int> cluster2;
+
+                for(QString item : cluster2Items)
+                {
+                    cluster2.push_back(item.toInt() - 1);
+                }
+
+                std::shared_ptr<Bicluster> newBic = std::make_shared<Bicluster>(-1, cluster1, cluster2);
+
+                currRes->foundedBiclusters.push_back(newBic);
+            }
+
+            engine->db->SaveResult(currRes);
+        }
+    }
+}
+
+void Experimental::RunAllEnsemble(int idMatrix, QString desc)
+{
+    std::vector<std::shared_ptr<BiclusteringObject>> test  = engine->db->GetResults(-1, idMatrix, -1, -1);
+
+    std::vector<MergeType> mt;
+
+    mt.push_back(MergeType::ByACV);
+    //mt.push_back(MergeType::ByACVHeuristic);
+    //mt.push_back(MergeType::Standard);
+    //mt.push_back(MergeType::None);
+    //mt.push_back(MergeType::GainFunction);
+
+    std::vector<QString> descs;
+
+    descs.push_back("ByACV");
+    //descs.push_back("ByACVHeuristic");
+    //descs.push_back("Standard");
+    //descs.push_back("None");
+    //descs.push_back("GainFunction");
+
+    std::vector<Enums::FeatureType> ft;
+
+    ft.push_back(Enums::FeatureType::ACV);
+    //ft.push_back(Enums::FeatureType::ASR);
+    //ft.push_back(Enums::FeatureType::MSR);
+    //ft.push_back(Enums::FeatureType::SMSR);
+    //ft.push_back(Enums::FeatureType::Variance);
+
+
+    std::vector<QString> descsFeat;
+
+    descsFeat.push_back("ACV");
+    descsFeat.push_back("ASR");
+    descsFeat.push_back("MSR");
+    descsFeat.push_back("SMSR");
+    descsFeat.push_back("Variance");
+
+    int f = 0;
+
+    for(Enums::FeatureType ift : ft)
+    {
+        int d = 0;
+
+        for(MergeType imt : mt)
+        {
+            std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(test[0]->dataMatrix, -1, 0, desc + "_" + descs[d++] + "_" + descsFeat[f]);
+
+            //std::shared_ptr<Consensus> newObject = std::make_shared<Consensus>(engine->CurrentVmatrix, -1);
+
+            newObject->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
+
+            newObject->dataMatrix->expectedBiClusterCount = newObject->dataMatrix->expectedBiClusterCount;
+
+            newObject->SetEnsemble(test);
+
+            newObject->ExtractType = imt;
+
+            newObject->qualityMeasure = ift;
+
+            std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
+
+            params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+
+            //auto res = newObject->Compute(params);
+
+            //engine->db->SaveResult(res);
+
+            if (imt == MergeType::GainFunction)
+            {
+
+                    newObject->penaltyForGainFunction = f + 1;
+                    newObject->desc += "_" + QString::number(f + 1);
+
+            }
+
+
+            engine->AddBiClusteringTask(newObject);
+        }
+
+        f++;
+    }
+
+    std::shared_ptr<TriClustering> newObjectT = std::make_shared<TriClustering>(test[0]->dataMatrix, -1, 0, desc);
+
+    newObjectT->expectedBiClusterCount = newObjectT->dataMatrix->expectedBiClusterCount;
+
+    newObjectT->dataMatrix->expectedBiClusterCount = newObjectT->dataMatrix->expectedBiClusterCount;
+
+    newObjectT->SetEnsemble(test);
+
+    //newObject->ExtractType = imt;
+
+    //std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> paramsT;
+
+    //paramsT.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObjectT->dataMatrix->expectedBiClusterCount));
+
+    //auto res = newObject->Compute(params);
+
+    //engine->db->SaveResult(res);
+
+    engine->AddBiClusteringTask(newObjectT);
+}
+
 void Experimental::ARFFPlay()
 {
     std::shared_ptr<Matrix> dupa = std::make_shared<Matrix>("/mnt/E/TCGA/DataMatrixTCGA5_mutect2v2.vmatrix");
@@ -1115,7 +1308,11 @@ void Experimental::StartCustom(QString mode)
 
 //return;
 
-    //return;
+    ImportMatlabResults();
+
+    //RunAllEnsemble(1, "NewBatch");
+
+    return;
 
     for(int i = 14037; i <= 15164; ++i)
     {
