@@ -53,6 +53,7 @@ public:
     void RunSingleNMF(int matrix, Enums::Methods method);
     void ImportMatlabResults();
     void RunAllEnsemble(int idMatrix, QString desc);
+    void ExportNMFs();
 };
 
 #endif // EXPERIMENTAL_H

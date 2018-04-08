@@ -1,5 +1,21 @@
 #include "experimental.h"
 
+void Experimental::ExportNMFs()
+{
+    std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, -1, -1, -1);
+
+    for(std::shared_ptr<BiclusteringObject> single : test)
+    {
+        std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(single);
+
+        if (tmpPtr != nullptr)
+        {
+            tmpPtr->HMatrix.save((QString::number(tmpPtr->idResult) + "_H.mat").toStdString(), arma::arma_ascii);
+            tmpPtr->WMatrix.save((QString::number(tmpPtr->idResult) + "_W.mat").toStdString(), arma::arma_ascii);
+        }
+    }
+}
+
 void Experimental::TestTriclustering()
 {
     std::vector<std::shared_ptr<BiclusteringObject>> test = engine->db->GetResults(-1, 1, Enums::Methods::PLSA, -1);
@@ -1312,8 +1328,9 @@ void Experimental::StartCustom(QString mode)
 
     //ImportMatlabResults();
 
+    ExportNMFs();
 
-    RunAllEnsemble(1, "NewBatch");
+    //RunAllEnsemble(1, "NewBatch");
 
     return;
 
