@@ -376,6 +376,37 @@ Matrix::Matrix(const Matrix &copy) : idMatrix(copy.idMatrix), data(copy.data), n
     name = copy.name;*/
 }
 
+void Matrix::WriteAsImage(QString filename)
+{
+    QImage image(this->data.n_rows, this->data.n_cols, QImage::Format_ARGB32_Premultiplied);
+
+    double min = this->data.min();
+    double max = this->data.max();
+
+    for(int i = 0; i < this->data.n_rows; ++i)
+    {
+        for(int j = 0; j < this->data.n_cols; ++j)
+        {
+
+            double newvalue = (510) / (max-min) * (data(i,j)-max) + 510;
+
+            int r = std::round(newvalue);
+
+            int g = 0;
+
+            if (r > 255)
+            {
+                g = r - 255;
+                r = 0;
+            }
+
+            QColor c(r, g, 0);
+            image.setPixelColor(i, j, c);
+        }
+    }
+
+    image.save(filename);
+}
 
 void Matrix::AddValue(double value)
 {

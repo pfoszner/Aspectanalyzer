@@ -404,7 +404,7 @@ std::vector<int> NMF::GetWBicluster(int k, Enums::ExtractingMethod extractingTyp
                 }
                 break;
             case Enums::Quadrille:
-                threshold = max * 0.75;
+                threshold = max * 0.30;
                 break;
             default:
                 threshold = 0;
@@ -493,7 +493,7 @@ std::vector<int> NMF::GetHBicluster(int k, Enums::ExtractingMethod extractingTyp
                 }
                 break;
             case Enums::Quadrille:
-                threshold = max * 0.75;
+                threshold = max * 0.30;
                 break;
             default:
                 threshold = 0;

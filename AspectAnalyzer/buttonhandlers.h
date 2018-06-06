@@ -36,6 +36,7 @@ public slots:
     void btnPauseSlot();
     void btnStopSlot();
     void btnCustomSlot(QString);
+    void btnLoadResultsSlot();
 
 
 signals:

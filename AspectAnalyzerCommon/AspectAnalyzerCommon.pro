@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       -= gui
+QT       += gui
 QT       += sql network widgets
 
 DEFINES += _OSX

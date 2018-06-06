@@ -10,11 +10,12 @@ ApplicationWindow {
     color: "#475542"
     title: qsTr("Aspect Analyzer")
 
-    signal btnAddTaskSignal(int id)
+    signal btnAddTaskSignal()
     signal btnPlaySignal()
     signal btnPauseSignal()
     signal btnStopSignal()
     signal btnCustomSignal(string mode)
+    signal btnLoadResultsSignal()
 
 
     TabView {
@@ -247,7 +248,30 @@ ApplicationWindow {
             transformOrigin: Item.Center
             title: "Data"
             source: "Tab3.qml"
-            Rectangle { color: "#475542" ; border.color: "#475542"
+            Rectangle { color: "#475542" ; z: -1; border.color: "#475542"
+
+            TableView {
+                id: resultView
+                x: 8
+                y: 8
+                width: 624
+                height: 400
+            }
+
+            Button {
+                id: btnLoadResults
+                x: 8
+                y: 410
+                text: "Load results"
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+
+                        btnLoadResultsSignal();
+
+                    }
+                }
+            }
 
             }
         }

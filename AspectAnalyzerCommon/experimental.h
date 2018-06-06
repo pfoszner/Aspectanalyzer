@@ -54,6 +54,7 @@ public:
     void ImportMatlabResults();
     void RunAllEnsemble(int idMatrix, QString desc);
     void ExportNMFs();
+    void CheckNMFBiclusNumberSearch();
 };
 
 #endif // EXPERIMENTAL_H

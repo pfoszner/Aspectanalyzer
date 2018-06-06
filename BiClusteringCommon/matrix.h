@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include <armadillo>
+#include <QtGui/QImage>
 //#include "/usr/local/include/armadillo"
 
 class Matrix
@@ -42,6 +43,7 @@ public:
 
 public:
     void AddValue(double value);
+    void WriteAsImage(QString filename);
 
 private:
     void LoadFromDataList(std::vector <QString>& sdata);
@@ -58,6 +60,8 @@ private:
     double AverageSpearmansRank(const arma::mat& Amatrix);
     double Variance(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
     double Variance(const arma::mat& Amatrix);
+
+
 
 };
 #endif // MATRIX_H

@@ -1319,6 +1319,8 @@ void Experimental::PringInfo(int taskID, QString filename)
 
 void Experimental::StartCustom(QString mode)
 {
+    CheckNMFBiclusNumberSearch();
+
     //ImportKumalResults(20);
     //ImportKumalResultsNoise(20);
     //ImportKumalResultsNumber(20);
@@ -1328,7 +1330,7 @@ void Experimental::StartCustom(QString mode)
 
     //ImportMatlabResults();
 
-    ExportNMFs();
+    //ExportNMFs();
 
     //RunAllEnsemble(1, "NewBatch");
 
@@ -2960,6 +2962,319 @@ void Experimental::DividePowerlogs()
 
         file.close();
     }
+
+    qDebug() << "Done";
+}
+
+double fRand(double fMin, double fMax)
+{
+    double f = (double)rand() / RAND_MAX;
+    return fMin + f * (fMax - fMin);
+}
+
+void Experimental::CheckNMFBiclusNumberSearch()
+{
+    int N = 500;
+    arma::arma_rng::set_seed_random();
+    arma::mat currentData = arma::mat(N, N, arma::fill::randu);
+    arma::mat gtData = arma::mat(N, N, arma::fill::randu);
+
+    for(int k = 0; k < 5; ++k)
+    {
+        for(int i=(k*100)+10; i < (k*100)+90; ++i)
+        {
+            for(int j=(k*100)+10; j < (k*100)+90; ++j)
+            {
+                gtData(i,j) = 2.0;
+            }
+        }
+    }
+
+    Matrix gt(-1, gtData);
+    Matrix current(-1, currentData);
+
+    arma::mat powComponent = gtData - currentData;
+
+    qDebug() << "Initial distance: " << arma::accu(powComponent % powComponent);
+
+    gt.WriteAsImage("gt0.png");
+    current.WriteAsImage("current0.png");
+
+    //nsKullbackLeibler
+    std::shared_ptr<BiclusteringObject> newObject;
+    newObject = std::make_shared<nsKullbackLeibler>(std::make_shared<Matrix>(gt), 0.5);
+
+    newObject->expectedBiClusterCount = 10;
+
+    newObject->dataMatrix->expectedBiClusterCount = 10;
+
+    std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
+
+    params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+
+    newObject->Compute(params);
+
+    int ix = 0;
+    double simi = -1;
+
+    for(int i = 0; i < newObject->foundedBiclusters.size(); ++i)
+    {
+            arma::mat test = arma::mat(currentData);
+
+            for(int c1 : newObject->foundedBiclusters[i]->cluster1)
+            {
+                for(int c2 : newObject->foundedBiclusters[i]->cluster2)
+                {
+                    test(c1, c2) = gt.data(c1, c2);
+                }
+            }
+
+            arma::mat powComponent = gtData - test;
+
+            if (simi < 0 || simi > arma::accu(powComponent % powComponent))
+            {
+                ix = i;
+                simi = arma::accu(powComponent % powComponent);
+            }
+    }
+
+    for(int c1 : newObject->foundedBiclusters[ix]->cluster1)
+    {
+        for(int c2 : newObject->foundedBiclusters[ix]->cluster2)
+        {
+            current.data(c1, c2) = gt.data(c1, c2);
+            gt.data(c1, c2) = fRand(0, 1);
+        }
+    }
+
+    qDebug() << "First iteration distance: " << simi;
+
+    gt.WriteAsImage("gt1.png");
+    current.WriteAsImage("current1.png");
+
+    newObject = std::make_shared<nsKullbackLeibler>(std::make_shared<Matrix>(gt), 0.5);
+    newObject->expectedBiClusterCount = 10;
+
+    newObject->dataMatrix->expectedBiClusterCount = 10;
+    newObject->Compute(params);
+
+    ix = 0;
+    simi = -1;
+
+    for(int i = 0; i < newObject->foundedBiclusters.size(); ++i)
+    {
+            arma::mat test = arma::mat(currentData);
+
+            for(int c1 : newObject->foundedBiclusters[i]->cluster1)
+            {
+                for(int c2 : newObject->foundedBiclusters[i]->cluster2)
+                {
+                    test(c1, c2) = gt.data(c1, c2);
+                }
+            }
+
+            arma::mat powComponent = gtData - test;
+
+            if (simi < 0 || simi > arma::accu(powComponent % powComponent))
+            {
+                ix = i;
+                simi = arma::accu(powComponent % powComponent);
+            }
+    }
+
+    for(int c1 : newObject->foundedBiclusters[ix]->cluster1)
+    {
+        for(int c2 : newObject->foundedBiclusters[ix]->cluster2)
+        {
+            current.data(c1, c2) = gt.data(c1, c2);
+            gt.data(c1, c2) = fRand(0, 1);
+        }
+    }
+
+    qDebug() << "second iteration distance: " << simi;
+
+    gt.WriteAsImage("gt2.png");
+    current.WriteAsImage("current2.png");
+
+
+    newObject = std::make_shared<nsKullbackLeibler>(std::make_shared<Matrix>(gt), 0.5);
+    newObject->expectedBiClusterCount = 10;
+
+    newObject->dataMatrix->expectedBiClusterCount = 10;
+    newObject->Compute(params);
+
+    ix = 0;
+    simi = -1;
+
+    for(int i = 0; i < newObject->foundedBiclusters.size(); ++i)
+    {
+            arma::mat test = arma::mat(currentData);
+
+            for(int c1 : newObject->foundedBiclusters[i]->cluster1)
+            {
+                for(int c2 : newObject->foundedBiclusters[i]->cluster2)
+                {
+                    test(c1, c2) = gt.data(c1, c2);
+                }
+            }
+
+            arma::mat powComponent = gtData - test;
+
+            if (simi < 0 || simi > arma::accu(powComponent % powComponent))
+            {
+                ix = i;
+                simi = arma::accu(powComponent % powComponent);
+            }
+    }
+
+    for(int c1 : newObject->foundedBiclusters[ix]->cluster1)
+    {
+        for(int c2 : newObject->foundedBiclusters[ix]->cluster2)
+        {
+            current.data(c1, c2) = gt.data(c1, c2);
+            gt.data(c1, c2) = fRand(0, 1);
+        }
+    }
+
+    qDebug() << "second iteration distance: " << simi;
+
+    gt.WriteAsImage("gt3.png");
+    current.WriteAsImage("current3.png");
+
+
+    newObject = std::make_shared<nsKullbackLeibler>(std::make_shared<Matrix>(gt), 0.5);
+    newObject->expectedBiClusterCount = 10;
+
+    newObject->dataMatrix->expectedBiClusterCount = 10;
+    newObject->Compute(params);
+
+    ix = 0;
+    simi = -1;
+
+    for(int i = 0; i < newObject->foundedBiclusters.size(); ++i)
+    {
+            arma::mat test = arma::mat(currentData);
+
+            for(int c1 : newObject->foundedBiclusters[i]->cluster1)
+            {
+                for(int c2 : newObject->foundedBiclusters[i]->cluster2)
+                {
+                    test(c1, c2) = gt.data(c1, c2);
+                }
+            }
+
+            arma::mat powComponent = gtData - test;
+
+            if (simi < 0 || simi > arma::accu(powComponent % powComponent))
+            {
+                ix = i;
+                simi = arma::accu(powComponent % powComponent);
+            }
+    }
+
+    for(int c1 : newObject->foundedBiclusters[ix]->cluster1)
+    {
+        for(int c2 : newObject->foundedBiclusters[ix]->cluster2)
+        {
+            current.data(c1, c2) = gt.data(c1, c2);
+            gt.data(c1, c2) = fRand(0, 1);
+        }
+    }
+
+    qDebug() << "second iteration distance: " << simi;
+
+    gt.WriteAsImage("gt4.png");
+    current.WriteAsImage("current4.png");
+
+
+    newObject = std::make_shared<nsKullbackLeibler>(std::make_shared<Matrix>(gt), 0.5);
+    newObject->expectedBiClusterCount = 10;
+
+    newObject->dataMatrix->expectedBiClusterCount = 10;
+    newObject->Compute(params);
+
+    ix = 0;
+    simi = -1;
+
+    for(int i = 0; i < newObject->foundedBiclusters.size(); ++i)
+    {
+            arma::mat test = arma::mat(currentData);
+
+            for(int c1 : newObject->foundedBiclusters[i]->cluster1)
+            {
+                for(int c2 : newObject->foundedBiclusters[i]->cluster2)
+                {
+                    test(c1, c2) = gt.data(c1, c2);
+                }
+            }
+
+            arma::mat powComponent = gtData - test;
+
+            if (simi < 0 || simi > arma::accu(powComponent % powComponent))
+            {
+                ix = i;
+                simi = arma::accu(powComponent % powComponent);
+            }
+    }
+
+    for(int c1 : newObject->foundedBiclusters[ix]->cluster1)
+    {
+        for(int c2 : newObject->foundedBiclusters[ix]->cluster2)
+        {
+            current.data(c1, c2) = gt.data(c1, c2);
+            gt.data(c1, c2) = fRand(0, 1);
+        }
+    }
+
+    qDebug() << "second iteration distance: " << simi;
+
+    gt.WriteAsImage("gt5.png");
+    current.WriteAsImage("current5.png");
+
+
+    newObject = std::make_shared<nsKullbackLeibler>(std::make_shared<Matrix>(gt), 0.5);
+    newObject->expectedBiClusterCount = 10;
+
+    newObject->dataMatrix->expectedBiClusterCount = 10;
+    newObject->Compute(params);
+
+    ix = 0;
+    simi = -1;
+
+    for(int i = 0; i < newObject->foundedBiclusters.size(); ++i)
+    {
+            arma::mat test = arma::mat(currentData);
+
+            for(int c1 : newObject->foundedBiclusters[i]->cluster1)
+            {
+                for(int c2 : newObject->foundedBiclusters[i]->cluster2)
+                {
+                    test(c1, c2) = gt.data(c1, c2);
+                }
+            }
+
+            arma::mat powComponent = gtData - test;
+
+            if (simi < 0 || simi > arma::accu(powComponent % powComponent))
+            {
+                ix = i;
+                simi = arma::accu(powComponent % powComponent);
+            }
+    }
+
+    for(int c1 : newObject->foundedBiclusters[ix]->cluster1)
+    {
+        for(int c2 : newObject->foundedBiclusters[ix]->cluster2)
+        {
+            current.data(c1, c2) = gt.data(c1, c2);
+            gt.data(c1, c2) = fRand(0, 1);
+        }
+    }
+
+    qDebug() << "second iteration distance: " << simi;
+
+    gt.WriteAsImage("gt6.png");
+    current.WriteAsImage("current6.png");
 
     qDebug() << "Done";
 }

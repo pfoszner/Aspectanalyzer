@@ -4,8 +4,6 @@
 #
 #-------------------------------------------------
 
-QT       -= gui
-
 TARGET = BiClusteringCommon
 TEMPLATE = lib
 CONFIG += staticlib
