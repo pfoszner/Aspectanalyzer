@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
     //QObject *dataView = dataTab.children().value(0);
     //QTableView *dataViewObject = qobject_cast<QTableView *>(dataView);
 
-    QObject::connect(window, SIGNAL(btnAddTaskSignal(int)),
-                         &btnHandlers, SLOT(btnAddTaskSlot(int)));
+    QObject::connect(window, SIGNAL(btnAddTaskSignal()),
+                         &btnHandlers, SLOT(btnAddTaskSlot()));
 
 //    QObject::connect(window, SIGNAL(btnLoadFromFileSignal()),
 //                         &btnHandlers, SLOT(btnLoadFromFileSlot()));

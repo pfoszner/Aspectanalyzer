@@ -36,9 +36,11 @@ protected:
     arma::umat old_cc;
     const double doubleMin = 10e-300;
     bool trimByACV = false;
+    double divergence = 0;
 
 public:
     void RebuildBiclusters();
+    void SaveNMFToLocalFile();
 
 
 protected:

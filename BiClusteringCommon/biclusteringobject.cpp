@@ -364,7 +364,11 @@ void BiclusteringObject::PostProcessingTask()
         features.push_back(FeatureResult(ift, AverageValue / foundedBiclusters.size(), 0));
 
     }
+
+
     //SaveToLocalFile(AverageAVC, Value);
+
+
 }
 
 void BiclusteringObject::SaveToLocalFile(double AverageAVC, double Similarity)
@@ -377,11 +381,7 @@ void BiclusteringObject::SaveToLocalFile(double AverageAVC, double Similarity)
 
         QTextStream out(&retVal);
 
-        time_t     now = time(0);
-        struct tm  tstruct;
-        char       buf[80];
-        tstruct = *localtime(&now);
-        strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
 
         //out << "Result computation finished: " << buf << std::endl;
     }

@@ -50,7 +50,7 @@ void nsKullbackLeibler::PreProcessing()
     InitializeSmatrix();
 }
 
-nsKullbackLeibler::nsKullbackLeibler(std::shared_ptr<Matrix>& MatrixData, double theta) : NMF(MatrixData), theta(theta)
+nsKullbackLeibler::nsKullbackLeibler(std::shared_ptr<Matrix> MatrixData, double theta) : NMF(MatrixData), theta(theta)
 {
     idMethod = Enums::NonSmooth_KULLBACK_LIEBER;
 }

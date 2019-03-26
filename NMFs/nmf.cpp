@@ -90,6 +90,14 @@ void NMF::ParseParameters(std::vector<std::tuple<Enums::MethodsParameters, std::
 
                 break;
             }
+            case Enums::SaveToLocalFile:
+            {
+                QString* m = reinterpret_cast<QString*>(std::get<1>(param).get());
+                if (m != nullptr) {
+                    saveToLocalFile = *m;
+                }
+                break;
+            }
         }
     }
 
@@ -155,8 +163,10 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
     {
         int sendInterval = std::round((double)maxNumberOfSteps / (double)progressStepsToSend);
 
-        qDebug() << "Send interval" << sendInterval;
 
+//#if DEBUG
+//        qDebug() << "Send interval" << sendInterval;
+//#endif
         if (params.size() > 0)
             ParseParameters(params);
 
@@ -168,7 +178,7 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
         InitializateFirstValues();
 
-        double divergence = 0;
+        divergence = 0;
 
         double lastDivergance = 0;
 
@@ -311,6 +321,8 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
         PostProcessingTask();
 
+        //SaveNMFToLocalFile();
+
         //std::shared_ptr<BiclusteringObject> retVal;
 
         //retVal;
@@ -319,7 +331,7 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
 
         time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
-        qDebug() << "Time spend: " << time_spent;
+  //      qDebug() << "Time spend: " << time_spent;
 
         emit ReportProgress(progressStepsToSend);
 
@@ -335,6 +347,69 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
         emit ReportProgress(progressStepsToSend);
 
         return null;
+    }
+}
+
+void NMF::SaveNMFToLocalFile()
+{
+    if (saveToLocalFile.length() > 0)
+    {
+        QFile retValW(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_WMatrix_" + QString::number(divergence) + ".txt");
+
+        retValW.open(QFile::Append | QFile::Text);
+
+        QTextStream outW(&retValW);
+
+        for (int i = 0; i < p; ++i)
+        {
+            for (int j = 0; j < expectedBiClusterCount; ++j)
+            {
+                outW << WMatrix(i, j) << "\t";
+            }
+
+            outW << "\n";
+        }
+
+        retValW.close();
+
+        QFile retValH(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_HMatrix_" + QString::number(divergence) + ".txt");
+
+        retValH.open(QFile::Append | QFile::Text);
+
+        QTextStream outH(&retValH);
+
+        for (int i = 0; i < expectedBiClusterCount; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                outH << HMatrix(i, j) << "\t";
+            }
+
+            outH << "\n";
+        }
+
+        retValH.close();
+
+        RebuildBiclusters();
+
+        QFile retValB(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_Biclusters_" + QString::number(divergence) + ".txt");
+
+        retValB.open(QFile::Append | QFile::Text);
+
+        QTextStream outB(&retValB);
+
+        int bicNum = 0;
+        for(std::shared_ptr<Bicluster> bic : foundedBiclusters)
+        {
+            outB << "Bicluster " << QString::number(bicNum) << "ACV: " << *bic->GetFeature(Enums::FeatureType::ACV) << " MSR: " << *bic->GetFeature(Enums::FeatureType::MSR) << "\n";
+            for(int i : bic->cluster1)
+            {
+
+            }
+        }
+
+        retValB.close();
+
     }
 }
 
@@ -628,7 +703,7 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
             }
         }
 
-        qDebug() << "Done bicluster " << i << ". Size <" << clust1.size() << ", " << clust2.size() << ">.";
+    //    qDebug() << "Done bicluster " << i << ". Size <" << clust1.size() << ", " << clust2.size() << ">.";
 
         retVal.push_back(bic);
     }
