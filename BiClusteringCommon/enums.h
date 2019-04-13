@@ -64,7 +64,8 @@ public:
         Theta,
         Supervised,
         SaveToLocalFile,
-        SaveToDatabase
+        SaveToDatabase,
+        CutOffThreashold
     };
 
     enum FeatureType
