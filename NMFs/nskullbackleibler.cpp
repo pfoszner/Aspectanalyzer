@@ -29,9 +29,9 @@ void nsKullbackLeibler::InitializeSmatrix()
 
     double add = theta / expectedBiClusterCount;
 
-    for (int i = 0; i < expectedBiClusterCount; ++i)
+    for (unsigned int i = 0; i < expectedBiClusterCount; ++i)
     {
-        for (int j = 0; j < expectedBiClusterCount; ++j)
+        for (unsigned int j = 0; j < expectedBiClusterCount; ++j)
         {
             if (i == j)
             {
@@ -50,7 +50,7 @@ void nsKullbackLeibler::PreProcessing()
     InitializeSmatrix();
 }
 
-nsKullbackLeibler::nsKullbackLeibler(std::shared_ptr<Matrix>& MatrixData, double theta) : NMF(MatrixData), theta(theta)
+nsKullbackLeibler::nsKullbackLeibler(std::shared_ptr<Matrix> MatrixData, double theta) : NMF(MatrixData), theta(theta)
 {
     idMethod = Enums::NonSmooth_KULLBACK_LIEBER;
 }

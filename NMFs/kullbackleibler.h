@@ -8,7 +8,7 @@ class KullbackLeibler : public NMF
     Q_OBJECT
 
 public:
-    KullbackLeibler(std::shared_ptr<Matrix>& matrixData);
+    KullbackLeibler(std::shared_ptr<Matrix> matrixData);
     virtual double DivernegceValue();
     virtual void PreProcessing();
     virtual void UpdateStep();

@@ -1,7 +1,7 @@
 #include "kullbackleibler.h"
 
 
-KullbackLeibler::KullbackLeibler(std::shared_ptr<Matrix>& MatrixData) : NMF(MatrixData)
+KullbackLeibler::KullbackLeibler(std::shared_ptr<Matrix> MatrixData) : NMF(MatrixData)
 {
     idMethod = Enums::KULLBACK_LIEBER;
 }

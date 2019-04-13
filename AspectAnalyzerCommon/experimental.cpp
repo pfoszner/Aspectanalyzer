@@ -1317,9 +1317,35 @@ void Experimental::PringInfo(int taskID, QString filename)
     }
 }
 
+void Experimental::Custom3SoftExp()
+{
+//    std::shared_ptr<Matrix> m = std::make_shared<Matrix>("E:\\pfoszner\\2015_item.vmatrix");
+//    engine->db->SaveMatrix(m->data, "item", "2015", Enums::V, -1);
+
+//    m = std::make_shared<Matrix>("E:\\pfoszner\\2015_money.vmatrix");
+//    engine->db->SaveMatrix(m->data, "money", "2015", Enums::V, -1);
+
+//    m = std::make_shared<Matrix>("E:\\pfoszner\\2016_item.vmatrix");
+//    engine->db->SaveMatrix(m->data, "item", "2016", Enums::V, -1);
+
+//    m = std::make_shared<Matrix>("E:\\pfoszner\\2016_money.vmatrix");
+//    engine->db->SaveMatrix(m->data, "money", "2016", Enums::V, -1);
+
+//    m = std::make_shared<Matrix>("E:\\pfoszner\\2017_item.vmatrix");
+//    engine->db->SaveMatrix(m->data, "item", "2017", Enums::V, -1);
+
+//    m = std::make_shared<Matrix>("E:\\pfoszner\\2017_money.vmatrix");
+//    engine->db->SaveMatrix(m->data, "money", "2017", Enums::V, -1);
+
+    for(int m = 1; m < 7; ++m)
+        RunNMF(m, 2, 20, 1, 1);
+}
+
 void Experimental::StartCustom(QString mode)
 {
-    CheckNMFBiclusNumberSearch();
+    //CheckNMFBiclusNumberSearch();
+
+    Custom3SoftExp();
 
     //ImportKumalResults(20);
     //ImportKumalResultsNoise(20);
@@ -2071,6 +2097,8 @@ void Experimental::RunNMF(int matrix, int start, int stop, int step, uint rep)
                     std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>> params;
 
                     params.emplace_back(Enums::NumberOfBiClusters, std::make_shared<int>(newObject->dataMatrix->expectedBiClusterCount));
+
+                    params.emplace_back(Enums::MethodsParameters::SaveToLocalFile, std::make_shared<QString>("E:\\pfoszner\\results\\batch\\" + QString::number(mat) + "_" + QString::number(s) + "_" + QString::number(m)));
 
                     engine->AddBiClusteringTask(newObject);
 

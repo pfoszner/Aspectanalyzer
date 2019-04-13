@@ -15,7 +15,7 @@ private:
     void InitializeSmatrix();
 
 public:
-    nsKullbackLeibler(std::shared_ptr<Matrix>&, double);
+    nsKullbackLeibler(std::shared_ptr<Matrix>, double);
     virtual double DivernegceValue();
     virtual void PreProcessing();
     virtual void UpdateStep();
