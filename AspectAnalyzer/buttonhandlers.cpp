@@ -18,6 +18,8 @@ ButtonHandlers::~ButtonHandlers()
 //Add new bi-clustering task to worker
 void ButtonHandlers::btnAddTaskSlot()
 {
+    qDebug() << "test";
+
     AddBiclusteringTask wizard(engine);
 
     wizard.exec();

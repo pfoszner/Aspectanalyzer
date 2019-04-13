@@ -181,6 +181,8 @@ public:
     QComboBox *extrctionCB;
     QLabel *theta;
     QLineEdit *thetaLE;
+    QLabel *threashold;
+    QLineEdit *threasholdLE;
 
     friend class AddBiclusteringTask;
 };

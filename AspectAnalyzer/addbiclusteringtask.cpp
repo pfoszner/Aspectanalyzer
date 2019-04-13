@@ -103,6 +103,10 @@
             if (resultsPage->saveToFileBox->isChecked())
                 params.emplace_back(Enums::MethodsParameters::SaveToLocalFile, std::make_shared<QString>(resultsPage->saveFileLabel->text()));
 
+            int threshold = paramsPage->threasholdLE->text().toInt();
+
+            params.emplace_back(Enums::MethodsParameters::CutOffThreashold, std::make_shared<int>(threshold));
+
             newObject->ParseParameters(params);
 
             engine->AddBiClusteringTask(newObject);
@@ -414,6 +418,16 @@
             numRepLE->setText("10");
             numRepLE->setValidator(new QIntValidator(1,1000000,numRepLE));
             layout->addWidget(numRepLE, rowNum, 1);
+
+            rowNum++;
+
+            threashold = new QLabel("Cut-off Threashold");
+            layout->addWidget(threashold, rowNum, 0);
+            threasholdLE = new QLineEdit;
+            threasholdLE->setText("75");
+            threasholdLE->setValidator(new QIntValidator(0,100,threasholdLE));
+            layout->addWidget(threasholdLE, rowNum, 1);
+
             rowNum++;
         }
 

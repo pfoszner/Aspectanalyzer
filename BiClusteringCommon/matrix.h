@@ -44,6 +44,7 @@ public:
 public:
     void AddValue(double value);
     void WriteAsImage(QString filename);
+    arma::mat GetBiclusterSubMatrix(const std::vector<int>& clusterW, const std::vector<int>& clusterH);
 
 private:
     void LoadFromDataList(std::vector <QString>& sdata);

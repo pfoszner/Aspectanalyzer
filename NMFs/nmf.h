@@ -28,6 +28,7 @@ protected:
     Enums::ExtractingMethod exMethod = Enums::Quadrille;
     double theta = 0.5;
     bool supervisedDim = false;
+    double cutOffThreashold = 0.75;
     int n;
     int p;
     int count = 0;
@@ -36,9 +37,11 @@ protected:
     arma::umat old_cc;
     const double doubleMin = 10e-300;
     bool trimByACV = false;
+    double divergence = 0;
 
 public:
     void RebuildBiclusters();
+    void SaveNMFToLocalFile();
 
 
 protected:

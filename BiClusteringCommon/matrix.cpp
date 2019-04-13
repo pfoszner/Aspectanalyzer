@@ -751,6 +751,31 @@ double Matrix::MeanSquaredResidue(const arma::mat& Amatrix)
     return retVal / (dim1 * dim2);
 }
 
+
+arma::mat Matrix::GetBiclusterSubMatrix(const std::vector<int>& clusterW, const std::vector<int>& clusterH)
+{
+                arma::mat Amatrix = arma::zeros<arma::mat>((uint)clusterW.size(), (uint)clusterH.size());
+
+                for (uint i = 0; i < clusterH.size(); ++i)
+                {
+                    for (uint j = 0; j < clusterW.size(); ++j)
+                    {
+                        try
+                        {
+                            Amatrix(j, i) = data(clusterW[j], clusterH[i]);
+                        }
+                        catch(...)
+                        {
+                            qDebug() << "Panic. ACV part errror: " << clusterW[j] << "," << clusterH[i];
+                        }
+                    }
+                }
+
+                //return std::make_shared<double>(AverageSpearmansRank(Amatrix));
+
+                return Amatrix;
+}
+
 double Matrix::AverageCorrelationValue(const std::vector<int>& clusterW, const std::vector<int>& clusterH)
 {
     double retVal = 0;

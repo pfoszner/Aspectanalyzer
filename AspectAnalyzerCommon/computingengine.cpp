@@ -127,6 +127,13 @@ void ComputingEngine::CheckResultsToWrite()
 
             db->SaveResult(taskToSave);
 
+            std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(taskToSave);
+
+            if (tmpPtr != nullptr)
+            {
+                tmpPtr->SaveNMFToLocalFile();
+            }
+
             queueSize = resultsToWrite.size();
 
             lock.unlock();
