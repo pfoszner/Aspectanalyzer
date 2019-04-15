@@ -414,9 +414,9 @@ void NMF::SaveNMFToLocalFile()
         int bicNum = 0;
         for(std::shared_ptr<Bicluster> bic : foundedBiclusters)
         {
-            auto ACV = *bic->GetFeature(Enums::FeatureType::ACV);
-            auto MSR = *bic->GetFeature(Enums::FeatureType::MSR);
-            outB << "Bicluster " << QString::number(++bicNum) << " ACV: " << QString::number(ACV) << " MSR: " << QString::number(MSR) << "\n";
+            //auto ACV = *bic->GetFeature(Enums::FeatureType::ACV);
+            //auto MSR = *bic->GetFeature(Enums::FeatureType::MSR);
+            outB << "Bicluster " << QString::number(++bicNum) << "\n";// << " ACV: " << QString::number(ACV) << " MSR: " << QString::number(MSR) << "\n";
             for(int i : bic->cluster1)
             {
                 outB << this->dataMatrix->rowLabels[i].value << "\t";
@@ -733,17 +733,17 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
 
     for (int i = 0; i < expectedBiClusterCount; ++i)
     {
-        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, 15);  //n
-        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, 100);  //p
+        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, n);  //n
+        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, p);  //p
 
         if (clust1.size() == 0 || clust2.size() == 0)
             return std::vector<std::shared_ptr<Bicluster>>();
 
         std::shared_ptr<Bicluster> bic = std::make_shared<Bicluster>(-1, clust1, clust2);
 
-        bic->SetFeature(Enums::FeatureType::ACV, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::ACV, clust1, clust2));
-        bic->SetFeature(Enums::FeatureType::MSR, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::MSR, clust1, clust2));
-        bic->SetFeature(Enums::FeatureType::Variance, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::Variance, clust1, clust2));
+        //bic->SetFeature(Enums::FeatureType::ACV, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::ACV, clust1, clust2));
+        //bic->SetFeature(Enums::FeatureType::MSR, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::MSR, clust1, clust2));
+        //bic->SetFeature(Enums::FeatureType::Variance, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::Variance, clust1, clust2));
 
         //qDebug() << "Get bicluster " << i << " Initial ACV: " << *bic->ACV << " Size: (" << clust1.size() << ", " << clust2.size() << ")";
 

@@ -1337,8 +1337,28 @@ void Experimental::Custom3SoftExp()
 //    m = std::make_shared<Matrix>("E:\\pfoszner\\2017_money.vmatrix");
 //    engine->db->SaveMatrix(m->data, "money", "2017", Enums::V, -1);
 
-    for(int m = 1; m < 7; ++m)
-        RunNMF(m, 20, 20, 1, 1);
+//    for(int m = 1; m < 4; ++m)
+//        RunNMF(m, 2, 8, 1, 1);
+
+    for(int m = 1; m < 4; ++m)
+    {
+        std::vector<std::shared_ptr<BiclusteringObject>> results = engine->db->GetResults(-1, m, -1, -1);
+
+        for(std::shared_ptr<BiclusteringObject> r : results)
+        {
+            std::shared_ptr<NMF> tmpPtr = std::dynamic_pointer_cast<NMF>(r);
+
+            if (tmpPtr != nullptr)
+            {
+                tmpPtr->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
+                tmpPtr->dataMatrix->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
+                tmpPtr->RebuildBiclusters();
+                tmpPtr->saveToLocalFile = "E:\\pfoszner\\results\\batch\\" + QString::number(tmpPtr->idResult);
+                tmpPtr->SaveNMFToLocalFile();
+            }
+        }
+    }
+
 }
 
 void Experimental::StartCustom(QString mode)
