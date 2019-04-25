@@ -1319,20 +1319,26 @@ void Experimental::PringInfo(int taskID, QString filename)
 
 void Experimental::Custom3SoftExp()
 {
-//    std::shared_ptr<Matrix> m = std::make_shared<Matrix>("E:\\pfoszner\\2015_item.vmatrix");
-//    engine->db->SaveMatrix(m->data, "item", "2015", Enums::V, -1);
+    //std::shared_ptr<Matrix> m = std::make_shared<Matrix>(QString("D:\\tmp\\2015_item.vmatrix"));
+    //engine->db->SaveMatrix(m->data, "item", "2015", Enums::V, -1);
+    //engine->db->SaveLabels(m->rowLabels, 1);
+    //engine->db->SaveLabels(m->columnLabels, 1);
 
 //    m = std::make_shared<Matrix>("E:\\pfoszner\\2015_money.vmatrix");
 //    engine->db->SaveMatrix(m->data, "money", "2015", Enums::V, -1);
 
-//    m = std::make_shared<Matrix>("E:\\pfoszner\\2016_item.vmatrix");
-//    engine->db->SaveMatrix(m->data, "item", "2016", Enums::V, -1);
+    //m = std::make_shared<Matrix>(QString("D:\\tmp\\2016_item.vmatrix"));
+    //engine->db->SaveMatrix(m->data, "item", "2016", Enums::V, -1);
+    //engine->db->SaveLabels(m->rowLabels, 2);
+    //engine->db->SaveLabels(m->columnLabels, 2);
 
 //    m = std::make_shared<Matrix>("E:\\pfoszner\\2016_money.vmatrix");
 //    engine->db->SaveMatrix(m->data, "money", "2016", Enums::V, -1);
 
-//    m = std::make_shared<Matrix>("E:\\pfoszner\\2017_item.vmatrix");
-//    engine->db->SaveMatrix(m->data, "item", "2017", Enums::V, -1);
+    //m = std::make_shared<Matrix>(QString("D:\\tmp\\2017_item.vmatrix"));
+    //engine->db->SaveMatrix(m->data, "item", "2017", Enums::V, -1);
+    //engine->db->SaveLabels(m->rowLabels, 3);
+    //engine->db->SaveLabels(m->columnLabels, 3);
 
 //    m = std::make_shared<Matrix>("E:\\pfoszner\\2017_money.vmatrix");
 //    engine->db->SaveMatrix(m->data, "money", "2017", Enums::V, -1);
@@ -1353,7 +1359,7 @@ void Experimental::Custom3SoftExp()
                 tmpPtr->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
                 tmpPtr->dataMatrix->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
                 tmpPtr->RebuildBiclusters();
-                tmpPtr->saveToLocalFile = "E:\\pfoszner\\results\\batch\\" + QString::number(tmpPtr->idResult);
+                tmpPtr->saveToLocalFile = "D:\\tmp\\results\\" + QString::number(tmpPtr->idResult);
                 tmpPtr->SaveNMFToLocalFile();
             }
         }

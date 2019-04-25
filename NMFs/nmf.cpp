@@ -364,8 +364,27 @@ void NMF::SaveNMFToLocalFile()
 {
     if (saveToLocalFile.length() > 0)
     {
+
         if (!QDir(saveToLocalFile).exists())
             QDir().mkdir(saveToLocalFile);
+
+
+        QFile retValG(saveToLocalFile + QDir::separator() + "general.txt");
+
+        retValG.open(QFile::Append | QFile::Text);
+
+        QTextStream outG(&retValG);
+
+        outG << *this->dataMatrix->idMatrix << "\n";
+        outG << this->dataMatrix->name << "\n";
+        outG << this->dataMatrix->group << "\n";
+        outG << this->idMethod << "\n";
+        outG << foundedBiclusters.size() << "\n";
+
+        retValG.close();
+
+        return;
+
 
         QFile retValW(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_WMatrix_" + QString::number(divergence) + ".txt");
 
@@ -439,31 +458,31 @@ void NMF::SaveNMFToLocalFile()
             outB << "\n\n";
 
 
-            QFile retValB(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_Biclusters_" + QString::number(divergence) + ".txt");
+//            QFile retValB(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_Biclusters_" + QString::number(divergence) + ".txt");
 
-            retValB.open(QFile::Append | QFile::Text);
+//            retValB.open(QFile::Append | QFile::Text);
 
-            QTextStream outB(&retValB);
+//            QTextStream outB(&retValB);
 
-            QFile retValBT(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_Bicluster_" + QString::number(bicNum) + "_" + QString::number(divergence) + ".txt");
+//            QFile retValBT(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_Bicluster_" + QString::number(bicNum) + "_" + QString::number(divergence) + ".txt");
 
-            retValBT.open(QFile::Append | QFile::Text);
+//            retValBT.open(QFile::Append | QFile::Text);
 
-            QTextStream outBT(&retValBT);
+//            QTextStream outBT(&retValBT);
 
-            arma::mat biclusterData = this->dataMatrix->GetBiclusterSubMatrix(bic->cluster1, bic->cluster2);
+//            arma::mat biclusterData = this->dataMatrix->GetBiclusterSubMatrix(bic->cluster1, bic->cluster2);
 
-            for(int r = 0; r < biclusterData.n_rows; ++r)
-            {
-                for(int c = 0; c < biclusterData.n_cols; ++c)
-                {
-                    outBT << QString::number(biclusterData(r,c)) << "\t";
-                }
+//            for(int r = 0; r < biclusterData.n_rows; ++r)
+//            {
+//                for(int c = 0; c < biclusterData.n_cols; ++c)
+//                {
+//                    outBT << QString::number(biclusterData(r,c)) << "\t";
+//                }
 
-                outBT << "\n";
-            }
+//                outBT << "\n";
+//            }
 
-            retValBT.close();
+//            retValBT.close();
         }
 
         retValB.close();
@@ -747,7 +766,7 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
 
         //qDebug() << "Get bicluster " << i << " Initial ACV: " << *bic->ACV << " Size: (" << clust1.size() << ", " << clust2.size() << ")";
 
-        if (*bic->GetFeature(Enums::FeatureType::ACV) < 1.0 && trimByACV)
+        if (trimByACV && *bic->GetFeature(Enums::FeatureType::ACV) < 1.0)
         {
             if (clust1.size() > clust2.size())
             {
