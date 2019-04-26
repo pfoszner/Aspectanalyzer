@@ -1343,10 +1343,10 @@ void Experimental::Custom3SoftExp()
 //    m = std::make_shared<Matrix>("E:\\pfoszner\\2017_money.vmatrix");
 //    engine->db->SaveMatrix(m->data, "money", "2017", Enums::V, -1);
 
-//    for(int m = 1; m < 4; ++m)
-//        RunNMF(m, 2, 8, 1, 1);
+    for(int m = 1; m < 7; ++m)
+        RunNMF(m, 2, 8, 1, 1);
 
-    for(int m = 1; m < 4; ++m)
+    for(int m = 1; m < 7; ++m)
     {
         std::vector<std::shared_ptr<BiclusteringObject>> results = engine->db->GetResults(-1, m, -1, -1);
 

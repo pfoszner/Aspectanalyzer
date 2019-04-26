@@ -315,6 +315,8 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
             }
         }
 
+        qDebug() << "Done calculations";
+
         //if (SendInfo != null)
         //    SendInfo(this.MaxNumberOfSteps - NumOfSteps);
 
@@ -329,7 +331,9 @@ std::shared_ptr<BiclusteringObject> NMF::Compute(std::vector<std::tuple<Enums::M
             qDebug() << "Panic! Panic! Panic!";
         }
 
-        PostProcessingTask();
+        //PostProcessingTask();
+
+        qDebug() << "Done everything";
 
         //SaveNMFToLocalFile();
 
@@ -383,44 +387,41 @@ void NMF::SaveNMFToLocalFile()
 
         retValG.close();
 
-        return;
+//        QFile retValW(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_WMatrix_" + QString::number(divergence) + ".txt");
 
+//        retValW.open(QFile::Append | QFile::Text);
 
-        QFile retValW(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_WMatrix_" + QString::number(divergence) + ".txt");
+//        QTextStream outW(&retValW);
 
-        retValW.open(QFile::Append | QFile::Text);
+//        for (int i = 0; i < p; ++i)
+//        {
+//            for (int j = 0; j < expectedBiClusterCount; ++j)
+//            {
+//                outW << WMatrix(i, j) << "\t";
+//            }
 
-        QTextStream outW(&retValW);
+//            outW << "\n";
+//        }
 
-        for (int i = 0; i < p; ++i)
-        {
-            for (int j = 0; j < expectedBiClusterCount; ++j)
-            {
-                outW << WMatrix(i, j) << "\t";
-            }
+//        retValW.close();
 
-            outW << "\n";
-        }
+//        QFile retValH(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_HMatrix_" + QString::number(divergence) + ".txt");
 
-        retValW.close();
+//        retValH.open(QFile::Append | QFile::Text);
 
-        QFile retValH(saveToLocalFile + QDir::separator() + QString::number(this->idResult) + "_HMatrix_" + QString::number(divergence) + ".txt");
+//        QTextStream outH(&retValH);
 
-        retValH.open(QFile::Append | QFile::Text);
+//        for (int i = 0; i < expectedBiClusterCount; ++i)
+//        {
+//            for (int j = 0; j < n; ++j)
+//            {
+//                outH << HMatrix(i, j) << "\t";
+//            }
 
-        QTextStream outH(&retValH);
+//            outH << "\n";
+//        }
 
-        for (int i = 0; i < expectedBiClusterCount; ++i)
-        {
-            for (int j = 0; j < n; ++j)
-            {
-                outH << HMatrix(i, j) << "\t";
-            }
-
-            outH << "\n";
-        }
-
-        retValH.close();
+//        retValH.close();
 
         RebuildBiclusters();
 
