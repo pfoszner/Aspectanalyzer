@@ -151,6 +151,18 @@ void BiclusteringObject::Deserialize(QByteArray deserialize)
             cols.append(cl);
         }
 
+        int sLen = ArrayToInt(deserialize.mid(0, 4));
+        deserialize.remove(0, 4);
+
+        QString name = QString::fromUtf8(deserialize.mid(0, sLen));
+        deserialize.remove(0, sLen);
+
+        sLen = ArrayToInt(deserialize.mid(0, 4));
+        deserialize.remove(0, 4);
+
+        QString group = QString::fromUtf8(deserialize.mid(0, sLen));
+        deserialize.remove(0, sLen);
+
         if (deserialize.size() > 0)
         {
             QDir dir = QDir::current();
@@ -175,6 +187,9 @@ void BiclusteringObject::Deserialize(QByteArray deserialize)
             data.load(filename.toStdString());
 
             this->dataMatrix = std::make_shared<Matrix>(idMatrix, data);
+            this->dataMatrix->name = name;
+            this->dataMatrix->group = group;
+
 
             //qDebug() << "Size: " << data.n_rows << ", " << data.n_cols;
             int index = 0;
@@ -269,6 +284,12 @@ QByteArray BiclusteringObject::Serialize(bool withData)
         buffer.append(IntToArray(cl.value.length()));
         buffer.append(cl.value.toUtf8());
     }
+
+    buffer.append(IntToArray(this->dataMatrix->name.length()));
+    buffer.append(this->dataMatrix->name.toUtf8());
+
+    buffer.append(IntToArray(this->dataMatrix->group.length()));
+    buffer.append(this->dataMatrix->group.toUtf8());
 
     if (withData)
     {
