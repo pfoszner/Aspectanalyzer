@@ -60,6 +60,10 @@ void ComputingEngine::receiveData(QByteArray data)
             lock.unlock();
             CheckResultsToWrite();
         }
+        else if (newObject->mode == BiclusteringObject::ComputingMode::RemoteSave)
+        {
+            db->SaveMatrix(taskTmp->dataMatrix);
+        }
     }
     else if (data.length() == 4)
     {

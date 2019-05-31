@@ -30,6 +30,7 @@ enum ComputingMode
     RemoteToCompute,
     ReadyToSend,
     RemoteDone,
+    RemoteSave,
 };
 
     int idMatrix = -1;

@@ -1343,8 +1343,6 @@ void Experimental::Custom3SoftExp(QString folder)
 //    m = std::make_shared<Matrix>("E:\\pfoszner\\2017_money.vmatrix");
 //    engine->db->SaveMatrix(m->data, "money", "2017", Enums::V, -1);
 
-    //for(int m = 1; m < 7; ++m)
-    //    RunNMF(m, 2, 8, 1, 1);
 
     std::vector<int> ms = engine->db->getAllMatrices();
 
@@ -1361,7 +1359,6 @@ void Experimental::Custom3SoftExp(QString folder)
                 tmpPtr->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
                 tmpPtr->dataMatrix->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
                 tmpPtr->RebuildBiclusters();
-                tmpPtr->saveToLocalFile = "D:\\tmp\\" + folder + "\\" + QString::number(tmpPtr->idResult);
                 tmpPtr->SaveNMFToLocalFile();
             }
         }
@@ -1372,7 +1369,6 @@ void Experimental::Custom3SoftExp(QString folder)
 void Experimental::StartCustom(QString mode)
 {
     //CheckNMFBiclusNumberSearch();
-
     Custom3SoftExp(mode);
 
     //ImportKumalResults(20);
