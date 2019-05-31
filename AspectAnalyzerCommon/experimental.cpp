@@ -1317,7 +1317,7 @@ void Experimental::PringInfo(int taskID, QString filename)
     }
 }
 
-void Experimental::Custom3SoftExp()
+void Experimental::Custom3SoftExp(QString folder)
 {
     //std::shared_ptr<Matrix> m = std::make_shared<Matrix>(QString("D:\\tmp\\2015_item.vmatrix"));
     //engine->db->SaveMatrix(m->data, "item", "2015", Enums::V, -1);
@@ -1343,10 +1343,12 @@ void Experimental::Custom3SoftExp()
 //    m = std::make_shared<Matrix>("E:\\pfoszner\\2017_money.vmatrix");
 //    engine->db->SaveMatrix(m->data, "money", "2017", Enums::V, -1);
 
-    for(int m = 1; m < 7; ++m)
-        RunNMF(m, 2, 8, 1, 1);
+    //for(int m = 1; m < 7; ++m)
+    //    RunNMF(m, 2, 8, 1, 1);
 
-    for(int m = 1; m < 7; ++m)
+    std::vector<int> ms = engine->db->getAllMatrices();
+
+    for(int m : ms)
     {
         std::vector<std::shared_ptr<BiclusteringObject>> results = engine->db->GetResults(-1, m, -1, -1);
 
@@ -1359,7 +1361,7 @@ void Experimental::Custom3SoftExp()
                 tmpPtr->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
                 tmpPtr->dataMatrix->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
                 tmpPtr->RebuildBiclusters();
-                tmpPtr->saveToLocalFile = "D:\\tmp\\results\\" + QString::number(tmpPtr->idResult);
+                tmpPtr->saveToLocalFile = "D:\\tmp\\" + folder + "\\" + QString::number(tmpPtr->idResult);
                 tmpPtr->SaveNMFToLocalFile();
             }
         }
@@ -1371,7 +1373,7 @@ void Experimental::StartCustom(QString mode)
 {
     //CheckNMFBiclusNumberSearch();
 
-    Custom3SoftExp();
+    Custom3SoftExp(mode);
 
     //ImportKumalResults(20);
     //ImportKumalResultsNoise(20);

@@ -55,6 +55,8 @@ public:
     void RunAllEnsemble(int idMatrix, QString desc);
     void ExportNMFs();
     void CheckNMFBiclusNumberSearch();
-	arma::mat GetSimpleMatrix1();	void Custom3SoftExp();};
+    arma::mat GetSimpleMatrix1();
+    void Custom3SoftExp(QString folder);
+};
 
 #endif // EXPERIMENTAL_H

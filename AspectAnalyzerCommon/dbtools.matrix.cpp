@@ -20,6 +20,26 @@ std::vector<int> DBTools::getGroupOfMatrices(QString group)
     return retVal;
 }
 
+std::vector<int> DBTools::getAllMatrices()
+{
+    QString queryString = "SELECT id_matrix FROM matrix WHERE id_result is null";
+
+    std::vector<int> retVal;
+
+    QSqlQuery query(db);
+
+    query.exec(queryString);
+
+    while (query.next())
+    {
+        int ID = query.value("id_matrix").toInt();
+
+        retVal.push_back(ID);
+    }
+
+    return retVal;
+}
+
 void DBTools::GetMatrixTableList(QTableWidget *table)
 {
     QSqlQuery query(db);

@@ -34,6 +34,7 @@ public:
     void GetMatrixTableList(QTableWidget *table);
     std::vector<int> GetResultsIDs(int m);
     std::vector<int> getGroupOfMatrices(QString group);
+    std::vector<int> getAllMatrices();
 
 private:
     QString path;

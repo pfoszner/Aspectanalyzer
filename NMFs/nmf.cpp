@@ -436,7 +436,19 @@ void NMF::SaveNMFToLocalFile()
         {
             //auto ACV = *bic->GetFeature(Enums::FeatureType::ACV);
             //auto MSR = *bic->GetFeature(Enums::FeatureType::MSR);
-            outB << "Bicluster " << QString::number(++bicNum) << "\n";// << " ACV: " << QString::number(ACV) << " MSR: " << QString::number(MSR) << "\n";
+
+            std::vector<int> clust2;
+            std::vector<int> clust1;
+
+            for (int i = 0; i < 10; ++i)
+            {
+                clust1.push_back(bic->cluster1[i]);
+                clust2.push_back(bic->cluster2[i]);
+            }
+
+            double ACV = dataMatrix->CalculateQualityMeasure(Enums::FeatureType::ACV, clust1, clust2);
+
+            outB << "Bicluster " << QString::number(++bicNum) << " ACV: " << QString::number(ACV) << "\n";//" MSR: " << QString::number(MSR) << "\n";
             for(int i : bic->cluster1)
             {
                 outB << this->dataMatrix->rowLabels[i].value << "\t";
