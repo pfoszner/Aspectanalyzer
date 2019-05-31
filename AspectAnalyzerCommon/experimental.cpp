@@ -1319,6 +1319,23 @@ void Experimental::PringInfo(int taskID, QString filename)
 
 void Experimental::Custom3SoftExp(QString folder)
 {
+    bool connected = engine->aaclient.connectToHost("192.168.17.2");
+
+    std::shared_ptr<Matrix> m = std::make_shared<Matrix>(QString("E:\\pfoszner\\share\\promocje.vmatrix"));
+
+    std::shared_ptr<BiclusteringObject> task = std::make_shared<BiclusteringObject>(m);
+
+    if (connected)
+    {
+        task->sourceAddress = "157.158.80.10";
+        task->mode = BiclusteringObject::ComputingMode::RemoteSave;
+        engine->aaclient.writeData(task->Serialize(true));
+        engine->aaclient.disconnectFromHost();
+    }
+
+    return;
+
+
     //std::shared_ptr<Matrix> m = std::make_shared<Matrix>(QString("D:\\tmp\\2015_item.vmatrix"));
     //engine->db->SaveMatrix(m->data, "item", "2015", Enums::V, -1);
     //engine->db->SaveLabels(m->rowLabels, 1);

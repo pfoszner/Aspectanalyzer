@@ -197,8 +197,6 @@ QByteArray BiclusteringObject::Serialize(bool withData)
         }
     }
 
-//    std::vector<FeatureResult> features;
-
     temp = (qint32)this->features.size();
 
     buffer.append(IntToArray(temp));
@@ -210,6 +208,22 @@ QByteArray BiclusteringObject::Serialize(bool withData)
         buffer.append(IntToArray(f.indexNbr));
         buffer.append(IntToArray(f.type));
         buffer.append(DoubleToArray(f.value));
+    }
+
+    temp = (qint32)this->dataMatrix->rowLabels.size();
+
+    for(Label rl : this->dataMatrix->rowLabels)
+    {
+        buffer.append(IntToArray(rl.value.length()));
+        buffer.append(rl.value.toUtf8());
+    }
+
+    temp = (qint32)this->dataMatrix->columnLabels.size();
+
+    for(Label cl : this->dataMatrix->rowLabels)
+    {
+        buffer.append(IntToArray(cl.value.length()));
+        buffer.append(cl.value.toUtf8());
     }
 
     if (withData)
