@@ -253,6 +253,7 @@ QByteArray BiclusteringObject::Serialize(bool withData)
     }
 
     temp = (qint32)this->dataMatrix->rowLabels.size();
+    buffer.append(IntToArray(temp));
 
     for(Label rl : this->dataMatrix->rowLabels)
     {
@@ -261,6 +262,7 @@ QByteArray BiclusteringObject::Serialize(bool withData)
     }
 
     temp = (qint32)this->dataMatrix->columnLabels.size();
+    buffer.append(IntToArray(temp));
 
     for(Label cl : this->dataMatrix->rowLabels)
     {
