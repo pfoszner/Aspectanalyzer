@@ -159,6 +159,15 @@ void DBTools::GetMatrixData(int idResult, int idType, std::shared_ptr<NMF> resul
     QFile::remove(filename);
 }
 
+int DBTools::SaveMatrix(std::shared_ptr<Matrix> matrixToSave)
+{
+    int retVal = SaveMatrix(matrixToSave->data, matrixToSave->name, matrixToSave->group, Enums::V, -1);
+    SaveLabels(matrixToSave->rowLabels, retVal);
+    SaveLabels(matrixToSave->columnLabels, retVal);
+
+    return retVal;
+}
+
 int DBTools::SaveMatrix(arma::mat matrixToSave, QString name, QString group, int type, int result)
 {
     int retVal = -1;
