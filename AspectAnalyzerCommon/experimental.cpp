@@ -1319,7 +1319,7 @@ void Experimental::PringInfo(int taskID, QString filename)
 
 void Experimental::Custom3SoftExp(QString folder)
 {
-    bool connected = engine->aaclient.connectToHost("192.168.17.2");
+    bool connected = engine->aaclient.connectToHost("192.168.17.3");
 
     std::shared_ptr<Matrix> m = std::make_shared<Matrix>(QString("E:\\pfoszner\\share\\promocje.vmatrix"));
 
