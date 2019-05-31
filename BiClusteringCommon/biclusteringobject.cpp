@@ -180,13 +180,13 @@ void BiclusteringObject::Deserialize(QByteArray deserialize)
             int index = 0;
             for(QString label : rows)
             {
-                this->dataMatrix->rowLabels.emplace_back(-1, idMatrix, -1, index++, label);
+                this->dataMatrix->rowLabels.emplace_back(-1, idMatrix, (int)Enums::LabelType::RowLabel, index++, label);
             }
 
             index = 0;
             for(QString label : cols)
             {
-                this->dataMatrix->columnLabels.emplace_back(-1, idMatrix, -1, index++, label);
+                this->dataMatrix->columnLabels.emplace_back(-1, idMatrix, (int)Enums::LabelType::ColumnLabel, index++, label);
             }
             QFile::remove(filename);
         }
@@ -264,7 +264,7 @@ QByteArray BiclusteringObject::Serialize(bool withData)
     temp = (qint32)this->dataMatrix->columnLabels.size();
     buffer.append(IntToArray(temp));
 
-    for(Label cl : this->dataMatrix->rowLabels)
+    for(Label cl : this->dataMatrix->columnLabels)
     {
         buffer.append(IntToArray(cl.value.length()));
         buffer.append(cl.value.toUtf8());
