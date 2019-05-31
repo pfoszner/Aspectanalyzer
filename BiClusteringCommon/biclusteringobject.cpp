@@ -140,7 +140,7 @@ void BiclusteringObject::Deserialize(QByteArray deserialize)
 
         QStringList cols;
 
-        for(int f = 0; f < rLen; ++f)
+        for(int f = 0; f < cLen; ++f)
         {
             int labelLen = ArrayToInt(deserialize.mid(0, 4));
             deserialize.remove(0, 4);

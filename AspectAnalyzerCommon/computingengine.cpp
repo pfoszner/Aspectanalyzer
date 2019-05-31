@@ -17,6 +17,12 @@ void ComputingEngine::receiveData(QByteArray data)
     {
         std::shared_ptr<BiclusteringObject> taskTmp = std::make_shared<BiclusteringObject>(data);
 
+        if (taskTmp->mode == BiclusteringObject::ComputingMode::RemoteSave)
+        {
+            db->SaveMatrix(taskTmp->dataMatrix);
+            return;
+        }
+
         std::shared_ptr<BiclusteringObject> newObject;
 
         switch(taskTmp->idMethod)
@@ -59,10 +65,6 @@ void ComputingEngine::receiveData(QByteArray data)
 
             lock.unlock();
             CheckResultsToWrite();
-        }
-        else if (newObject->mode == BiclusteringObject::ComputingMode::RemoteSave)
-        {
-            db->SaveMatrix(taskTmp->dataMatrix);
         }
     }
     else if (data.length() == 4)
