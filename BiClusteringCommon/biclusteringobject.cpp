@@ -119,6 +119,38 @@ void BiclusteringObject::Deserialize(QByteArray deserialize)
             features.emplace_back(type, value, indexNbr);
         }
 
+        int rLen = ArrayToInt(deserialize.mid(0, 4));
+        deserialize.remove(0, 4);
+
+        QStringList rows;
+
+        for(int f = 0; f < rLen; ++f)
+        {
+            int labelLen = ArrayToInt(deserialize.mid(0, 4));
+            deserialize.remove(0, 4);
+
+            QString rl = QString::fromUtf8(deserialize.mid(0, labelLen));
+            deserialize.remove(0, labelLen);
+
+            rows.append(rl);
+        }
+
+        int cLen = ArrayToInt(deserialize.mid(0, 4));
+        deserialize.remove(0, 4);
+
+        QStringList cols;
+
+        for(int f = 0; f < rLen; ++f)
+        {
+            int labelLen = ArrayToInt(deserialize.mid(0, 4));
+            deserialize.remove(0, 4);
+
+            QString cl = QString::fromUtf8(deserialize.mid(0, labelLen));
+            deserialize.remove(0, labelLen);
+
+            cols.append(cl);
+        }
+
         if (deserialize.size() > 0)
         {
             QDir dir = QDir::current();
@@ -145,7 +177,17 @@ void BiclusteringObject::Deserialize(QByteArray deserialize)
             this->dataMatrix = std::make_shared<Matrix>(idMatrix, data);
 
             //qDebug() << "Size: " << data.n_rows << ", " << data.n_cols;
+            int index = 0;
+            for(QString label : rows)
+            {
+                this->dataMatrix->rowLabels.emplace_back(-1, idMatrix, -1, index++, label);
+            }
 
+            index = 0;
+            for(QString label : cols)
+            {
+                this->dataMatrix->columnLabels.emplace_back(-1, idMatrix, -1, index++, label);
+            }
             QFile::remove(filename);
         }
 }
