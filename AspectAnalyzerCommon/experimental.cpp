@@ -459,7 +459,7 @@ void Experimental::ImportKumalResults(int repNum)
     {
         qDebug() << "Model rep " << m;
 
-        QString path = "D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\Dane\\model\\rep_" + QString::number(m);
+        QString path = "D:\\AppData\\owncloud.foszner.pl\\Praca\\PolSl\\AspectAnalyzer\\Dane\\model\\rep_" + QString::number(m);
 
         std::vector<std::shared_ptr<BiclusteringObject>> importRes;
 
@@ -661,7 +661,7 @@ void Experimental::ImportKumalResultsNoise(int repNum)
     {
         qDebug() << "Noise rep " << m;
 
-        QString path = "D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\Dane\\noise\\rep_" + QString::number(m);
+        QString path = "D:\\AppData\\owncloud.foszner.pl\\Praca\\PolSl\\AspectAnalyzer\\Dane\\noise\\rep_" + QString::number(m);
 
         std::vector<std::shared_ptr<BiclusteringObject>> importRes;
 
@@ -867,7 +867,7 @@ void Experimental::ImportKumalResultsNumber(int repNum)
     {
         qDebug() << "Number rep " << m;
 
-        QString path = "D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\Dane\\number\\rep_" + QString::number(m);
+        QString path = "D:\\AppData\\owncloud.foszner.pl\\Praca\\PolSl\\AspectAnalyzer\\Dane\\number\\rep_" + QString::number(m);
 
         std::vector<std::shared_ptr<BiclusteringObject>> importRes;
 
@@ -1072,7 +1072,7 @@ void Experimental::ImportKumalResultsOverlap(int repNum)
     {
         qDebug() << "Overlap rep " << m;
 
-        QString path = "D:\\AppData\\owncloud\\Praca\\PolSl\\AspectAnalyzer\\Dane\\overlap\\rep_" + QString::number(m);
+        QString path = "D:\\AppData\\owncloud.foszner.pl\\Praca\\PolSl\\AspectAnalyzer\\Dane\\overlap\\rep_" + QString::number(m);
 
         std::vector<std::shared_ptr<BiclusteringObject>> importRes;
 
@@ -1392,14 +1392,26 @@ void Experimental::Custom3SoftExp(QString folder)
 void Experimental::StartCustom(QString mode)
 {
     //CheckNMFBiclusNumberSearch();
-    Custom3SoftExp(mode);
+    //Custom3SoftExp(mode);
 
     //ImportKumalResults(20);
     //ImportKumalResultsNoise(20);
     //ImportKumalResultsNumber(20);
     //ImportKumalResultsOverlap(20);
 
-//return;
+
+     std::vector<std::shared_ptr<BiclusteringObject>> results = engine->db->GetResults(-1, 1, -1, -1);
+
+     for(std::shared_ptr<BiclusteringObject> res : results)
+     {
+         res->PostProcessingTask();
+
+         engine->db->SaveResult(res);
+
+         engine->db->SaveFeatures(res->features, res->idResult, -1, -1);
+     }
+
+return;
 
     //ImportMatlabResults();
 
