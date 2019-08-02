@@ -1319,21 +1319,21 @@ void Experimental::PringInfo(int taskID, QString filename)
 
 void Experimental::Custom3SoftExp(QString folder)
 {
-    bool connected = engine->aaclient.connectToHost("192.168.17.3");
+//    bool connected = engine->aaclient.connectToHost("192.168.17.3");
 
-    std::shared_ptr<Matrix> m = std::make_shared<Matrix>(QString("E:\\pfoszner\\share\\promocje.vmatrix"));
+//    std::shared_ptr<Matrix> m = std::make_shared<Matrix>(QString("E:\\pfoszner\\share\\promocje.vmatrix"));
 
-    std::shared_ptr<BiclusteringObject> task = std::make_shared<BiclusteringObject>(m);
+//    std::shared_ptr<BiclusteringObject> task = std::make_shared<BiclusteringObject>(m);
 
-    if (connected)
-    {
-        task->sourceAddress = "157.158.80.10";
-        task->mode = BiclusteringObject::ComputingMode::RemoteSave;
-        engine->aaclient.writeData(task->Serialize(true));
-        engine->aaclient.disconnectFromHost();
-    }
+//    if (connected)
+//    {
+//        task->sourceAddress = "157.158.80.10";
+//        task->mode = BiclusteringObject::ComputingMode::RemoteSave;
+//        engine->aaclient.writeData(task->Serialize(true));
+//        engine->aaclient.disconnectFromHost();
+//    }
 
-    return;
+    //return;
 
 
     //std::shared_ptr<Matrix> m = std::make_shared<Matrix>(QString("D:\\tmp\\2015_item.vmatrix"));
@@ -1365,6 +1365,11 @@ void Experimental::Custom3SoftExp(QString folder)
 
     for(int m : ms)
     {
+        RunNMF(m, 2, 16, 1, 1);
+    }
+
+    for(int m : ms)
+    {
         std::vector<std::shared_ptr<BiclusteringObject>> results = engine->db->GetResults(-1, m, -1, -1);
 
         for(std::shared_ptr<BiclusteringObject> r : results)
@@ -1375,6 +1380,7 @@ void Experimental::Custom3SoftExp(QString folder)
             {
                 tmpPtr->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
                 tmpPtr->dataMatrix->expectedBiClusterCount = tmpPtr->foundedBiclusters.size();
+                tmpPtr->saveToLocalFile = "D:\\tmp\\" + folder + "\\" + QString::number(tmpPtr->idResult);
                 tmpPtr->RebuildBiclusters();
                 tmpPtr->SaveNMFToLocalFile();
             }

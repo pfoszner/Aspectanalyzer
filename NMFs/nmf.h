@@ -38,6 +38,8 @@ protected:
     const double doubleMin = 10e-300;
     bool trimByACV = false;
     double divergence = 0;
+    int minN = 4;
+    int minP = 20;
 
 public:
     void RebuildBiclusters();
@@ -61,6 +63,7 @@ private:
     std::vector<int> GetHBicluster(int k, Enums::ExtractingMethod extractingType, double threshold, uint maxBiclusterSize);
     void TrimCluster1(std::shared_ptr<Bicluster>& bic, int bicNumber);
     void TrimCluster2(std::shared_ptr<Bicluster>& bic, int bicNumber);
+
 
 public:
     std::shared_ptr<BiclusteringObject> Compute(std::vector<std::tuple<Enums::MethodsParameters, std::shared_ptr<void>>>& params);

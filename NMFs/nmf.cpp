@@ -697,15 +697,22 @@ void NMF::TrimCluster1(std::shared_ptr<Bicluster>& bic, int bicNumber)
     std::vector<int> clust2 = bic->cluster2;
     std::vector<int> clust1 = bic->cluster1;
 
-    while (clust1.size() > 10 && NotDone)
+    std::vector<double> candidates;
+    std::vector<uint> sizes;
+
+    while (clust1.size() > 10)//minP && NotDone)
     {
         //clock_t begin = clock();
+
+        sizes.push_back((uint)clust1.size() - 1);
 
         clust1 = GetWBicluster(bicNumber, exMethod, 0, (uint)clust1.size() - 1);
 
         std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2);
 
         NewBic->SetFeature(Enums::FeatureType::ACV, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::ACV, clust1, clust2));
+
+        candidates.push_back(*NewBic->GetFeature(Enums::FeatureType::ACV));
 
         //clock_t end = clock();
 
@@ -722,6 +729,24 @@ void NMF::TrimCluster1(std::shared_ptr<Bicluster>& bic, int bicNumber)
             NotDone = false;
         }
     }
+
+    uint maxIndex = sizes[0];
+    double maxValue = candidates[0];
+
+    for(uint i = 0; i < sizes.size(); ++i)
+    {
+        if (maxValue < candidates[i])
+        {
+            maxValue = candidates[i];
+            maxIndex = sizes[i];
+        }
+    }
+
+    clust1 = GetHBicluster(bicNumber, exMethod, 0, maxIndex);
+
+    std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2);
+
+    bic = NewBic;
 }
 
 void NMF::TrimCluster2(std::shared_ptr<Bicluster>& bic, int bicNumber)
@@ -731,15 +756,22 @@ void NMF::TrimCluster2(std::shared_ptr<Bicluster>& bic, int bicNumber)
     std::vector<int> clust2 = bic->cluster2;
     std::vector<int> clust1 = bic->cluster1;
 
-    while (clust2.size() > 10 && NotDone)
+    std::vector<double> candidates;
+    std::vector<uint> sizes;
+
+    while (clust2.size() > 10)// && NotDone)
     {
         //clock_t begin = clock();
+
+        sizes.push_back((uint)clust2.size() - 1);
 
         clust2 = GetHBicluster(bicNumber, exMethod, 0, (uint)clust2.size() - 1);
 
         std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2);
 
         NewBic->SetFeature(Enums::FeatureType::ACV, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::ACV, clust1, clust2));
+
+        //*NewBic->GetFeature(Enums::FeatureType::ACV);
 
         //clock_t end = clock();
 
@@ -756,6 +788,24 @@ void NMF::TrimCluster2(std::shared_ptr<Bicluster>& bic, int bicNumber)
             NotDone = false;
         }
     }
+
+    uint maxIndex = sizes[0];
+    double maxValue = candidates[0];
+
+    for(uint i = 0; i < sizes.size(); ++i)
+    {
+        if (maxValue < candidates[i])
+        {
+            maxValue = candidates[i];
+            maxIndex = sizes[i];
+        }
+    }
+
+    clust2 = GetHBicluster(bicNumber, exMethod, 0, maxIndex);
+
+    std::shared_ptr<Bicluster> NewBic = std::make_shared<Bicluster>(-1, clust1, clust2);
+
+    bic = NewBic;
 }
 
 
@@ -765,15 +815,15 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
 
     for (int i = 0; i < expectedBiClusterCount; ++i)
     {
-        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, n);  //n
-        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, p);  //p
+        std::vector<int> clust2 = GetHBicluster(i, exMethod, 0, minN);  //n
+        std::vector<int> clust1 = GetWBicluster(i, exMethod, 0, minP);  //p
 
         if (clust1.size() == 0 || clust2.size() == 0)
             return std::vector<std::shared_ptr<Bicluster>>();
 
         std::shared_ptr<Bicluster> bic = std::make_shared<Bicluster>(-1, clust1, clust2);
 
-        //bic->SetFeature(Enums::FeatureType::ACV, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::ACV, clust1, clust2));
+        bic->SetFeature(Enums::FeatureType::ACV, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::ACV, clust1, clust2));
         //bic->SetFeature(Enums::FeatureType::MSR, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::MSR, clust1, clust2));
         //bic->SetFeature(Enums::FeatureType::Variance, dataMatrix->CalculateQualityMeasure(Enums::FeatureType::Variance, clust1, clust2));
 
@@ -785,11 +835,11 @@ std::vector<std::shared_ptr<Bicluster>> NMF::GetBiclusters()
             {
                 TrimCluster1(bic, i);
 
-                TrimCluster2(bic, i);
+                //TrimCluster2(bic, i);
             }
             else
             {
-                TrimCluster2(bic, i);
+                //TrimCluster2(bic, i);
 
                 TrimCluster1(bic, i);
             }
